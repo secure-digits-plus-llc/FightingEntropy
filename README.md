@@ -14,7 +14,19 @@ Professionals and Experts that run *any* software *anywhere*, *everywhere*, and 
 
 Microsoft. Duh. When it comes to Google/Linux/Kubernetes/Python, "Being written by the best software engineers out there..." is not a quality that is considered or sought during Google's software development cycle. That's what makes Azure and AWS the most desirable thing on the market... they happen to have been made by software engineers that 1) knew what they were doing, and 2) relentlessly considered AND sought this quality known as "written by the *best software engineers out there*" 
 
-Guess what Azure and AWS feature collectively, it's called "An Operating System that 1) works all the time, 2) doesn't need to be connected to the internet, 3) takes up the same amount of disk space and memory when you have engineers that know what the hell they're doing 4) stays up to date when it is connected to the internet in the same exact manner as a ChromeBook.... and 5) runs circles around anything that *tries to call itself an operating system*... For instance, Fushia[VaporWare]/Android[Badly made]/ChromeOS[Also badly made], or iOS[Better than Android, but still, also badly made]/MacOS[Best Windows Rip off/Badly made]/iUse'i'Alot, or maybe even Linux[We're still trying to get WINE/Steam to 100% work...], RHEL/CentOS[About the best offering Linux has... Worthy of being #2], Ubuntu[Please like me more...]... but in the business they refer to these things as, "continually pretending like anyone is making a massive effort to stop making these many many failed attempts to beat the thing that 'the best software engineers out there MADE called Microsoft Windows, the only thing that could truly be called an 'operating system' because it 'actually works...' ) and pretending like we could ever come remotely close to what they did... but still label this sometimes-functional thing that very commonly does not work, and mistakenly call refer to it as an operating system."
+Guess what Azure and AWS feature collectively, it's called "An Operating System that 1) works all the time, 2) doesn't need to be connected to the internet, 3) takes up the same amount of disk space and memory when you have engineers that know what the hell they're doing 4) stays up to date when it is connected to the internet in the same exact manner as a ChromeBook.... and 5) runs circles around anything that *tries to call itself an operating system*... 
+
+For instance, 
+Fushia [ VaporWare ]
+Android [ Badly made ]
+ChromeOS [ Also badly made ]
+iOS [ Better than Android, but still, also badly made ]
+MacOS [ Best Windows Rip off / It would be cooler if you stopped trying to make iOS and MacOS the same thing... ]
+Linux [ We're still trying to get WINE/Steam to 100% work... ]
+RHEL / CentOS [ About the best offering Linux has... Worthy of being #2 ]
+Ubuntu [ Please like me more... ]... 
+
+In the business, they refer to these things as, "continually pretending like anyone is making a massive effort to stop making these many many failed attempts to beat the thing that 'the best software engineers out there MADE called Microsoft Windows, and mistakenly refer to every attempt as 'why the hell is it even called an operating system if it doesn't work...'"
 
 For your information, that "100% thing that works, that was written by the best software engineers out there? Well, it's called an The one and only Microsoft Windows Operating System. It features this thing called "The most secure god damn network environment you could ever hope to build or secure, called Active Directory." Ever heard of these things? Well... now you have. You can't call Google Drive anywhere near as top notch as Active Directory, especially when 'Google uses Active Directory'. 
 
