@@ -38,7 +38,13 @@ browser based operating system... such as Android/ChromeOS, iOS/MacOS..."...
 
 For your information, that thing is called "Microsoft Windows"... and, guess what. It was... written... by the best... software engineers... out there. And what that means is, you can't even build a quantum computer to compete with how top notch this operating system is bruh. No really. Take your little-girl powered Google ChromeOS, and beat it already..."
 
-It's not like Kubes doesn't make it's best attempt in existence, to hold their head high and hope that it could possibly come in '2nd place' it comes to "Being written by the best software engineers out there..." It's just that when someone with a Chromebook shows up, and you happen to do more than just 'Play Pogo' or 'Edit a text document'... Then, a Google Chromebook is simply "ignoring that you have no nutsack whatsoever, and that in order to do anything of significance... you need to be connected to the internet... and logged in... which, guess what. Can't login if you're not connected to the internet. Idiot. Try to use a chromebook when it is not connected to the internet. I guarantee, you will say "I wish I went with a Windows machine instead... WTF is this garbage..."
+It's not like Linux/Kubes/Docker doesn't make it's best attempt in existence, to hold it's head high, and you know, *hope* that it comes in '2nd place' when it comes to "Being written by the best software engineers out there..." 
+
+It's just that when someone who rants and raves about RHEL or Kubes, "doesn't realize that they're not dealing with the type of software that is written by actual experts..." for instance, Microsoft, duh. Or lets say that someone with a Chromebook shows up... and like 99% of the people out there that happen to require more than just 'play Pogo' or 'edit a text document'... 
+
+Then going with anything made by Google, its like "ignoring that you have no nutsack whatsoever", and... "in order to do *anything of significance*... you need to be connected to the internet AND logged in..." Which, guess what. All that cloud power can do a lot of magical processing power displacement except in the case where you can't login to use it because you're not connected to the internet. "OH, it doesn't get Viruses, because it has no nutsack to drive your applications, so that's why..." 
+
+Go ahead and buy a ChromeBook and don't ever connect it to the internet... I guarantee, you will say "This is this garbage... why did I buy this POS... I wish I went with a legit computer that has Microsoft Windows installed... then I wouldn't be sitting here with my dick in my hand looking at this thing that does an amazing job of 'nothing, especially when it's not connected to the internet...'"
 
 # Virtual or Physical
 This is targeted to be used in live and virtual environments, together, or split, or what have you. It will absorb 
