@@ -16,14 +16,22 @@ Microsoft. Duh. When it comes to Google/Linux/Kubernetes/Python, "Being written 
 
 Guess what Azure and AWS feature collectively, it's called "An Operating System that 1) works all the time, 2) doesn't need to be connected to the internet, 3) takes up the same amount of disk space and memory when you have engineers that know what the hell they're doing 4) stays up to date when it is connected to the internet in the same exact manner as a ChromeBook.... and 5) runs circles around anything that *tries to call itself an operating system*... 
 
-For instance, 
+For instance,
+
 Fushia [ VaporWare ]
+
 Android [ Badly made ]
+
 ChromeOS [ Also badly made ]
+
 iOS [ Better than Android, but still, also badly made ]
+
 MacOS [ Best Windows Rip off / It would be cooler if you stopped trying to make iOS and MacOS the same thing... ]
+
 Linux [ We're still trying to get WINE/Steam to 100% work... ]
+
 RHEL / CentOS [ About the best offering Linux has... Worthy of being #2 ]
+
 Ubuntu [ Please like me more... ]... 
 
 In the business, they refer to these things as, "continually pretending like anyone is making a massive effort to stop making these many many failed attempts to beat the thing that 'the best software engineers out there MADE called Microsoft Windows, and mistakenly refer to every attempt as 'why the hell is it even called an operating system if it doesn't work...'"
