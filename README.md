@@ -1,3 +1,12 @@
+# Immediate Info, this project is forked over from my personal repository @ https://github.com/mcc85s/PSD-Remaster
+I haven't been able to make changes to Mr. Niehaus's old script library quite yet, I still have plenty of other things to complete and such in order to '*really* build this damn thing..."
+
+Anyway, this shall be my last commit for 2019.
+
+It's been ONE HELL of a year.
+
+- MC
+
 # Secure Digits Plus: Fighting Entropy
 Hybrid-DSC is a modification for PowerShell that is targeted to easily automate the distribution of a Secure Windows Operating System/Network topology with all dependencies/prerequisites deployed, configured, and handled appropriately for any given node(s) it generates. It *sort of* works in the same way that a quine would..? Where instead of reproducing the source code, it's just reproducing the code necessary to allow a child item to be spawned with deployment AND configuration instructions that can be executed, expanded to maturity, and then reintegrated back to the original hive cluster. (Similar to Chef, SCCM, etc.)
 
