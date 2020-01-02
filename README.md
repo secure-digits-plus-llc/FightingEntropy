@@ -1,3 +1,6 @@
+# YouTube Channel that features this module in action, as well as educational topics
+https://www.youtube.com/channel/UCaEsk04O6rcJmkLlSctGreQ?view_as=subscriber
+
 # Immediate Info, this project is forked over from my personal repository @ https://github.com/mcc85s/PSD-Remaster
 I haven't been able to make changes to Mr. Niehaus's old script library quite yet, I still have plenty of other things to complete and such in order to '*really* build this damn thing..."
 
