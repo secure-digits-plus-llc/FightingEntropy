@@ -1,4 +1,4 @@
-# YouTube Channel that features this module in action, as well as educational topics
+# YouTube Channel which features this module:
 https://www.youtube.com/channel/UCaEsk04O6rcJmkLlSctGreQ?view_as=subscriber
 
 # Immediate Info, this project is forked over from my personal repository @ https://github.com/mcc85s/PSD-Remaster
