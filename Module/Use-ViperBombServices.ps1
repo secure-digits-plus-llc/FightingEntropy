@@ -58,7 +58,38 @@
             [ Parameter ( ParameterSetName = "Copyright" ) ] [ Switch ] $Copyright ,
             [ Parameter ( ParameterSetName =      "Help" ) ] [ Switch ] $Help      )
 
-        $Source = [ PSCustomObject ]@{ Service = "Black Viper (Sparks v1.0).csv" }
+        $Default = [ PSCustomObject ]@{
+
+            PassedArgs           = If ( ! $Args ) { "N/A" } Else { $Args }
+            TermsOfService       = 0
+            DisplayActive        = 1
+            DisplayInactive      = 0
+            DisplaySkipped       = 0
+            MiscSimulate         = 0
+            MiscXbox             = 0
+            MiscChange           = 0
+            MiscStopDisabled     = 0
+            DevelDiagErrors      = 0
+            DevelLog             = 0
+            DevelConsole         = 0
+            DevelDiagReport      = 0
+            BypassBuild          = 0
+            BypassEdition        = 0
+            BypassLaptop         = 0
+            LoggingService       = 0 
+            LoggingServiceFile   = "Service.log"
+            LoggingScript        = 0
+            LoggingScriptFile    = "Script.log"
+            BackupRegistry       = 0
+            BackupRegistryPath   = "Backup.reg"
+            BackupTemplate       = 0
+            BackupTemplatePath   = "Backup.csv"
+            ServiceConfig        = "Black Viper (Sparks v1.0)"
+            ServiceProfile       = "Default"
+            ScriptConfig         = "DevOPS (MC/SDP v1.0)"
+            ScriptProfile        = "Default"
+
+        }
 
         If ( $Version )
         {
@@ -68,11 +99,11 @@
     
                 Version        = "7.0.0"
                 Date           = "2020-01-02"
-                Script         = "DevOPS (MC/SDP v1.0)"
+                Script         = $Default.ScriptConfig
                 Release        = "Testing"
                 Site           = "https://www.securedigitsplus.com"
                 URLBase        = $I[1]
-                URLService     = $Source
+                URLService     = $Default.ServiceConfig
                 URLDonate      = "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/"
             }
         }
@@ -91,67 +122,41 @@
 
         If ( $Control )
         {
-            [ PSCustomObject ]@{
-
-                PassedArgs           = If ( ! $Args ) { "N/A" } Else { $Args }
-                TermsOfService       = 0
-                DisplayActive        = 1
-                DisplayInactive      = 0
-                DisplaySkipped       = 0
-                MiscSimulate         = 0
-                MiscXbox             = 0
-                MiscChange           = 0
-                MiscStopDisabled     = 0
-                DevelDiagErrors      = 0
-                DevelLog             = 0
-                DevelConsole         = 0
-                DevelDiagReport      = 0
-                BypassBuild          = 0
-                BypassEdition        = 0
-                BypassLaptop         = 0
-                LoggingService       = 0 
-                LoggingServiceFile   = "Service.log"
-                LoggingScript        = 0
-                LoggingScriptFile    = "Script.log"
-                BackupRegistry       = 0
-                BackupRegistryPath   = "Backup.reg"
-                BackupTemplate       = 0
-                BackupTemplatePath   = "Backup.csv"
-                ServiceConfig        = "Black Viper (Sparks v1.0)"
-                ServiceProfile       = "Default"
-                ScriptConfig         = "DevOPS (MC/SDP v1.0)"
-                ScriptProfile        = "Default"
-
-            }
+            $Default
         }
 
         If ( $Copyright )
         {   
-            "   " ,
-            "Copyright (c) 2019 Zero Rights Reserved " ,
-            "Services Configuration by Charles 'Black Viper' Sparks " ,
-            "   " ,
+            "Copyright (c) 2019 Zero Rights Reserved                                 " ,
+            "Services Configuration by Charles 'Black Viper' Sparks                  " ,
             "------------------------------------------------------------------------" ,
-            "   " , 
             "The MIT License (MIT) + an added Condition " ,
-            "   " ,
+            ( " " * 72 ) , 
             "Copyright (c) 2017-2019 Madbomb122 " ,
             "[ Black Viper Service Script ] " ,
-            "   " , 
-            "     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and    " , 
-            "associated documentation files (the 'Software'), to deal in the Software without restriction, including   " ,
-            "without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell   " , 
-            "copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the  " , 
-            "following conditions:                                                                                     " ,
-            "   " , 
-            "   The above copyright notice(s), this permission notice and ANY original donation link shall be included "
-            "in all copies or substantial portions of the Software.                                                    " ,
-            "   " ,
-            "   THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT  " ,
-            "LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO " , 
-            "EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER " , 
-            "IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR   " ,
-            "THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                                "
+            ( " " * 72 ) , 
+            "Permission is hereby granted, free of charge, to any person obtaining a " ,
+            "copy of this software and associated documentation files (the Software)," , 
+            "to deal in the Software without restriction, including w/o limitation   " , 
+            "the rights to: use/copy/modify/merge/publish/distribute/sublicense,     " , 
+            "and/or sell copies of the Software, and to permit persons to whom the   " , 
+            "Software is furnished to do so, subject to the following conditions:    " ,
+            ( " " * 72 ) , 
+            "The above copyright notice(s), this permission notice and ANY original  " , 
+            "donation link shall be included in all copies or substantial portions of" , 
+            "the Software.                                                           " ,
+            ( " " * 72 ) , 
+            " The software is provided 'As Is', without warranty of any kind, express" ,
+            "or implied, including but not limited to warranties of merchantibility, " ,
+            "or fitness for a particular purpose and noninfringement. In no event    " , 
+            "shall the authors or copyright holders be liable for any claim, damages " ,
+            "or other liability, whether in an action of contract, tort or otherwise," , 
+            "arising from, out of or in connection with the software or the use or   " ,
+            "other dealings in the software.                                         " ,
+            ( " " * 72 ) ,
+            "In other words, these terms of service must be accepted in order to use," ,
+            "and in no circumstance may the author(s) be subjected to any liability  " ,
+            "or damage resultant to its use.                                         " 
         }
 
         If ( $Help )
@@ -233,17 +238,17 @@
     {
         $Xaml = @"
         <Window 
-                               xmlns = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
-                             xmlns:x = 'http://schemas.microsoft.com/winfx/2006/xaml'
-                               Title = 'Secure Digits Plus LLC | Hybrid @ ViperBomb Service Configuration Utility'
-                              Height = '540'
-                               Width = '720'
-                                Icon = '$( $GWF.Icon )'
-                             Topmost = 'True'
-                         BorderBrush = 'Black'
-                          ResizeMode = 'NoResize'
-                 HorizontalAlignment = 'Center'
-               WindowStartupLocation = 'CenterScreen'>
+                                       xmlns = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+                                     xmlns:x = 'http://schemas.microsoft.com/winfx/2006/xaml'
+                                       Title = 'Secure Digits Plus LLC | Hybrid @ ViperBomb Service Configuration Utility'
+                                      Height = '540'
+                                       Width = '720'
+                                        Icon = '$( $GWF.Icon )'
+                                     Topmost = 'True'
+                                 BorderBrush = 'Black'
+                                  ResizeMode = 'NoResize'
+                         HorizontalAlignment = 'Center'
+                       WindowStartupLocation = 'CenterScreen'>
             <Window.Resources>
                 <Style x:Key         = 'SeparatorStyle1' 
                        TargetType    = '{x:Type Separator}'>
@@ -255,18 +260,18 @@
                         <Setter.Value>
                             <ControlTemplate TargetType     = '{x:Type Separator}'>
                                 <Border Height              = '24' 
-                                        SnapsToDevicePixels = 'True' 
-                                        Background          = '#FF4D4D4D' 
-                                        BorderBrush         = 'Azure' 
-                                        BorderThickness     = '1,1,1,1' 
-                                        CornerRadius        = '5,5,5,5'/>
+                                                SnapsToDevicePixels = 'True' 
+                                                Background          = '#FF4D4D4D' 
+                                                BorderBrush         = 'Azure' 
+                                                BorderThickness     = '1,1,1,1' 
+                                                CornerRadius        = '5,5,5,5'/>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
                 </Style>
                 <Style TargetType    = '{x:Type ToolTip}'>
                     <Setter Property = 'Background' 
-                            Value    = '#FFFFFFBF'/>
+                                    Value    = '#FFFFFFBF'/>
                 </Style>
             </Window.Resources>
             <Window.Effect>
@@ -275,15 +280,15 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height        = '24'/>
-                    <RowDefinition Height        = '*'/>
+                    <RowDefinition Height        = '*' />
                     <RowDefinition Height        = '48'/>
                 </Grid.RowDefinitions>
                 <Menu Grid.Row                   = '0'
-                      IsMainMenu                 = 'True'
-                      Padding                    = '5'
-                      FontFamily                 = 'Lucida Console'>
-                    <MenuItem     Header         = 'Configuration'>
-                        <MenuItem Header         = 'Home'>
+                              IsMainMenu         = 'True'
+                              Padding            = '5'
+                              FontFamily         = 'Lucida Console'>
+                    <MenuItem         Header     = 'Configuration'>
+                        <MenuItem     Header     = 'Home'>
                             <MenuItem Name       = 'MenuConfigHomeDefaultMax'
                                       Header     = 'Default Maximum'/>
                             <MenuItem Name       = 'MenuConfigHomeDefaultMin'
@@ -312,16 +317,16 @@
                                       Header     = 'Safe Minimum'/>
                         </MenuItem>
                     </MenuItem>
-                    <MenuItem     Header         = 'Info'>
-                        <MenuItem Name           = 'MenuInfoFeedback'
-                                  Header         = 'Feedback'/>
-                        <MenuItem Name           = 'MenuInfoFAQ'
-                                  Header         = 'FAQ'/>
-                        <MenuItem Name           = 'MenuInfoAbout'
-                                  Header         = 'About'/>
-                        <MenuItem Name           = 'MenuInfoCopyright'
-                                  Header         = 'Copyright'/>
-                        <MenuItem Header         = 'MadBomb122'>
+                    <MenuItem         Header     = 'Info'>
+                        <MenuItem     Name       = 'MenuInfoFeedback'
+                                      Header     = 'Feedback'/>
+                        <MenuItem     Name       = 'MenuInfoFAQ'
+                                      Header     = 'FAQ'/>
+                        <MenuItem     Name       = 'MenuInfoAbout'
+                                      Header     = 'About'/>
+                        <MenuItem     Name       = 'MenuInfoCopyright'
+                                      Header     = 'Copyright'/>
+                        <MenuItem     Header     = 'MadBomb122'>
                             <MenuItem Name       = 'MenuInfoMadBombDonate'
                                       Header     = 'Donate to MadBomb122'/>
                             <MenuItem Name       = 'MenuInfoMadBombGitHub'
@@ -337,7 +342,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width  = '*'/>
                     </Grid.ColumnDefinitions>
-                    <TabControl BorderBrush      = 'Gainsboro' 
+                    <TabControl BorderBrush      = 'Gainsboro'
                                 Grid.Row         = '1' 
                                 Name             = 'TabControl'>
                         <TabControl.Resources>
@@ -351,9 +356,9 @@
                                                     CornerRadius                      = '4,4,0,0' 
                                                     Margin                            = '2,0'>
                                                 <ContentPresenter x:Name              = 'ContentSite' 
-                                                                  VerticalAlignment   = 'Center' 
-                                                                  HorizontalAlignment = 'Center' 
-                                                                  ContentSource       = 'Header' 
+                                                                  VerticalAlignment   = 'Center'
+                                                                  HorizontalAlignment = 'Center'
+                                                                  ContentSource       = 'Header'
                                                                   Margin              = '10,2'/>
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -376,42 +381,41 @@
                             </Style>
                         </TabControl.Resources>
                         <TabItem Header = 'Service Dialog'>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height = '30'/>
-                                <RowDefinition Height = '30'/>
-                                <RowDefinition Height =  '*'/>
-                            </Grid.RowDefinitions>
-                            <Grid Grid.Row="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width = '*'/>
-                                <ColumnDefinition Width = '*'/>
-                            </Grid.ColumnDefinitions>
-                                <Button   Grid.Column = '0' Margin ='5' Name = 'ServiceDialogLoad'   Content           = 'Load Services'/>
-                                <TextBlock Grid.Column       = '1' 
-                                               Margin         = '5' 
-                                               TextAlignment  = 'Center'>Service State:
-							            <Run   Background     = '#66FF66' 
-                                               Text           = 'Compliant'/> /
-                                        <Run   Background     = '#FFFF66' 
-                                               Text           = 'Unspecified'/> /
-                                        <Run   Background     = '#FF6666' 
-                                               Text           = 'Non Compliant'/>
-                            </TextBlock>
-                            </Grid>
-                            <Grid Grid.Row            = '1'>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width = '*'/>
-                                    <ColumnDefinition Width = '*'/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox  Grid.Column = '0' Margin ='5' Name = 'ServiceDialogSearch' TextWrapping      = 'Wrap'>Search</TextBox>
-                                <ComboBox Grid.Column = '1' Margin ='5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center'>
-                                    <ComboBoxItem Content = 'Checked'/>
-                                    <ComboBoxItem Content = 'Display Name' IsSelected='True'/>
-                                    <ComboBoxItem Content = 'Name'/>
-                                    <ComboBoxItem Content = 'Current Setting'/>
-                                </ComboBox>
-                            </Grid>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height = '30'/>
+                                    <RowDefinition Height = '30'/>
+                                    <RowDefinition Height =  '*'/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width = '*'/>
+                                        <ColumnDefinition Width = '*'/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.ColumnSpan = '2' 
+                                                       Margin         = '5' 
+                                                       TextAlignment  = 'Center'>Service State:
+							                    <Run   Background     = '#66FF66' 
+                                                       Text           = 'Compliant'/> /
+                                                <Run   Background     = '#FFFF66' 
+                                                       Text           = 'Unspecified'/> /
+                                                <Run   Background     = '#FF6666' 
+                                                       Text           = 'Non Compliant'/>
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Grid.Row            = '1'>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width = '*'/>
+                                        <ColumnDefinition Width = '*'/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox  Grid.Column = '0' Margin ='5' Name = 'ServiceDialogSearch' TextWrapping      = 'Wrap'>Search</TextBox>
+                                    <ComboBox Grid.Column = '1' Margin ='5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center'>
+                                        <ComboBoxItem Content = 'Checked'/>
+                                        <ComboBoxItem Content = 'Display Name' IsSelected='True'/>
+                                        <ComboBoxItem Content = 'Name'/>
+                                        <ComboBoxItem Content = 'Current Setting'/>
+                                    </ComboBox>
+                                </Grid>
                                 <DataGrid Grid.Row            = '2'
                                           Grid.Column         = '0'
                                           Name                = 'ServiceDialogGrid'
@@ -522,10 +526,10 @@
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <ComboBox ItemsSource           = '{Binding Service_Type_List}'
-                                                              Text                  = '{Binding Path                 = Service_Profile,
+                                                                      Text          = '{Binding Path                 = Service_Profile,
                                                                                                 Mode                 = TwoWay,
                                                                                                 UpdateSourceTrigger  = PropertyChanged}'
-                                                              IsEnabled             = '{Binding ElementName          = Custom_Profile,
+                                                                      IsEnabled     = '{Binding ElementName          = Custom_Profile,
                                                                                                 Path                 = IsChecked}'/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
@@ -580,16 +584,9 @@
                                                     <RowDefinition Height = '30'/>
                                                     <RowDefinition Height = '30'/>
                                                 </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width = '25'/>
-                                                    <ColumnDefinition Width = '*'/>
-                                                </Grid.ColumnDefinitions>
-                                                <CheckBox  Grid.Row = '0' Grid.Column = '0' Margin = '5' Name = 'DisplayActive'/>
-                                                <TextBlock Grid.Row = '0' Grid.Column = '1' Margin = '5' >Show Active Services</TextBlock>
-                                                <CheckBox  Grid.Row = '1' Grid.Column = '0' Margin = '5' Name = 'DisplayInactive'/>
-                                                <TextBlock Grid.Row = '1' Grid.Column = '1' Margin = '5' >Show Inactive Services</TextBlock>
-                                                <CheckBox  Grid.Row = '2' Grid.Column = '0' Margin = '5' Name = 'DisplaySkipped'/>
-                                                <TextBlock Grid.Row = '2' Grid.Column = '1' Margin = '5' >Show Skipped Services</TextBlock>
+                                                <CheckBox  Grid.Row = '0' Margin = '5' Name = 'DisplayActive'    Content = "Show Active Services"           />
+                                                <CheckBox  Grid.Row = '1' Margin = '5' Name = 'DisplayInactive'  Content = "Show Inactive Services"         />
+                                                <CheckBox  Grid.Row = '2' Margin = '5' Name = 'DisplaySkipped'   Content = "Show Skipped Services"          />
                                             </Grid>
                                         </GroupBox>
                                         <GroupBox Grid.Row = '1' Header = 'Miscellaneous' Margin = '5'>
@@ -600,18 +597,10 @@
                                                     <RowDefinition Height = '30'/>
                                                     <RowDefinition Height = '30'/>
                                                 </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width = '25'/>
-                                                    <ColumnDefinition Width = '*'/>
-                                                </Grid.ColumnDefinitions>
-                                                <CheckBox  Grid.Row = '0' Grid.Column = '0' Margin = '5' Name = 'MiscSimulate'/>
-                                                <TextBlock Grid.Row = '0' Grid.Column = '1' Margin = '5' >Simulate Changes [ Dry Run ]</TextBlock>
-                                                <CheckBox  Grid.Row = '1' Grid.Column = '0' Margin = '5' Name = 'MiscXbox'/>
-                                                <TextBlock Grid.Row = '1' Grid.Column = '1' Margin = '5' >Skip All Xbox Services</TextBlock>
-                                                <CheckBox  Grid.Row = '2' Grid.Column = '0' Margin = '5' Name = 'MiscChange'/>
-                                                <TextBlock Grid.Row = '2' Grid.Column = '1' Margin = '5' >Allow Change of Service State</TextBlock>
-                                                <CheckBox  Grid.Row = '3' Grid.Column = '0' Margin = '5' Name = 'MiscStopDisabled'/>
-                                                <TextBlock Grid.Row = '3' Grid.Column = '1' Margin = '5' >Stop Disabled Services</TextBlock>
+                                                <CheckBox  Grid.Row = '0' Margin = '5' Name = 'MiscSimulate'     Content = "Simulate Changes [ Dry Run ]"   />
+                                                <CheckBox  Grid.Row = '1' Margin = '5' Name = 'MiscXbox'         Content = "Skip All Xbox Services"         />
+                                                <CheckBox  Grid.Row = '2' Margin = '5' Name = 'MiscChange'       Content = "Allow Change of Service State"  />
+                                                <CheckBox  Grid.Row = '3' Margin = '5' Name = 'MiscStopDisabled' Content = "Stop Disabled Services"         />
                                             </Grid>
                                         </GroupBox>
                                         <GroupBox Grid.Row='2' Header = 'Development' Margin='5'>
@@ -622,18 +611,10 @@
                                                     <RowDefinition Height = '30'/>
                                                     <RowDefinition Height = '30'/>
                                                 </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width = '25'/>
-                                                    <ColumnDefinition Width = '*'/>
-                                                </Grid.ColumnDefinitions>
-                                                <CheckBox  Grid.Row = '0' Grid.Column = '0' Margin = '5' Name = 'DevelDiagErrors' />
-                                                <TextBlock Grid.Row = '0' Grid.Column = '1' Margin = '5' >Diagnostic Output [ On Error ]</TextBlock>
-                                                <CheckBox  Grid.Row = '1' Grid.Column = '0' Margin = '5' Name = 'DevelLog' />
-                                                <TextBlock Grid.Row = '1' Grid.Column = '1' Margin = '5' >Enable Development Logging</TextBlock>
-                                                <CheckBox  Grid.Row = '2' Grid.Column = '0' Margin = '5' Name = 'DevelConsole' />
-                                                <TextBlock Grid.Row = '2' Grid.Column = '1' Margin = '5' >Show Console Window</TextBlock>
-                                                <CheckBox  Grid.Row = '3' Grid.Column = '0' Margin = '5' Name = 'DevelDiagReport' />
-                                                <TextBlock Grid.Row = '3' Grid.Column = '1' Margin = '5' >Show Diagnostic</TextBlock>
+                                                <CheckBox  Grid.Row = '0' Margin = '5' Name = 'DevelDiagErrors'  Content = "Diagnostic Output [ On Error ]" />
+                                                <CheckBox  Grid.Row = '1' Margin = '5' Name = 'DevelLog'         Content = "Enable Development Logging"     />
+                                                <CheckBox  Grid.Row = '2' Margin = '5' Name = 'DevelConsole'     Content = "Show Console Window"            />
+                                                <CheckBox  Grid.Row = '3' Margin = '5' Name = 'DevelDiagReport'  Content = "Show Diagnostic"                />
                                             </Grid>
                                         </GroupBox>
                                     </Grid>
@@ -651,23 +632,13 @@
                                                 <RowDefinition Height = '30'/>
                                                 <RowDefinition Height = '30'/>
                                             </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width = '25'/>
-                                                <ColumnDefinition Width = '*'/>
-                                            </Grid.ColumnDefinitions>
-                                            <CheckBox   Grid.Row = '0' Margin = '5' Name = 'BypassBuild'/>
-                                            <TextBlock  Grid.Row = '0' Margin = '5' Grid.Column = '1' >
-                                                Skip Build/Version Check
-                                            </TextBlock>
-                                            <ComboBox   Grid.Row = '1' Margin = '5' Grid.ColumnSpan = '2' Name = 'BypassEdition'>
+                                            <CheckBox   Grid.Row = '0' Margin = '5' Name = 'BypassBuild' Content = "Skip Build/Version Check"/>
+                                            <ComboBox   Grid.Row = '1' Margin = '5' Name = 'BypassEdition'>
                                                 <ComboBoxItem Content = 'Override Edition Check' IsSelected = 'True'/>
                                                 <ComboBoxItem Content = 'Windows 10 Home'/>
                                                 <ComboBoxItem Content = 'Windows 10 Pro'/>
                                             </ComboBox>
-                                            <CheckBox   Grid.Row = '2' Margin = '5' Name = 'BypassLaptop'/>
-                                            <TextBlock  Grid.Row = '2' Margin = '5' Grid.Column = '1' >
-                                                Enable Laptop Tweaks
-                                            </TextBlock>
+                                            <CheckBox   Grid.Row = '2' Margin = '5' Name = 'BypassLaptop' Content = "Enable Laptop Tweaks"/>
                                         </Grid>
                                     </GroupBox>
                                     <GroupBox Grid.Row = '1' Header = 'Logging' Margin = '5'>
@@ -705,30 +676,16 @@
                                         <RowDefinition Height = '90'/>
                                     </Grid.RowDefinitions>
                                     <GroupBox Grid.Row = '0' Header = 'Service Configuration' Margin = '5'>
-                                        <Grid Grid.Row = '0'>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height = '25'/>
-                                                <RowDefinition Height = '35'/>
-                                            </Grid.RowDefinitions>
-                                            <TextBlock Grid.Row = '0' Margin = '5' Name = 'ServiceConfig' >Black Viper (Sparks v1.0)</TextBlock>
-                                            <ComboBox  Grid.Row = '1' Margin = '5' Name = 'ServiceProfile' Height ='24'>
-                                                <ComboBoxItem Content = 'Black Viper (Sparks v1.0)' IsSelected = 'True'/>
-                                                <ComboBoxItem Content = 'DevOPS (MC/SDP v1.0)' IsEnabled = 'False'/>
-                                            </ComboBox>
-                                        </Grid>
+                                        <ComboBox  Margin = '5' Name = 'ServiceProfile' Height ='24'>
+                                            <ComboBoxItem Content = 'Black Viper (Sparks v1.0)' IsSelected = 'True'/>
+                                            <ComboBoxItem Content = 'DevOPS (MC/SDP v1.0)' IsEnabled = 'False'/>
+                                        </ComboBox>
                                     </GroupBox>
                                     <GroupBox Grid.Row = '1' Header = 'User Interface' Margin = '5'>
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height = '25'/>
-                                                <RowDefinition Height = '35'/>
-                                            </Grid.RowDefinitions>
-                                            <TextBlock Grid.Row = '0' Margin = '5' Name = 'ScriptConfig' >DevOPS (MC/SDP v1.0)</TextBlock>
-                                            <ComboBox  Grid.Row = '1' Margin = '5' Name = 'ScriptProfile' Height = '24' >
-                                                <ComboBoxItem Content = 'DevOPS (MC/SDP v1.0)' IsSelected =  'True'/>
-                                                <ComboBoxItem Content = 'MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False' />
-                                            </ComboBox>
-                                        </Grid>
+                                        <ComboBox  Margin = '5' Height = '24' Name = 'ScriptProfile'>
+                                            <ComboBoxItem Content = 'DevOPS (MC/SDP v1.0)' IsSelected =  'True'/>
+                                            <ComboBoxItem Content = 'MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False' />
+                                        </ComboBox>
                                     </GroupBox>
                                 </Grid>
                             </Grid>
@@ -736,14 +693,14 @@
                         <TabItem Header = 'Console'>
                             <Grid Background = '#FFE5E5E5'>
                                 <ScrollViewer VerticalScrollBarVisibility = 'Visible'>
-                                    <TextBlock Name = 'Console_Output' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>
+                                    <TextBlock Name = 'ConsoleOutput' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>
                                 </ScrollViewer>
                             </Grid>
                         </TabItem>
                         <TabItem Header = 'Diagnostics'>
                             <Grid Background = '#FFE5E5E5'>
                                 <ScrollViewer VerticalScrollBarVisibility = 'Visible'>
-                                    <TextBlock Name = 'Diagnostic_Output' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>
+                                    <TextBlock Name = 'DiagnosticOutput' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>
                                 </ScrollViewer>
                             </Grid>
                         </TabItem>
@@ -786,7 +743,7 @@
                 <GroupBox Header = "Caution" Margin="5">
                     <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height = "3*"/>
+                    <RowDefinition Height = "3*" />
                     <RowDefinition Height = "25" />
                     <RowDefinition Height = "50" />
                 </Grid.RowDefinitions>
@@ -943,7 +900,7 @@
             If ( $Log     ) { @{ 0 = '-log'     ; 1 = -1 ; 2 = $True  ; 3 = 'ScriptLog=1' , 'LogName=-'                     } }
             If ( $LogC    ) { @{ 0 = '-logc'    ; 1 = -1 ; 2 = $True  ; 3 = 'ScriptLog=2' , 'LogName=-'                     } } )
 
-        Return [ PSCustomObject ]@{ 
+        [ PSCustomObject ]@{ 
         
             Arg   = $X[0]
             Match = $X[1]
@@ -957,25 +914,26 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         $PassedArg             = $args # <-- Replace $Args w/ 'Initialize-ScriptMode -$Switch'
 
-        IEX "Using Namespace System.Security.Principal"
+        "Security.Principal.Windows" | % { IEX "( [ $_`Principal ][ $_`Identity ]::GetCurrent() ).IsInRole( 'Administrator' )" } | % {
 
-        ( "Windows" | % { "( [ $_`Principal ][ $_`Identity ]::GetCurrent() ).IsInRole( 'Administrator' )" } ) | % {
-
-            If ( ( IEX $_ ) -ne $True )
-            { 
+            If ( $False ) 
+            {                
                 Write-Theme -Action "Access [!]" "Limited, attempting elevation" 12 4 15
 
                 SAPS PowerShell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" $PassedArg" -Verb RunAs
                 
-                If ( ( IEX $_ ) -ne $True )
-                {
+                If ( $False )
+                { 
                     Write-Theme -Action "Exception [!]" "Elevation has failed" 12 4 15
                     Read-Host "Press Enter to Exit"
-                    Exit
+                    #Exit
                 }
             }
 
-            Write-Theme -Action "Access [+]" "Granted" 11 11 15
+            If ( $True )
+            { 
+                Write-Theme -Action "Access [+]" "Granted" 11 11 15 
+            }
         }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____     
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -986,16 +944,17 @@
 
             [ Parameter ( ParameterSetName = "Theme" ) ] [ Switch ] $Display )
 
-        $Return = GCIM Win32_Service | % {
+        $Return                  = GCIM Win32_Service | % {
     
             [ PSCustomObject ]@{ 
             
-                Name        = $_.Name 
-                Status      = $_.State
-                StartType   = $_.StartMode
-                DisplayName = $_.DisplayName
-                PathName    = $_.PathName
-                Description = $_.Description
+                Name             = $_.Name 
+                Status           = $_.State
+                StartType        = $_.StartMode
+                DelayedAutoStart = GP "HKLM:\SYSTEM\CurrentControlSet\Services\$( $_.Name )\" | % { $_.DelayedAutostart } | % { If ( $_ -eq $Null ) { "-" } Else { $_ } }
+                DisplayName      = $_.DisplayName
+                PathName         = $_.PathName
+                Description      = $_.Description
             }
         }
 
@@ -1186,7 +1145,7 @@
                 FileBase           = [ PSCustomObject ]@{
  
                     Settings       = "$_\BVSetting.xml"
-                    Service        = "$_\$( $Control.ServiceConfig ).csv"
+                    Service        = "$_\$( Resolve-Script -Control | % { $_.ServiceConfig } ).csv"
                 }
 
                 Environment        = [ PSCustomObject ]@{ 
@@ -1214,22 +1173,6 @@
                                      'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
 	                                 'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' )
                 }
-
-                Defaults           = [ PSCustomObject ]@{
-
-                    Viper          = 0
-                    Automated      = 0
-                    All            = '-Min'
-                    ViperTag       = 'BV-'
-                    Execute        = 2
-                    Error          = 0
-                    Log            = 0
-                    Config         = 0
-                    Script         = 0
-                    Laptop         = Resolve-Windows -Type
-                    Errors         = 0
-                    GUI            = 0
-                }
             }
         }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -1237,7 +1180,6 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-ServiceProfile #_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
         $Config                     = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
 
         $Collect                    = [ PSCustomObject ]@{
@@ -1248,15 +1190,15 @@
 
         $List                       = Resolve-ScriptVars  | % { $_.FileBase } | % { IPCSV $_.Service }
 
-        $X = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" } | % {
+        @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" } | % {
 
-            $Collect | Add-Member -MemberType NoteProperty -Name $X -Value @{ Scoped = @( ) ; NonScoped = @( ) }
-        }
+            $Collect | Add-Member -MemberType NoteProperty -Name $_ -Value @{ Scoped = @( ) ; NonScoped = @( ) }
 
             ForEach ( $i in 0..( $List.Count - 1 ) )
             {
                 $K = [ PSCustomObject ]@{ 
                 
+                    Index   = "{0:d3}" -f $I
                     Service = $List[$I].Service.Replace( '?????' , $Config )
                     Setting = @( 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (Delayed)' )[$List[$I].$_]
                 }
@@ -1271,12 +1213,6 @@
                     $Collect.$_.NonScoped += $K
                 }
             }
-        }
-
-        @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" } | % { 
-
-            $Collect.$_.Scoped    = $Collect.$_.Scoped    | Sort Service
-            $Collect.$_.NonScoped = $Collect.$_.NonScoped | Sort Service
         }
 
         $Collect
@@ -1406,121 +1342,147 @@
             $Named                = $_.Named
         }
 
-        $GUI.Pref_Config_Profile.Text 
-
         $GUI | % { 
         
-            If ( $_.Menu_Config_0.Add_Click ) <# Maximum                              #>
-            {
-                Select-ServiceProfile -Config $Services -Subset 
+            $_.MenuConfigHomeDefaultMax    | % { $_.Add_Click({ $Services."10H:D+" ; "Windows 10 Home: Default Maximum" }) }
+            $_.MenuConfigHomeDefaultMin    | % { $_.Add_Click({ $Services."10H:D-" ; "Windows 10 Home: Default Minimum" }) }
+            $_.MenuConfigProDefaultMax     | % { $_.Add_Click({ $Services."10P:D+" ;  "Windows 10 Pro: Default Maximum" }) }
+            $_.MenuConfigProDefaultMin     | % { $_.Add_Click({ $Services."10P:D-" ;  "Windows 10 Pro: Default Minimum" }) }
+            $_.MenuConfigDesktopSafeMax    | % { $_.Add_Click({ $Services."DT:D+"  ;         "Desktop: Default Maximum" }) }
+            $_.MenuConfigDesktopSafeMin    | % { $_.Add_Click({ $Services."DT:D-"  ;         "Desktop: Default Minimum" }) }
+            $_.MenuConfigDesktopTweakedMax | % { $_.Add_Click({ $Services."DT:D+"  ;         "Desktop: Default Maximum" }) }
+            $_.MenuConfigDesktopTweakedMin | % { $_.Add_Click({ $Services."DT:D-"  ;         "Desktop: Default Minimum" }) }
+            $_.MenuConfigLaptopSafeMax     | % { $_.Add_Click({ $Services."LT:D+"  ;          "Laptop: Default Maximum" }) }
+            $_.MenuConfigLaptopSafeMin     | % { $_.Add_Click({ $Services."LT:D-"  ;          "Laptop: Default Minimum" }) }
+
+            $_.MenuInfoFeedback            | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
+            $_.MenuInfoFAQ                 | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript/blob/master/README.md" }) }
+            $_.MenuInfoAbout               | % { $_.Add_Click({ 
+            
+                @{  Title   = "About - ViperBomb Service Configuration Utility"
+                    Message = "This utility provides an interface to load and customize " ,
+                              "service configuration profiles, such as:`n"                ,
+                              "`n"                                                        ,
+                              "    Default: Black Viper (Sparks v1.0)`n"                  ,
+                              "    Custom: If in proper format`n"                         ,
+                              "    Backup: Created via this utility"             -join '' } | % { Show-Message -Title $_.Title -Message $_.Message }
+            
+            }) }
+
+            $_.MenuInfoCopyright           | % { $_.Add_Click({ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) }) }
+            $_.MenuInfoMadBombDonate       | % { $_.Add_Click({ Start "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/" }) }
+            $_.MenuInfoMadBombGitHub       | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript" }) }
+            $_.MenuInfoBlackViper          | % { $_.Add_Click({ Start "http://www.BlackViper.com" }) }
+            $_.MenuInfoSecureDigitsPlus    | % { $_.Add_Click({ Start "https://www.securedigitsplus.com" }) }
+       
+            #$_.ServiceDialogSearch
+            #$_.ServiceDialogSelect
+
+            #$_.DisplayActive
+            #$_.DisplayInactive
+            #$_.DisplaySkipped
+
+            #$_.MiscSimulate
+            #$_.MiscXbox
+            #$_.MiscChange
+            #$_.MiscStopDisabled
+
+            #$_.DevelDiagErrors
+            #$_.DevelLog
+            #$_.DevelConsole
+            #$_.DevelDiagReport
+
+            #$_.BypassBuild
+            #$_.BypassEdition
+            #$_.BypassLaptop
+
+            $_.LoggingService              | % { 
+            
+                $_.Add_Click(
+                { 
+                    If ( ! $GUI.LoggingServiceFile.IsEnabled )
+                    {
+                        $GUI.LoggingServiceFile.IsEnabled = $True
+                    }
+
+                    $Dialog = New-Object System.Windows.Forms.SaveFileDialog
+                    
+                    $Dialog | % { 
+
+                        $_.InitialDirectory         = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                        $_.Filter                   = 'LOG (*.log) | *.log'
+                        $_.Filename                 = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
+                    }
+                        
+                    If ( ( $Dialog.ShowDialog() -eq $True ) -and ( $Dialog.Filename -ne "" ) )
+                    { 
+                        $GUI.LoggingServiceFile.Text = $Dialog.Filename
+                    }
+
+                    Else
+                    {
+                        $GUI.LoggingServiceFile | % { 
+                            
+                            $_.IsEnabled = $False
+                            $_.Text      = "<Click above to use this feature>" 
+                        }
+                    }
+                })
             }
 
-            If ( $_.Menu_Config_1.Add_Click ) <# Minimum                              #>
-            {
-                
+            $_.LoggingScript                | % { 
+            
+                $_.Add_Click(
+                { 
+                    If ( ! $GUI.LoggingScriptFile.IsEnabled )
+                    {
+                        $GUI.LoggingScriptFile.IsEnabled = $True
+                    }
+
+                    $Dialog = New-Object System.Windows.Forms.SaveFileDialog
+                    
+                    $Dialog | % { 
+
+                        $_.InitialDirectory         = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                        $_.Filter                   = 'LOG (*.log) | *.log'
+                        $_.Filename                 = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Script.log"
+                    }
+                        
+                    If ( ( $Dialog.ShowDialog() -eq $True ) -and ( $Dialog.Filename -ne "" ) )
+                    { 
+                        $GUI.LoggingServiceFile.Text = $Dialog.Filename
+                    }
+
+                    Else
+                    {
+                        $GUI.LoggingServiceFile | % { 
+                            
+                            $_.IsEnabled = $False
+                            $_.Text      = "<Click above to use this feature>" 
+                        }
+                    }
+                })
             }
 
-            If ( $_.Menu_Config_2.Add_Click ) <# Default                              #>
-            {
+            #$_.LoggingServiceFile
+            #$_.LoggingScript
+            #$_.LoggingScriptFile
 
-            }
+            #$_.BackupRegistry
+            #$_.BackupRegistryFile
+            #$_.BackupTemplate
+            #$_.BackupTemplateFile
 
-            If ( $_.Menu_Config_3.Add_Click ) <# Safe                                 #>
-            {
+            
+            #$_.ServiceConfig
+            #$_.ServiceProfile
+            #$_.ScriptConfig
+            #$_.ScriptProfile
 
-            }
-
-            If ( $_.Menu_Config_4.Add_Click ) <# Tweaked                              #>
-            {
-
-            }
-
-            If ( $_.Menu_Config_5.Add_Click ) <# Custom                               #>
-            {
-
-            }
-
-            If ( $_.Menu_Info_0.Add_Click )   <# Feedback                             #>
-            {
-
-            }
-
-            If ( $_.Menu_Info_1.Add_Click )   <# FAQ                                  #>
-            {
-
-            }
-
-            If ( $_.Menu_Info_2.Add_Click )   <# About                                #>
-            {
-
-            }
-
-            If ( $_.Menu_Info_3.Add_Click )   <# Copyright                            #>
-            {
-
-            }
-
-            If ( $_.Menu_MB_0.Add_Click )     <# Donate to MadBomb122                 #>
-            {
-
-            }
-
-            If ( $_.Menu_MB_1.Add_Click )     <# MadBomb122's GitHub                  #>
-            {
-                Resolve-Script -Version | % { Start $_.Site }
-            }
-
-            If ( $_.Menu_BV_0.Add_Click )     <# BlackViper's Website                 #>
-            {
-                Start "http://www.blackviper.com/"
-            }
-
-            If ( $_.Menu_SD_0.Add_Click )     <# Secure Digits Plus: Fighting Entropy #>
-            {
-                Start "https://securedigitsplus.com"
-            }
-
-            If ( $_.Service_Dialog_Load.Add_Click )
-            {
-                
-            }
-            $_.Service_Dialog_Search
-            $_.Service_Dialog_Select
-            $_.Service_Dialog_Grid
-            $_.Service_Profile
-            $_.Preferences_Tab
-            $_.Pref_Disp_0
-            $_.Pref_Disp_1
-            $_.Pref_Disp_2
-            $_.Pref_Misc_0
-            $_.Pref_Misc_1
-            $_.Pref_Misc_2
-            $_.Pref_Misc_3
-            $_.Pref_Devel_0
-            $_.Pref_Devel_1
-            $_.Pref_Devel_2
-            $_.Pref_Devel_3
-            $_.Pref_Bypass_Laptop
-            $_.Pref_Bypass_Build
-            $_.Pref_Bypass_Drop
-            $_.Pref_Log_Service_Browse
-            $_.Pref_Log_Service_Path
-            $_.Pref_Log_Script_Browse
-            $_.Pref_Log_Script_Path
-            $_.Pref_Backup_Reg_Browse
-            $_.Pref_Backup_Reg_Path
-            $_.Pref_Backup_CSV_Browse
-            $_.Pref_Backup_CSV_Path
-            $_.Pref_Config_Version
-            $_.Pref_Config_Profile
-            $_.Pref_Module_Version
-            $_.Pref_Module_Profile
-            $_.Console_Tab
-            $_.Console_Output
-            $_.Diagnostic_Tab
-            $_.Diagnostic_Output
-            $_.Start
-            $_.Cancel
+            #$_.ConsoleOutput
+            #$_.DiagnosticOutput
+            #$_.Start
+            $_.Cancel | % { $_.Add_Click({ $GUI.DialogResult = $False }) }
         }
 
         Show-WPFWindow -GUI $GUI                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
