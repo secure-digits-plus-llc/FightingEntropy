@@ -1233,7 +1233,7 @@
                     
                             If ( $_ -ne $Null ) 
                             { 
-                                ( $False , $True )[$_] 
+                                ( 0 , 1 )[$_] 
                             }
 
                             Else
@@ -1383,14 +1383,10 @@
             [ Parameter ( Mandatory ) ] [ Int ] $Mode )
 
     Add-Type -Name Window -Namespace Console -MemberDefinition '
-        
-        [DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow(); 
-        [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
-        
-    '
+        [DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();
+        [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);'
 
     [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , $Mode )
-
     
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -1399,15 +1395,25 @@
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
-        $Console                  = Show-Console -Mode 5
+        $Console                       = Show-Console -Mode 5
         
-        $Services                 = Get-ServiceProfile
+        $Services                      = Get-ServiceProfile
 
-        Return-ViperBombGUI -Main | % { 
+        Return-ViperBombGUI -Main      | % { 
         
-            $Xaml                 = $_.Xaml
-            $GUI                  = $_.GUI
-            $Named                = $_.Named
+            $Xaml                      = $_.Xaml
+            $GUI                       = $_.GUI
+            $Named                     = $_.Named
+        }
+
+        [ System.Windows.RoutedEventHandler ] $Search = {
+
+            $Sideline                          = $GUI.ServiceDialogGrid.ItemsSource
+
+            $GUI.ServiceDialogGrid.ItemsSource = $Sideline | ? { 
+            
+                $_.$( $GUI.ServiceDialogSelect | % { $_[$_.SelectedIndex] } ) -match $GUI.ServiceDialogSearch.Text
+            }
         }
 
         [ System.Windows.RoutedEventHandler ] $DataGrid = {
@@ -1429,112 +1435,116 @@
                     ServicePathName            = $_.PathName
                     ServiceDescription         = $_.Description
                     ServiceCompliance          = If ( $_.Scoped -eq "+" ) { $True } Else { $False }
+
                 }
             }
 
             $GUI.ServiceDialogGrid.ItemsSource = $Swap
         }
 
-        $GUI.MenuConfigHomeDefaultMax     | % {
+        $GUI.MenuConfigHomeDefaultMax          | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."10H:D+"
+                $ServiceProfile                = $Services."10H:D+"
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
         }
 
-        $GUI.MenuConfigHomeDefaultMin     | % {
+        $GUI.MenuConfigHomeDefaultMin          | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."10H:D-"
+                $ServiceProfile                = $Services."10H:D-"
             })
 
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
         }
 
-        $GUI.MenuConfigProDefaultMax      | % {
+        $GUI.MenuConfigProDefaultMax           | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."10P:D+" 
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
-
-        $GUI.MenuConfigProDefaultMin      | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile           = $Services."10P:D-"
+                $ServiceProfile                = $Services."10P:D+" 
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
         }
 
-        $GUI.MenuConfigDesktopSafeMax     | % {
+        $GUI.MenuConfigProDefaultMin           | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."DT:S+"
+                $ServiceProfile                = $Services."10P:D-"
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
         }
 
-        $GUI.MenuConfigDesktopSafeMin     | % {
+        $GUI.MenuConfigDesktopSafeMax          | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."DT:S-"
+                $ServiceProfile                = $Services."DT:S+"
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
         }
 
-        $GUI.MenuConfigDesktopTweakedMax  | % {
+        $GUI.MenuConfigDesktopSafeMin          | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."DT:T+"  
+                $ServiceProfile                = $Services."DT:S-"
+            })
+            
+            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        }
+
+        $GUI.MenuConfigDesktopTweakedMax       | % {
+        
+            $_.Add_Click(
+            {
+                $ServiceProfile                = $Services."DT:T+"  
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
         }
 
-        $GUI.MenuConfigDesktopTweakedMin  | % {
-        
-            $_.Add_Click({ $ServiceProfile           = $Services."DT:T-"  })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
-        }
-
-        $GUI.MenuConfigLaptopSafeMax      | % {
+        $GUI.MenuConfigDesktopTweakedMin       | % {
         
             $_.Add_Click(
-            {
-                $ServiceProfile           = $Services."LT:S+"  
+            { 
+                $ServiceProfile                = $Services."DT:T-"  
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
         }
 
-        $GUI.MenuConfigLaptopSafeMin      | % {
+        $GUI.MenuConfigLaptopSafeMax           | % {
         
             $_.Add_Click(
             {
-                $ServiceProfile           = $Services."LT:S-"  
+                $ServiceProfile                = $Services."LT:S+"  
             })
             
             $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
         }
 
-        $GUI.MenuInfoFeedback             | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
-        $GUI.MenuInfoFAQ                  | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript/blob/master/README.md" }) }
-        $GUI.MenuInfoAbout                | % { 
+        $GUI.MenuConfigLaptopSafeMin           | % {
+        
+            $_.Add_Click(
+            {
+                $ServiceProfile                = $Services."LT:S-"  
+            })
+            
+            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
+        }
+
+        $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
+        $GUI.MenuInfoFAQ                       | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript/blob/master/README.md" }) }
+        $GUI.MenuInfoAbout                     | % { 
         
             $_.Add_Click(
             { 
@@ -1549,14 +1559,179 @@
             }) 
         }
 
-        $GUI.MenuInfoCopyright            | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
-        $GUI.MenuInfoMadBombDonate        | % { $_.Add_Click{ Start "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/" } }
-        $GUI.MenuInfoMadBombGitHub        | % { $_.Add_Click{ Start "https://GitHub.com/madbomb122/BlackViperScript" } }
-        $GUI.MenuInfoBlackViper           | % { $_.Add_Click{ Start "http://www.BlackViper.com" } }
-        $GUI.MenuInfoSecureDigitsPlus     | % { $_.Add_Click{ Start "https://www.securedigitsplus.com" } }
-       
-        #$GUI.ServiceDialogSearch
-        #$GUI.ServiceDialogSelect
+        $GUI.MenuInfoCopyright                 | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
+        $GUI.MenuInfoMadBombDonate             | % { $_.Add_Click{ Start "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/" } }
+        $GUI.MenuInfoMadBombGitHub             | % { $_.Add_Click{ Start "https://GitHub.com/madbomb122/BlackViperScript" } }
+        $GUI.MenuInfoBlackViper                | % { $_.Add_Click{ Start "http://www.BlackViper.com" } }
+        $GUI.MenuInfoSecureDigitsPlus          | % { $_.Add_Click{ Start "https://www.securedigitsplus.com" } }
+
+        #--------------------------#
+        # Logging Service Handling #
+        #--------------------------#
+
+        $GUI.LoggingServiceBrowse.Add_Click(
+        {
+            $GUI.LoggingServiceFile                  | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingServiceFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Service Logging Output"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'log (*.log) | *.log'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
+            }
+
+            $Dialog.ShowDialog()                    | % {
+
+                If ( "OK" )
+                {
+                    $GUI.LoggingServiceFile.Text    = $Dialog.Filename
+                }
+
+                Else
+                {
+                    $GUI.LoggingServiceFile         | % { 
+                          
+                        $_.IsEnabled                = $False
+                        $_.Text                     = "<Activate to designate a different file name/path>"
+                    }
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        #-------------------------#
+        # Logging Script Handling #
+        #-------------------------# 
+
+        $GUI.LoggingScriptBrowse.Add_Click(
+        {
+            $GUI.LoggingScriptFile                  | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingScriptFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Script Logging Output"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'log (*.log) | *.log'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Script.log"
+            }
+
+            $Dialog.ShowDialog()                    | % {
+
+                If ( "OK" )
+                {
+                    $GUI.LoggingScriptFile.Text     = $Dialog.Filename
+                }
+
+                Else
+                {
+                    $GUI.LoggingScriptFile          | % { 
+                          
+                        $_.IsEnabled                = $False
+                        $_.Text                     = "<Activate to designate a different file name/path>"
+                    }
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        #------------------------#
+        # Backup Registry (.reg) #
+        #------------------------#
+
+        $GUI.BackupRegistryBrowse.Add_Click(
+        {
+            $GUI.BackupRegistryFile                 | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupRegistryFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Registry Backup File"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'reg (*.reg) | *.reg'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Backup.reg"
+            }
+
+            $Dialog.ShowDialog()                    | % {
+
+                If ( "OK" )
+                {
+                    $GUI.BackupRegistryFile.Text    = $Dialog.Filename
+                }
+
+                Else
+                {
+                    $GUI.BackupRegistryFile         | % { 
+                          
+                        $_.IsEnabled                = $False
+                        $_.Text                     = "<Activate to designate a different file name/path>"
+                    }
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        #------------------------#
+        # Backup Template (.csv) #
+        #------------------------#
+
+        $GUI.BackupTemplateBrowse.Add_Click(
+        {
+            $GUI.BackupTemplateFile                 | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupTemplateFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Template Backup File"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'csv (*.csv) | *.csv'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Template.csv"
+            }
+
+            $Dialog.ShowDialog()                    | % {
+
+                If ( "OK" )
+                {
+                    $GUI.BackupTemplateFile.Text    = $Dialog.Filename
+                }
+
+                Else
+                {
+                    $GUI.BackupTemplateFile         | % { 
+                          
+                        $_.IsEnabled                = $False
+                        $_.Text                     = "<Activate to designate a different file name/path>"
+                    }
+                }
+            }
+
+            $Dialog.Dispose()
+        })
 
         #$GUI.DisplayActive
         #$GUI.DisplayInactive
@@ -1575,151 +1750,15 @@
         #$GUI.BypassBuild
         #$GUI.BypassEdition
         #$GUI.BypassLaptop
-
-
-        #--------------------------#
-        # Logging Service Handling #
-        #--------------------------# 
-
-        $GUI.LoggingServiceSwitch.Add_Click(
-        {   
-            If ( ! $GUI.LoggingServiceSwitch.IsChecked )
-            {
-                $GUI.LoggingServiceSwitch.IsChecked     = $True 
-                $GUI.LoggingServiceBrowse.IsEnabled     = $True
-                $GUI.LoggingServiceFile                 | % { 
-                    
-                    $_.IsEnabled                        = $True
-                    $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingServiceFile } ) -join '_'
-                }
-            }
-
-            If ( $GUI.LoggingServiceSwitch.IsChecked )
-            {
-                $GUI.LoggingServiceSwitch.IsChecked     = $False 
-                $GUI.LoggingServiceBrowse.IsEnabled     = $False
-                $GUI.LoggingServiceFile                 | % {
-
-                    $_.IsEnabled                        = $False
-                    $_.Text                             = "<Activate to designate a different file name/path>"
-                }
-            }
-        })
-                    
-        $GUI.LoggingServiceBrowse.Add_Click(
-        {
-            $Dialog                                     = New-Object System.Windows.Forms.SaveFileDialog
-                  
-            $Dialog                                     | % {
-
-                $_.Title                                = "Designate Service Logging Output"
-                $_.InitialDirectory                     = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                               = 'log (*.log) | *.log'
-                $_.Filename                             = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
-            }
-
-            $Dialog.ShowDialog()                        | % {
-
-                If ( "OK" )
-                {
-                    $GUI.LoggingServiceFile.Text        = $Dialog.Filename
-                }
-
-                Else
-                {
-                    $GUI.LoggingServiceFile             | % { 
-                            
-                        $_.IsEnabled                    = $False
-                        $_.Text                         = "<Activate to designate a different file name/path>"
-                    }
-                }
-            }
-
-            $Dialog.Dispose()
-        })
-
-            #-------------------------#
-            # Logging Script Handling #
-            #-------------------------# 
-
-            $GUI.LoggingScriptSwitch.Add_Click(
-            {
-                If ( ! $GUI.LoggingScriptSwitch.IsChecked )
-                { 
-                    $GUI.LoggingScriptSwitch.IsChecked      = $True 
-                    $GUI.LoggingScriptBrowse.IsEnabled      = $True
-                    $GUI.LoggingScriptFile                  | % {
-                    
-                        $_.IsEnabled                        = $True
-                        $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingScriptFile } ) -join '_'
-                    
-                    }
-                }
-            })
-
-            If ( $GUI.LoggingScriptSwitch.IsChecked )
-            {
-                $GUI.LoggingScriptSwitch.Add_Click(
-                {   
-                    $GUI.LoggingScriptSwitch.IsChecked      = $False 
-                    $GUI.LoggingScripteBrowse.IsEnabled     = $False
-                    $GUI.LoggingScriptFile                  | % {
-
-                        $_.IsEnabled                        = $False
-                        $_.Text                             = "<Activate to designate a different file name/path>"
-                    
-                    }
-                })
-
-                $GUI.LoggingScriptBrowse.Add_Click(
-                {
-                    $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-                    $Dialog                                 | % {
-
-                        $_.Title                            = "Designate Service Logging Output"
-                        $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                        $_.Filter                           = 'log (*.log) | *.log'
-                        $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
-                    }
-
-                    $Dialog.ShowDialog()                    | % { 
-
-                        If ( "OK" )
-                        {
-                            $GUI.LoggingScriptFile.Text     = $Dialog.Filename
-                        }
-
-                        Else
-                        {
-                            $GUI.LoggingScriptFile          | % { 
-                            
-                                $_.IsEnabled                = $False
-                                $_.Text                     = "<Activate to designate a different file name/path>"
-                            }
-                        }
-                    }
-
-                    $Dialog.Dispose()
-                })
-            }
-
-            #$GUI.BackupRegistrySwitch
-            #$GUI.BackupRegistryBrowse
-            #$GUI.BackupRegistryFile
-
-            #$GUI.BackupTemplateSwitch
-            #$GUI.BackupTemplateBrowse
-            #$GUI.BackupTemplateFile
             
-            #$GUI.ServiceProfile
-            #$GUI.ScriptProfile
+        #$GUI.ServiceProfile
+        #$GUI.ScriptProfile
 
-            #$GUI.ConsoleOutput
-            #$GUI.DiagnosticOutput
-            #$GUI.Start
+        #$GUI.ConsoleOutput
+        #$GUI.DiagnosticOutput
+        #$GUI.Start
 
-            $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
+        $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
 
         $GUI | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } | % { 
         
