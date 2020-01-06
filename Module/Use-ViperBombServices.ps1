@@ -56,7 +56,8 @@
             [ Parameter ( ParameterSetName =      "Path" ) ] [ Switch ] $Path      ,
             [ Parameter ( ParameterSetName =   "Control" ) ] [ Switch ] $Control   ,
             [ Parameter ( ParameterSetName = "Copyright" ) ] [ Switch ] $Copyright ,
-            [ Parameter ( ParameterSetName =      "Help" ) ] [ Switch ] $Help      )
+            [ Parameter ( ParameterSetName =      "Help" ) ] [ Switch ] $Help      ,
+            [ Parameter ( ParameterSetName =  "Services" ) ] [ Switch ] $Services  )
 
         $Default = [ PSCustomObject ]@{
 
@@ -78,8 +79,8 @@
             BypassLaptop         = 0
             LoggingServiceFile   = "Service.log"
             LoggingScriptFile    = "Script.log"
-            BackupRegistryPath   = "Backup.reg"
-            BackupTemplatePath   = "Backup.csv"
+            BackupRegistryFile   = "Backup.reg"
+            BackupTemplateFile   = "Backup.csv"
             ServiceConfig        = "Black Viper (Sparks v1.0)"
             ScriptConfig         = "DevOPS (MC/SDP v1.0)"
 
@@ -92,12 +93,12 @@
                 [ PSCustomObject ]@{
     
                     Version        = "7.0.0"
-                    Date           = "2020-01-03"
+                    Date           = "2020-01-05"
                     Script         = $_.ScriptConfig
                     Release        = "Testing"
                     Site           = "https://www.securedigitsplus.com"
                     URLBase        = "https://github.com/secure-digits-plus-llc/FightingEntropy"
-                    URLService     = $_.ServiceConfig
+                    URLService     = "https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Module/Services/$( $_.ServiceConfig )"
                     URLDonate      = "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/"
                 }
             }
@@ -110,7 +111,7 @@
                 [ PSCustomObject ]@{ 
             
                     Parent = Split-Path $_ -Parent
-                    Leaf   = Split-Path $_ -Leaf 
+                    Leaf   = Split-Path $_ -Leaf
                 }
             }
         }
@@ -216,6 +217,24 @@
             "  -help            Shows list of switches, then exits script.. alt -h                                     " , 
             "  -copy            Shows Copyright/License Information, then exits script                                 "
         }
+
+        If ( $Services )
+        {
+            [ PSCustomObject ]@{
+
+                Xbox     = 'XblAuthManager' , 'XblGameSave' , 'XboxNetApiSvc' , 'XboxGipSvc' , 'xbgm'
+
+                NetTCP   = 'Msmq' , 'Pipe' , 'Tcp' | % { "Net$_`Activator" }
+
+                DataGrid = 'Index' , 'Scoped' , 'Profile' , 'Name' , 'Status' , 'StartType' , 'DelayedAutoStart' , 'DisplayName' , 'PathName' , 'Description'
+
+                Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , "PrintWorkflowUserSvc" , 
+                              "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { "$_`_?????" } ; 'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
+                              'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 
+                              'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
+	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' )
+            }
+        }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -231,14 +250,17 @@
 
     If ( $Main )
     {
-                $Xaml = @"
-        <Window 
+        $Xaml = @"
+        <Window                               
+                                             x:Class = 'MadBombRevisedGUI.MainWindow'
                                                xmlns = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
                                              xmlns:x = 'http://schemas.microsoft.com/winfx/2006/xaml'
                                                Title = 'Secure Digits Plus LLC | Hybrid @ ViperBomb Service Configuration Utility'
                                               Height = '540'
+                                           MinHeight = '540'
                                                Width = '720'
-                                               Icon  = '$( $GWF.Icon )'
+                                            MinWidth = '720'
+                                                Icon = '$( $GWF.Icon )'
                                              Topmost = 'True'
                                          BorderBrush = 'Black'
                                           ResizeMode = 'CanResize'
@@ -515,7 +537,7 @@
                                                             CanUserSort             = 'True'
                                                             IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'Delay'
-                                                            Width                   = '40'
+                                                            Width                   = '20'
                                                             Binding                 = '{Binding DelayedAutoStart}'
                                                             CanUserSort             = 'True'
                                                             IsReadOnly              = 'True'/>
@@ -711,16 +733,18 @@
         </Window>
 "@
 
+        # May change this 'mess' to a Hashtable/Custom Object
+
         $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
-        @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub" | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
-        "Search" , "Select" , "Grid" | % { "ServiceDialog$_" } ; 
-        'Active' , 'Inactive' , 'Skipped' | % { "Display$_" } ; 
-        'Simulate' , 'Xbox' , 'Change' , 'StopDisabled' | % { "Misc$_" } ; 
-        'DiagErrors' , 'Log' , 'Console' , 'DiagReport' | % { "Devel$_" } ; 
-        'Build' , 'Edition' , 'Laptop' | % { "Bypass$_"  } ; 
-        'Service' , 'Script' | % { "$_`Switch" , "$_`Browse" , "$_`File" } | % { "Logging$_" } ; 
-        'Registry' , 'Template' | % { "$_`Switch" , "$_`Browse" , "$_`File" } | % { "Backup$_"  } ; 
-        'Service' , 'Script' | % { "$_`Profile" } ; 'Start' , 'Cancel' )
+        @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub"   | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
+        "Search" , "Select" , "Grid"                                          | % { "ServiceDialog$_" } ;
+        'Active' , 'Inactive' , 'Skipped'                                     | % { "Display$_"       } ; 
+        'Simulate' , 'Xbox' , 'Change' , 'StopDisabled'                       | % { "Misc$_"          } ; 
+        'DiagErrors' , 'Log' , 'Console' , 'DiagReport'                       | % { "Devel$_"         } ; 
+        'Build' , 'Edition' , 'Laptop'                                        | % { "Bypass$_"        } ; 
+        'Service' , 'Script'    | % { "$_`Switch" , "$_`Browse" , "$_`File" } | % { "Logging$_"       } ; 
+        'Registry' , 'Template' | % { "$_`Switch" , "$_`Browse" , "$_`File" } | % { "Backup$_"        } ; 
+        'Service' , 'Script'                                                  | % { "$_`Profile"      } ; 'Start' , 'Cancel' )
 
         $GUI   = Convert-XAMLToWindow -Xaml $Xaml -NE $Named -Passthru
     }
@@ -934,207 +958,6 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ Parameter ( ParameterSetName = "Theme" ) ] [ Switch ] $Display )
-
-        $Return                  = GCIM Win32_Service | % {
-    
-            [ PSCustomObject ]@{ 
-            
-                Name             = $_.Name 
-                Status           = $_.State
-                StartType        = $_.StartMode
-                DelayedAutoStart = "HKLM:\SYSTEM\CurrentControlSet\Services\$( $_.Name )" | ? { Test-Path $_ } | % { 
-                        
-                    GP $_ | % { $_.DelayedAutoStart } | % { 
-                    
-                        If ( $_ -ne $Null ) 
-                        { 
-                            @( 0 , 1 )[$_] 
-                        }
-
-                        Else
-                        {
-                            "-"
-                        }
-                    }
-                }
-                
-                DisplayName      = $_.DisplayName
-                PathName         = $_.PathName
-                Description      = $_.Description
-            }
-
-        }
-
-        If ( $Display )
-        {
-            $Range               = 0..( $Return.Count - 1 )
-            $Section             = 0..( $Return.Count - 1 )
-            $Subtable            = 0..( $Return.Count - 1 )
-    
-            $Names               = @( "Status" , "StartType" ; @( "" , "Display" , "Path" | % { "$_`Name" } ) )
-
-            ForEach ( $i in 0..( $Return.Count - 1 ) )
-            {
-                $X               = $Return[$I]
-        
-                $Section[$I]     = "( $( $X.DisplayName ) )"
-        
-                $Splat           = @{ 
-
-                    Items        = 0..4 | % {       $Names[$_]   }
-                    Values       = 0..4 | % { $X.$( $Names[$_] ) }
-
-                }
-
-                $SubTable[$I]    = New-SubTable @Splat
-            }
-
-            $Table = New-Table -Depth $Range.Count -Title "Current Services" -ID $Section -Table $SubTable
-    
-            Write-Theme -Table $Table -Prompt "Press Enter to Continue"
-        }
-
-        $Return
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Resolve-Windows # CIM / Edition Collection Table __________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding ( ) ] Param (
-
-            [ Parameter ( ParameterSetName =  "System" ) ] [ Switch ] $System  ,
-            [ Parameter ( ParameterSetName =      "OS" ) ] [ Switch ] $MSInfo  ,
-            [ Parameter ( ParameterSetName = "Edition" ) ] [ Switch ] $Edition ,
-            [ Parameter ( ParameterSetName =     "SKU" ) ] [ Switch ] $SKU     ,
-            [ Parameter ( ParameterSetName =    "Type" ) ] [ Switch ] $Type    )
-
-        $OS , $CS           = "Operating" , "Computer" | % { GCIM Win32_$_`System }
-
-        If ( $System )
-        {
-            $CS
-        }
-
-        If ( $MSInfo )
-        {
-            $OS
-        }
-
-        If ( $Edition )
-        {
-            $VS                 = @( ( 1507 , 10240 , "Threshold 1" , "Release To Manufacturing" ) ,
-                                     ( 1511 , 10586 , "Threshold 2" , "November Update"          ) ,
-                                     ( 1607 , 14393 , "Redstone 1"  , "Anniversary Update"       ) ,
-                                     ( 1703 , 15063 , "Redstone 2"  , "Creators Update"          ) ,
-                                     ( 1709 , 16299 , "Redstone 3"  , "Fall Creators Update"     ) ,
-                                     ( 1803 , 17134 , "Redstone 4"  , "April 2018 Update"        ) ,
-                                     ( 1809 , 17763 , "Redstone 5"  , "October 2018 Update"      ) ,
-                                     ( 1903 , 18362 , "19H1"        , "May 2019 Update"          ) ,
-                                     ( 1909 , 18363 , "19H2"        , "November 2019 Update"     ) ,
-                                     ( 2004 , 19000 , "20H1"        , "Unreleased"               ) )
-        
-            ForEach ( $i in 0..10 )
-            {
-                GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | ? { $VS[$I] -eq $_.ReleaseID } | % {
-                
-                Return [ PSCustomObject ]@{ 
-            
-                        Version     = $VS[$I][0]
-                        Build       = 10 , 0 , $VS[$I][1] -join '.'
-                        CodeName    = $VS[$I][2]
-                        Name        = $VS[$I][3]
-                    }
-                }
-            }
-        }
-
-        If ( $SKU )
-        {
-            (   0 , "Undefined" ) ,
-            (   1 , "Ultimate Edition" ) ,
-            (   2 , "Home Basic Edition" ) ,
-            (   3 , "Home Premium Edition" ) ,
-            (   4 , "Enterprise Edition" ) ,
-            (   5 , "Home Basic N Edition" ) ,
-            (   6 , "Business Edition" ) ,
-            (   7 , "Standard Server Edition" ) ,
-            (   8 , "Datacenter Server Edition" ) ,
-            (   9 , "Small Business Server Edition" ) ,
-            (  10 , "Enterprise Server Edition" ) ,
-            (  11 , "Starter Edition" ) ,
-            (  12 , "Datacenter Server Core Edition" ) ,
-            (  13 , "Standard Server Core Edition" ) ,
-            (  14 , "Enterprise Server Core Edition" ) ,
-            (  15 , "Enterprise Server IA64 Edition" ) ,
-            (  16 , "Business N Edition" ) ,
-            (  17 , "Web Server Edition" ) ,
-            (  18 , "Cluster Server Edition" ) ,
-            (  19 , "Home Server Edition" ) ,
-            (  20 , "Storage Express Server Edition" ) ,
-            (  21 , "Storage Standard Server Edition" ) ,
-            (  22 , "Storage Workgroup Server Edition" ) ,
-            (  23 , "Storage Enterprise Server Edition" ) ,
-            (  24 , "Server For Small Business Edition" ) ,
-            (  25 , "Small Business Server Premium Edition" ) ,
-            (  26 , "TBD" ) ,
-            (  27 , "Windows Enterprise" ) ,
-            (  28 , "Windows Ultimate" ) ,
-            (  29 , "Web Server Core" ) ,
-            (  33 , "Server Foundation" ) ,
-            (  34 , "Windows Home Server" ) ,
-            (  36 , "Windows Server Standard No Hyper-V Full" ) ,
-            (  37 , "Windows Server Datacenter No Hyper-V Full" ) ,
-            (  38 , "Windows Server Enterprise No Hyper-V Full" ) ,
-            (  39 , "Windows Server Datacenter No Hyper-V Core" ) ,
-            (  40 , "Windows Server Standard No Hyper-V Core" ) ,
-            (  41 , "Windows Server Enterprise No Hyper-V Core" ) ,
-            (  42 , "Microsoft Hyper-V Server" ) ,
-            (  43 , "Storage Server Express Core" ) ,
-            (  44 , "Storage Server Standard Core" ) ,
-            (  45 , "Server Workgroup Core" ) ,
-            (  46 , "Storage Server Enterprise Core" ) ,
-            (  50 , "Windows Small Business Server 2011 Essentials" ) ,
-            (  63 , "Small Business Server Premium Core" ) ,
-            (  64 , "Windows Server Hyper Core V" ) ,
-            (  87 , "Windows Thin PC" ) ,
-            (  89 , "Windows Embedded Industry" ) ,
-            (  97 , "Windows RT" ) ,
-            ( 101 , "Windows Home" ) ,
-            ( 103 , "Windows Professional with Media Center" ) ,
-            ( 104 , "Windows Mobile" ) ,
-            ( 118 , "Windows Embedded Handheld" ) ,
-            ( 123 , "Windows IoT Core" ) | % {
-
-                If ( $_[0] -eq $OS.OperatingSystemSKU )
-                {
-                    [ PSCustomObject ]@{ 
-                    
-                        ID   = $_[0]
-                        SKU  = $_[1]
-                    }
-                }
-            }
-        }
-
-        If ( $Type )
-        {
-            [ PSCustomObject ]@{
-
-                ID      = $CS.PCSystemType
-                Chassis = @( "" , "Desktop" , "Mobile/Laptop" , "Workstation" , "Server" , "Server" , "Appliance" , "Server" , "Maximum" )[ $CS.PCSystemType ]
-            }
-        }
-
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Resolve-ScriptVars # Script Variable Collection ___________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         
@@ -1169,20 +992,62 @@
                     Type           = Resolve-Windows -Type
                 }
 
-                Service            = [ PSCustomObject ]@{
+                Service            = Resolve-Script -Services
+            }
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Import-ServiceConfiguration #______________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
 
-                    Xbox           = 'XblAuthManager' , 'XblGameSave' , 'XboxNetApiSvc' , 'XboxGipSvc' , 'xbgm'
+            [ Parameter ( ) ] [ String ] $Custom )
 
-                    NetTCP         = 'Msmq' , 'Pipe' , 'Tcp' | % { "Net$_`Activator" }
+        $C      = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+        $X      = @( 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (Delayed)' )
 
-                    DataGrid       = 'Index' , 'Scoped' , 'Profile' , 'Name' , 'Status' , 'StartType' , 'DelayedAutoStart' , 'DisplayName' , 'PathName' , 'Description'
-
-                    Skip           = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , "PrintWorkflowUserSvc" , 
-                                     "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { "$_`_?????" } ; 'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
-                                     'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 
-                                     'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
-	                                 'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' )
+        If ( ! $Custom )
+        {
+            @{  
+            
+                Base = Resolve-Script -Path    | % { "$( $_.Parent        )\Services" }
+                File = Resolve-Script -Control | % { "$( $_.ServiceConfig ).csv"      }
+        
+            } | % { $_.Base , $_.File -join '\' } | % { 
+            
+                IPCSV $_ | % {
+                
+                    [ PSCustomObject ]@{ 
+                    
+                        Service  = $_.Service.Replace( '?????' , $C )
+                        "10H:D+" = $X[$_."10H:D+"]
+                        "10H:D-" = $X[$_."10H:D-"]
+                        "10P:D+" = $X[$_."10P:D+"]
+                        "10P:D-" = $X[$_."10P:D-"]
+                        "DT:S+"  = $X[$_."DT:S+"]
+                        "DT:S-"  = $X[$_."DT:S-"]
+                        "DT:T+"  = $X[$_."DT:T+"]
+                        "DT:T-"  = $X[$_."DT:T-"]
+                        "LT:S+"  = $X[$_."LT:S+"]
+                        "LT:S-"  = $X[$_."LT:S-"]
+                    }
                 }
+            }
+        }
+
+        If ( $Custom )
+        {
+            $Custom = Read-Host "Enter full path to custom service configuration"
+            
+            If ( ! ( Test-Path $Custom ) )
+            {
+                Write-Theme -Action "Exception [!]" "Path not a valid file."
+            }
+
+            If ( $Custom.Split('.')[-1] -ne ".csv" )
+            {
+                Write-Theme -Action "Exception [!]" "File not in a valid .csv format"
             }
         }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -1191,79 +1056,95 @@
     Function Get-ServiceProfile #_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
-        $Config                     = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+        $Config                          = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
 
         Write-Theme -Action "Collecting [+]" "[ Service Configuration ]: Current Profile"
 
-        $Collect                    = [ PSCustomObject ]@{
-
-            Skipped                 = Resolve-ScriptVars  | % { $_.Service.Skip } | % { $_.Replace( '?????' , $Config ) } | Sort
-            Current                 = Get-CurrentServices | Sort Name
-        }
+        $Skipped                         = Resolve-ScriptVars  | % { $_.Service.Skip } | % { $_.Replace( '?????' , $Config ) } | Sort
+        $Current                         = Get-CurrentServices | Sort Name
 
         Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
 
-        $List                       = Resolve-ScriptVars  | % { $_.FileBase } | % { IPCSV $_.Service }
+        $List                            = Import-ServiceConfiguration
 
-        @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" } | % {
+        $Collect                         = [ PSCustomObject ]@{ }
 
-            $Collect | Add-Member -MemberType NoteProperty -Name $_ -Value @( )
-        }
+        $Type                            = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
+
+        $Type                            | % { $Collect | Add-Member -MemberType NoteProperty -Name $_ -Value @( 0..( $List.Count - 1 ) ) }
 
         Write-Theme -Action "Processing [+]" "[ Service Configuration ]: Overlay"
 
         ForEach ( $L in 0..( $List.Count - 1 ) )
         {
-            $Name                       = $List[$L].Service.Replace( '?????' , $Config )
-
-            $Service                    = [ PSCustomObject ]@{
-
-                Index                   = "{0:d3}" -f $L
-                Scoped                  = "-"
-                Profile                 = "-"
-                Name                    = $Name
-                Status                  = "-"
-                StartType               = "-"
-                DelayedAutoStart        = "-"
-                DisplayName             = "-"
-                PathName                = "-"
-                Description             = "-"
-
-            }
+            $Index                       = "{0:d3}" -f $L
+            $Name                        = $List[$L].Service.Replace( '?????' , $Config )
+            $Slot                        = 0..9
+            $Push                        = 0..9
+            $C                           = 0
             
-            If ( $Service.Name -in $Collect.Current.Name )
+            If ( $Name -in $List.Service )
             {
-                $X = $Collect.Current | ? { $_.Name -eq $Service.Name }
+                $X                       = $List | ? { $_.Service -eq $Name }
 
-                $Service | % {
+                $Type                    | % {
+
+                    $Slot[$C]            = $X.$_
+                    $C ++
+                }
+            }
+
+            If ( $Name -in $Current.Name )
+            {
+                $X                       = $Current | ? { $_.Name -eq $Name }
+
+                0..9 | % { 
+
+                    $Push[$_]            = [ PSCustomObject ]@{
+
+                        Index            = $Index
+                        Scoped           = "+"
+                        Profile          = $Slot[$_]
+                        Name             = $Name
+                        Status           = $X.Status
+                        StartType        = $X.StartType
+                        DelayedAutoStart = $X.DelayedAutoStart
+                        DisplayName      = $X.DisplayName
+                        PathName         = $X.PathName
+                        Description      = $X.Description
+                    }
+                }
+            }
+
+            If ( $Name -notin $Current.Name )
+            {
+                0..9 | % { 
+                    
+                    $Push[$_]            = [ PSCustomObject ]@{
+
+                        Index                = $Index
+                        Scoped               = "-"
+                        Profile              = "-"
+                        Name                 = $Name
+                        Status               = "-"
+                        StartType            = "-"
+                        DelayedAutoStart     = "-"
+                        DisplayName          = "-"
+                        PathName             = "-"
+                        Description          = "-"
+                    }
+                }
+            }
+
+            $C = 0
+
+            $Type | % { 
+
+                $Collect.$_[$L] = $Push[$C]
+                $C ++
+            }
+
                 
-                    $_.Scoped           = "+"
-                    $_.Status           = $X.Status
-                    $_.StartType        = $X.StartType
-                    $_.DelayedAutoStart = $X.DelayedAutoStart
-                    $_.DisplayName      = $X.DisplayName
-                    $_.PathName         = $X.PathName
-                    $_.Description      = $X.Description
-
-                }
-
-                ForEach ( $M in 0..9 )
-                {                
-                    $N = ( @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" } )[$M]
-
-                    $Service.Profile    = @( 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (Delayed)' )[ $List[$L].$N ]
-
-                    $Collect.$N += $Service
-                }
-            }
-
-            If ( $Service.Name -notin $Collect.Current.Name )
-            {
-                ForEach ( $M in @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" } )
-                {
-                    $Collect.$M += $Service
-                }
-            }
         }
 
         $Collect                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
@@ -1395,9 +1276,7 @@
 
        # $Console                       = Show-Console -Mode 5
         
-        $Services                      = Get-ServiceProfile
-
-        $ServiceProfiles               = $Services."10H:D+"
+        $Services                       = Get-ServiceProfile
 
         Return-ViperBombGUI -Main      | % { 
         
@@ -1406,124 +1285,101 @@
             $Named                     = $_.Named
         }
 
-        [ System.Windows.RoutedEventHandler ] $DataGrid = {
+        $GUI.ServiceDialogGrid.ItemsSource = $Services.'10H:D+' | % { 
 
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            [ PSCustomObject ]@{
 
-            $GUI.ServiceDialogGrid.ItemsSource = @( )
-
-            $ServiceProfile | % {
-            
-                [ PSCustomObject ]@{ 
-                
-                    Index            = $_.Index 
+                    Index            = $_.Index
                     Scoped           = $_.Scoped
-                    Profile          = $_.Profile 
+                    Profile          = $_.Profile
                     Name             = $_.Name
                     Status           = $_.Status
-                    StartType        = $_.StartType 
+                    StartType        = $_.StartType
                     DelayedAutoStart = $_.DelayedAutoStart
                     DisplayName      = $_.DisplayName
                     PathName         = $_.PathName
                     Description      = $_.Description
-                }
-
-            } | % { $GUI.ServiceDialogGrid.ItemsSource += $_ }
+            }
         }
 
-        $GUI.MenuConfigHomeDefaultMax          | % {
+        [ System.Windows.RoutedEventHandler ] $DataGrid = {
+    
+            0..( $GUI.ServiceDialogGrid.ItemsSource.Profile.Count - 1 ) | % {
+
+                $GUI.ServiceDialogGrid.ItemsSource.Profile[$_] = $ServiceProfile[$_]
+            }
+        }
+
+        $GUI.MenuConfigHomeDefaultMax.Add_Click(
+        {
+            $ServiceProfile                = $Services."10H:D-".Profile
+            $_.Handled                     = $True
+        })
+
+        $GUI.MenuConfigHomeDefaultMin.Add_Click(
+        { 
+            $ServiceProfile                = $Services."10H:D-".Profile
+            $_.Handled                     = $True
+        })
+
+        $GUI.MenuConfigProDefaultMax.Add_Click(
+        { 
+            $ServiceProfile                = $Services."10P:D+".Profile
+            $_.Handled                     = $True
+        })
+
+        $GUI.MenuConfigProDefaultMin.Add_Click(
+        { 
+            $ServiceProfile                = $Services."10P:D-".Profile
+            $_.Handled                     = $True
+        })
         
-            $_.Add_Click({ $ServiceProfile     = $Services."10H:D+" })
+        $GUI.MenuConfigDesktopSafeMax.Add_Click(
+        { 
+            $ServiceProfile                = $Services."DT:S+".Profile
+            $_.Handled                     = $True
+        })
 
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
+        $GUI.MenuConfigDesktopSafeMin.Add_Click(
+        { 
+            $ServiceProfile                = $Services."DT:S-".Profile
+            $_.Handled                     = $True
+        })
 
-        $GUI.MenuConfigHomeDefaultMin          | % {
-        
-            $_.Add_Click({ $ServiceProfile     = $Services."10H:D-" })
+        $GUI.MenuConfigDesktopTweakedMax.Add_Click(
+        { 
+            $ServiceProfile                = $Services."DT:T+".Profile
+            $_.Handled                     = $True
+        })
 
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
+        $GUI.MenuConfigDesktopTweakedMin.Add_Click(
+        { 
+            $ServiceProfile                = $Services."DT:T-".Profile
+            $_.Handled                     = $True
+        })
 
-        $GUI.MenuConfigProDefaultMax           | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."10P:D+" 
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
+        $GUI.MenuConfigLaptopSafeMax.Add_Click(
+        { 
+            $ServiceProfile                = $Services."LT:S+".Profile
+            $_.Handled                     = $True
+        })
 
-        $GUI.MenuConfigProDefaultMin           | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."10P:D-"
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
+        $GUI.MenuConfigLaptopSafeMin.Add_Click(
+        { 
+            $ServiceProfile                = $Services."LT:S-".Profile
+            $_.Handled                     = $True
+        })
 
-        $GUI.MenuConfigDesktopSafeMax          | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."DT:S+"
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
-
-        $GUI.MenuConfigDesktopSafeMin          | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."DT:S-"
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        }
-
-        $GUI.MenuConfigDesktopTweakedMax       | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."DT:T+"  
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
-        }
-
-        $GUI.MenuConfigDesktopTweakedMin       | % {
-        
-            $_.Add_Click(
-            { 
-                $ServiceProfile                = $Services."DT:T-"  
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
-        }
-
-        $GUI.MenuConfigLaptopSafeMax           | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."LT:S+"  
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
-        }
-
-        $GUI.MenuConfigLaptopSafeMin           | % {
-        
-            $_.Add_Click(
-            {
-                $ServiceProfile                = $Services."LT:S-"  
-            })
-            
-            $_.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid ) 
-        }
+        $GUI.MenuConfigHomeDefaultMax.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigHomeDefaultMin.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigProDefaultMax.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigProDefaultMin.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigDesktopSafeMax.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigDesktopSafeMin.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigDesktopTweakedMax.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigDesktopTweakedMin.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigLaptopSafeMax.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
+        $GUI.MenuConfigLaptopSafeMin.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
 
         $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
         $GUI.MenuInfoFAQ                       | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript/blob/master/README.md" }) }
@@ -1735,6 +1591,7 @@
 
         #$GUI.ConsoleOutput
         #$GUI.DiagnosticOutput
+
         #$GUI.Start
 
         $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
@@ -1744,9 +1601,24 @@
             $_.Text = "<Activate to designate a different file name/path>" 
         }
 
-        Show-WPFWindow -GUI $GUI                                                    
-        
-                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}
-IPMO Hybrid-DSC -Force
+        Show-WPFWindow -GUI $GUI
+
+        #------------------------#
+        #   Post-Dialog Logic    #
+        #------------------------#
+
+        # This will be where the post dialog logic goes that handles the output of the script. It will be kick started
+        # when the $GUI.Start is wired up to process the error correction/validation of everything that the program
+        # allowed the user to enter/use... and if the output is validated, then the instructions/actions afterward go here.
+
+        # For other examples of how this process works, feel free to scope out the Install-HybridDSC or Initialize-DomainController
+        # functions in the main module.
+
+                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+        IPMO Hybrid-DSC -Force # What Free Actually Means _______________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+     #¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯       
+
 #StartScript -Global $Control
