@@ -515,7 +515,7 @@
                                                             Binding                 = '{Binding Scoped}'
                                                             CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Profile' 
-                                                            Width                   = '20'
+                                                            Width                   = '75'
                                                             Binding                 = '{Binding Profile}'
                                                             CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Name'
@@ -531,7 +531,7 @@
                                                             Binding                 = '{Binding StartType}'
                                                             CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Delay'
-                                                            Width                   = '25'
+                                                            Width                   = '50'
                                                             Binding                 = '{Binding DelayedAutoStart}'
                                                             CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'DisplayName'
@@ -1280,73 +1280,103 @@
 
         $GUI.MenuConfigHomeDefaultMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."10H:D+"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % { 
+                
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."10H:D+"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigHomeDefaultMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."10H:D-"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % { 
+                
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."10H:D-"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigProDefaultMax.Add_Click(
         { 
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."10P:D+"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % {
+                
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."10P:D+"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigProDefaultMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."10P:D-"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % { 
+                
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."10P:D-"
+                $_.Items.Refresh()
+            }
         })
         
         $GUI.MenuConfigDesktopSafeMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:S+"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % { 
+                
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."DT:S+"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigDesktopSafeMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:S-"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % {
+            
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."DT:S-"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigDesktopTweakedMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:T+"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % {
+            
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."DT:T+"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigDesktopTweakedMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:T-"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % {
+
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."DT:T-"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigLaptopSafeMax.Add_Click(
         {
 
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."LT:S+"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % {
+            
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."LT:S+"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuConfigLaptopSafeMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid.ItemsSource = $Null
-            $GUI.ServiceDialogGrid.ItemsSource = $Services."LT:S-"
-            $GUI.ServiceDialogGrid.Items.Refresh()
+            $GUI.ServiceDialogGrid         | % {
+        
+                $_.ItemsSource             = $Null
+                $_.ItemsSource             = $Services."LT:S-"
+                $_.Items.Refresh()
+            }
         })
 
         $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
