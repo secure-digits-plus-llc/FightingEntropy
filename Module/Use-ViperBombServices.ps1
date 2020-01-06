@@ -252,7 +252,6 @@
     {
         $Xaml = @"
         <Window                               
-                                             x:Class = 'MadBombRevisedGUI.MainWindow'
                                                xmlns = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
                                              xmlns:x = 'http://schemas.microsoft.com/winfx/2006/xaml'
                                                Title = 'Secure Digits Plus LLC | Hybrid @ ViperBomb Service Configuration Utility'
@@ -302,7 +301,8 @@
                 </Grid.RowDefinitions>
                 <Menu Grid.Row                   = '0'
                               IsMainMenu         = 'True'>
-                    <MenuItem     Header         = 'Configuration'>
+                    <MenuItem     Name           = 'MenuConfig'
+                                  Header         = 'Configuration'>
                         <MenuItem Header         = 'Home'>
                             <MenuItem Name       = 'MenuConfigHomeDefaultMax'
                                       Header     = 'Default Maximum'/>
@@ -506,56 +506,46 @@
                                         </Style>
                                     </DataGrid.RowStyle>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header                  = 'Index' 
+                                        <DataGridTextColumn Header                  = 'Index'
                                                             Width                   = '40'
                                                             Binding                 = '{Binding Index}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = '@' 
                                                             Width                   = '20'
                                                             Binding                 = '{Binding Scoped}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'Profile'
-                                                            Width                   = '100'
+                                                            CanUserSort             = 'True'/>
+                                        <DataGridTextColumn Header                  = 'Profile' 
+                                                            Width                   = '20'
                                                             Binding                 = '{Binding Profile}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Name'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding Name}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Status'
                                                             Width                   = '75'
                                                             Binding                 = '{Binding Status}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'StartType' 
                                                             Width                   = '75' 
                                                             Binding                 = '{Binding StartType}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Delay'
-                                                            Width                   = '20'
+                                                            Width                   = '25'
                                                             Binding                 = '{Binding DelayedAutoStart}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'DisplayName'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding DisplayName}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'PathName'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding PathName}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                         <DataGridTextColumn Header                  = 'Description'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding Description}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
+                                                            CanUserSort             = 'True'/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
@@ -735,7 +725,8 @@
 
         # May change this 'mess' to a Hashtable/Custom Object
 
-        $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
+        $Named = @( "MenuConfig" ;
+        @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
         @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub"   | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
         "Search" , "Select" , "Grid"                                          | % { "ServiceDialog$_" } ;
         'Active' , 'Inactive' , 'Skipped'                                     | % { "Display$_"       } ; 
@@ -1274,112 +1265,89 @@
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
-       # $Console                       = Show-Console -Mode 5
+       # $Console                          = Show-Console -Mode 5
         
-        $Services                       = Get-ServiceProfile
+        $Services                          = Get-ServiceProfile
 
-        Return-ViperBombGUI -Main      | % { 
+        Return-ViperBombGUI -Main          | % {
         
-            $Xaml                      = $_.Xaml
-            $GUI                       = $_.GUI
-            $Named                     = $_.Named
+            $Xaml                          = $_.Xaml
+            $GUI                           = $_.GUI
+            $Named                         = $_.Named
         }
 
-        $GUI.ServiceDialogGrid.ItemsSource = $Services.'10H:D+' | % { 
-
-            [ PSCustomObject ]@{
-
-                    Index            = $_.Index
-                    Scoped           = $_.Scoped
-                    Profile          = $_.Profile
-                    Name             = $_.Name
-                    Status           = $_.Status
-                    StartType        = $_.StartType
-                    DelayedAutoStart = $_.DelayedAutoStart
-                    DisplayName      = $_.DisplayName
-                    PathName         = $_.PathName
-                    Description      = $_.Description
-            }
-        }
-
-        [ System.Windows.RoutedEventHandler ] $DataGrid = {
-    
-            0..( $GUI.ServiceDialogGrid.ItemsSource.Profile.Count - 1 ) | % {
-
-                $GUI.ServiceDialogGrid.ItemsSource.Profile[$_] = $ServiceProfile[$_]
-            }
-        }
+        $GUI.ServiceDialogGrid.ItemsSource = $Services.'10H:D+'
 
         $GUI.MenuConfigHomeDefaultMax.Add_Click(
         {
-            $ServiceProfile                = $Services."10H:D-".Profile
-            $_.Handled                     = $True
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."10H:D+"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigHomeDefaultMin.Add_Click(
-        { 
-            $ServiceProfile                = $Services."10H:D-".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."10H:D-"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigProDefaultMax.Add_Click(
         { 
-            $ServiceProfile                = $Services."10P:D+".Profile
-            $_.Handled                     = $True
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."10P:D+"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigProDefaultMin.Add_Click(
-        { 
-            $ServiceProfile                = $Services."10P:D-".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."10P:D-"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
         
         $GUI.MenuConfigDesktopSafeMax.Add_Click(
-        { 
-            $ServiceProfile                = $Services."DT:S+".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:S+"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigDesktopSafeMin.Add_Click(
-        { 
-            $ServiceProfile                = $Services."DT:S-".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:S-"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigDesktopTweakedMax.Add_Click(
-        { 
-            $ServiceProfile                = $Services."DT:T+".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:T+"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigDesktopTweakedMin.Add_Click(
-        { 
-            $ServiceProfile                = $Services."DT:T-".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."DT:T-"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigLaptopSafeMax.Add_Click(
-        { 
-            $ServiceProfile                = $Services."LT:S+".Profile
-            $_.Handled                     = $True
+        {
+
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."LT:S+"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
 
         $GUI.MenuConfigLaptopSafeMin.Add_Click(
-        { 
-            $ServiceProfile                = $Services."LT:S-".Profile
-            $_.Handled                     = $True
+        {
+            $GUI.ServiceDialogGrid.ItemsSource = $Null
+            $GUI.ServiceDialogGrid.ItemsSource = $Services."LT:S-"
+            $GUI.ServiceDialogGrid.Items.Refresh()
         })
-
-        $GUI.MenuConfigHomeDefaultMax.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigHomeDefaultMin.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigProDefaultMax.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigProDefaultMin.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigDesktopSafeMax.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigDesktopSafeMin.AddHandler(    [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigDesktopTweakedMax.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigDesktopTweakedMin.AddHandler( [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigLaptopSafeMax.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
-        $GUI.MenuConfigLaptopSafeMin.AddHandler(     [ System.Windows.Controls.MenuItem ]::ClickEvent , $DataGrid )
 
         $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
         $GUI.MenuInfoFAQ                       | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript/blob/master/README.md" }) }
