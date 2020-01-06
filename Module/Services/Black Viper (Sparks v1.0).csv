@@ -40,7 +40,6 @@ DeviceAssociationService,2,0,2,0,2,0,2,0,2,0
 DeviceInstall,2,0,2,0,2,0,2,0,2,0
 DmEnrollmentSvc,2,0,2,0,2,0,2,0,2,0
 DsmSVC,2,0,2,0,2,0,2,0,2,0
-DevicePickerUserSvc_?????,2,0,2,0,2,0,2,0,2,0
 DevQueryBroker,2,0,2,0,2,0,2,0,2,0
 Dhcp,3,0,3,0,3,0,3,0,3,0
 diagsvc,2,0,2,0,2,0,2,0,2,0
