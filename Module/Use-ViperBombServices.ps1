@@ -52,12 +52,15 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
 
-            [ Parameter ( ParameterSetName =   "Version" ) ] [ Switch ] $Version   ,
-            [ Parameter ( ParameterSetName =      "Path" ) ] [ Switch ] $Path      ,
-            [ Parameter ( ParameterSetName =   "Control" ) ] [ Switch ] $Control   ,
-            [ Parameter ( ParameterSetName = "Copyright" ) ] [ Switch ] $Copyright ,
-            [ Parameter ( ParameterSetName =      "Help" ) ] [ Switch ] $Help      ,
-            [ Parameter ( ParameterSetName =  "Services" ) ] [ Switch ] $Services  )
+            [ Parameter ( ParameterSetName =    "Version" ) ] [ Switch ] $Version   ,
+            [ Parameter ( ParameterSetName =     "Update" ) ] [ Switch ] $Company   ,
+            [ Parameter ( ParameterSetName =    "MadBomb" ) ] [ Switch ] $MadBomb   ,
+            [ Parameter ( ParameterSetName =     "Sparks" ) ] [ Switch ] $Sparks    ,
+            [ Parameter ( ParameterSetName =       "Path" ) ] [ Switch ] $Path      ,
+            [ Parameter ( ParameterSetName =    "Control" ) ] [ Switch ] $Control   ,
+            [ Parameter ( ParameterSetName =  "Copyright" ) ] [ Switch ] $Copyright ,
+            [ Parameter ( ParameterSetName =       "Help" ) ] [ Switch ] $Help      ,
+            [ Parameter ( ParameterSetName =   "Services" ) ] [ Switch ] $Services  )
 
         $Default = [ PSCustomObject ]@{
 
@@ -88,19 +91,48 @@
 
         If ( $Version )
         {
-            $Default | % {
-                
-                [ PSCustomObject ]@{
+            [ PSCustomObject ]@{
     
-                    Version        = "7.0.0"
-                    Date           = "2020-01-05"
-                    Script         = $_.ScriptConfig
-                    Release        = "Testing"
-                    Site           = "https://www.securedigitsplus.com"
-                    URLBase        = "https://github.com/secure-digits-plus-llc/FightingEntropy"
-                    URLService     = "https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Module/Services/$( $_.ServiceConfig )"
-                    URLDonate      = "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/"
+                Version        = "ViperBomb v7.0.0"
+                Date           = "2020-01-07"
+                Script         = $Default.ScriptConfig
+                Service        = $Default.ServiceConfig
+                Release        = "Testing"
+            }
+        }
+
+        If ( $Company )
+        {
+            "https://github.com/secure-digits-plus-llc/FightingEntropy" | % {
+
+                [ PSCustomObject ]@{
+
+                    Base    = "$_"
+                    About   = "$_#secure-digits-plus-fighting-entropy"
+                    Service = "$_/blob/master/Module/Services/$( $Default.ServiceConfig )"
+                    Site    = "https://www.securedigitsplus.com"
                 }
+            }
+        }
+
+        If ( $MadBomb )
+        {
+            "https://github.com/madbomb122/BlackViperScript" | % { 
+
+                [ PSCustomObject ]@{
+
+                    Base   = "$_"
+                    About  = "$_/blob/master/README.md"
+                    Donate = "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/"
+                }
+            }
+        }
+
+        If ( $Sparks )
+        {
+            [ PSCustomObject ]@{
+
+                Website = "http://www.blackviper.com"
             }
         }
 
@@ -234,8 +266,7 @@
                               'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
 	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' )
             }
-        }
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -243,8 +274,8 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
 
-            [ Parameter ( Mandatory , ParameterSetName =   'Main' ) ][ Switch ] $Main  ,
-            [ Parameter ( Mandatory , ParameterSetName = 'Alaert' ) ][ Switch ] $Alert )
+            [ Parameter ( Mandatory , ParameterSetName =  'Main' ) ][ Switch ] $Main  ,
+            [ Parameter ( Mandatory , ParameterSetName = 'Alert' ) ][ Switch ] $Alert )
 
     $GWF  = Resolve-HybridDSC -Graphics
 
@@ -255,10 +286,10 @@
                                                xmlns = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
                                              xmlns:x = 'http://schemas.microsoft.com/winfx/2006/xaml'
                                                Title = 'Secure Digits Plus LLC | Hybrid @ ViperBomb Service Configuration Utility'
-                                              Height = '540'
-                                           MinHeight = '540'
-                                               Width = '720'
-                                            MinWidth = '720'
+                                              Height = '600'
+                                           MinHeight = '600'
+                                               Width = '800'
+                                            MinWidth = '800'
                                                 Icon = '$( $GWF.Icon )'
                                              Topmost = 'True'
                                          BorderBrush = 'Black'
@@ -297,12 +328,11 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height        = '20'/>
                     <RowDefinition Height        = '*'/>
-                    <RowDefinition Height        = '48'/>
+                    <RowDefinition Height        = '60'/>
                 </Grid.RowDefinitions>
                 <Menu Grid.Row                   = '0'
                               IsMainMenu         = 'True'>
-                    <MenuItem     Name           = 'MenuConfig'
-                                  Header         = 'Configuration'>
+                    <MenuItem     Header         = 'Configuration'>
                         <MenuItem Header         = 'Home'>
                             <MenuItem Name       = 'MenuConfigHomeDefaultMax'
                                       Header     = 'Default Maximum'/>
@@ -354,9 +384,6 @@
                     </MenuItem>
                 </Menu>
                 <Grid Grid.Row                   = '1'>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width  = '*'/>
-                    </Grid.ColumnDefinitions>
                     <TabControl BorderBrush      = 'Gainsboro' 
                                 Grid.Row         = '1' 
                                 Name             = 'TabControl'>
@@ -398,40 +425,71 @@
                         <TabItem Header = 'Service Dialog'>
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height = '30'/>
-                                    <RowDefinition Height = '30'/>
+                                    <RowDefinition Height = '60'/>
+                                    <RowDefinition Height = '32'/>
                                     <RowDefinition Height =  '*'/>
                                 </Grid.RowDefinitions>
                                 <Grid Grid.Row = '0' >
-                                    <TextBlock Margin         = '5' 
-                                               TextAlignment  = 'Center'>Service State:
-							            <Run   Background     = '#66FF66' 
-                                               Text           = 'Compliant'/> /
-                                        <Run   Background     = '#FFFF66' 
-                                               Text           = 'Unspecified'/> /
-                                        <Run   Background     = '#FF6666' 
-                                               Text           = 'Non Compliant'/>
-                                    </TextBlock>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width = '1.25*' />
+                                        <ColumnDefinition Width = '1.75*'/>
+                                        <ColumnDefinition Width = '0.75*' />
+                                        <ColumnDefinition Width = '0.75*' />
+                                    </Grid.ColumnDefinitions>
+                                    <GroupBox Grid.Column         = '0'
+                                              Header              = 'Selected Profile' 
+                                              Margin              = '5'>
+                                        <TextBlock Name           = 'CurrentProfile'
+                                                   TextAlignment  = 'Center'
+                                                   Margin         = '5'/>
+                                    </GroupBox>
+                                    <GroupBox Grid.Column         = '1' 
+                                              Header              = 'Operating System' 
+                                              Margin              = '5' >
+                                        <TextBlock Name           = 'CurrentOS'
+                                                   TextAlignment  = 'Center'
+                                                   Margin         = '5'/>
+                                    </GroupBox>
+                                    <GroupBox Grid.Column         = '2' 
+                                              Header              = 'Current Build' 
+                                              Margin              = '5' >
+                                        <TextBlock Name           = 'CurrentBuild'
+                                                   TextAlignment  = 'Center'
+                                                   Margin         = '5'/>
+                                    </GroupBox>
+                                    <GroupBox Grid.Column         = '3' 
+                                              Header              = 'Chassis' 
+                                              Margin              = '5' >
+                                        <TextBlock Name           = 'CurrentChassis'
+                                                   TextAlignment  = 'Center'
+                                                   Margin         = '5'/>
+                                    </GroupBox>
                                 </Grid>
-                                <Grid Grid.Row            = '1'>
+                                <Grid Grid.Row                  = '1'>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width = '50'/>
                                         <ColumnDefinition Width = '*'/>
                                         <ColumnDefinition Width = '150'/>
+                                        <ColumnDefinition Width = '200'/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column = '0' Margin = '5' FontSize="12" >Search:</TextBlock>
-                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping      = 'Wrap'></TextBox>
-                                    <ComboBox  Grid.Column = '2' Margin = '5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center' Height="20">
-                                        <ComboBoxItem Content = "Index" IsSelected = "True" />
-                                        <ComboBoxItem Content = "Profile"/>
-                                        <ComboBoxItem Content = "Name"/>
-                                        <ComboBoxItem Content = "Status"/>
-                                        <ComboBoxItem Content = "StartType"/>
-                                        <ComboBoxItem Content = "Delay"/>
-                                        <ComboBoxItem Content = "DisplayName"/>
-                                        <ComboBoxItem Content = "PathName"/>
-                                        <ComboBoxItem Content = "Description"/>
+                                    <TextBlock Grid.Column = '0' Margin = '5' FontSize='12' >Search:</TextBlock>
+                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping      = 'Wrap'/>
+                                    <ComboBox  Grid.Column = '2' Margin = '5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center' Height="22">
+                                        <ComboBoxItem Content = 'Name' IsSelected = 'True'/>
+                                        <ComboBoxItem Content = 'DisplayName'/>
+                                        <ComboBoxItem Content = 'PathName'/>
+                                        <ComboBoxItem Content = 'Description'/>
                                     </ComboBox>
+                                    <TextBlock Grid.Column    = '3' 
+                                               Margin         = '5' 
+                                               TextAlignment  = 'Center'>
+							            <Run   Background     = '#66FF66' 
+                                               Text           = 'Scoped'/>
+                                        <Run   Background     = '#FFFF66' 
+                                               Text           = 'Unspecified'/>
+                                        <Run   Background     = '#FF6666' 
+                                               Text           = 'Non Scoped'/>
+                                    </TextBlock>
                                 </Grid>
                                 <DataGrid Grid.Row                   = '2'
                                           Grid.Column                = '0'
@@ -476,7 +534,7 @@
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding          = '{Binding Compliance}'
                                                                    Value            = 'True'/>
-                                                        <Condition Binding          = '{Binding Matches}' 
+                                                        <Condition Binding          = '{Binding Matches}'
                                                                    Value            = 'False'/>
                                                     </MultiDataTrigger.Conditions>
                                                     <Setter Property                = 'Background' 
@@ -486,7 +544,7 @@
                                                     <MultiDataTrigger.Conditions>
                                                         <Condition Binding          = '{Binding Compliance}'
                                                                    Value            = 'False'/>
-                                                        <Condition Binding          = '{Binding Matches}' 
+                                                        <Condition Binding          = '{Binding Matches}'
                                                                    Value            = 'False'/>
                                                     </MultiDataTrigger.Conditions>
                                                     <Setter Property                = 'Background' 
@@ -509,43 +567,53 @@
                                         <DataGridTextColumn Header                  = 'Index'
                                                             Width                   = '40'
                                                             Binding                 = '{Binding Index}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = '@' 
                                                             Width                   = '20'
                                                             Binding                 = '{Binding Scoped}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'Profile' 
                                                             Width                   = '75'
                                                             Binding                 = '{Binding Profile}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'Name'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding Name}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'Status'
                                                             Width                   = '75'
                                                             Binding                 = '{Binding Status}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'StartType' 
                                                             Width                   = '75' 
                                                             Binding                 = '{Binding StartType}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'Delay'
                                                             Width                   = '50'
                                                             Binding                 = '{Binding DelayedAutoStart}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'DisplayName'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding DisplayName}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'PathName'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding PathName}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                         <DataGridTextColumn Header                  = 'Description'
                                                             Width                   = '150'
                                                             Binding                 = '{Binding Description}'
-                                                            CanUserSort             = 'True'/>
+                                                            CanUserSort             = 'True'
+                                                            IsReadOnly              = 'True'/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
@@ -714,28 +782,35 @@
                 <Grid Grid.Row = '2'>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width = '*'/>
+                        <ColumnDefinition Width = '0.5*'/>
+                        <ColumnDefinition Width = '0.5*'/>
                         <ColumnDefinition Width = '*'/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column = '0' Name =  'Start' Content = 'Start'  FontWeight = 'Bold' Margin = '10'/>
-                    <Button Grid.Column = '1' Name = 'Cancel' Content = 'Cancel' FontWeight = 'Bold' Margin = '10'/>
+                    <GroupBox Header = 'Service Config' Margin = '5' Grid.Column = '0'>
+                        <TextBlock Name ='ServiceLabel' TextAlignment = 'Center' Margin = '5'/>
+                    </GroupBox>
+                    <Button    Grid.Column = '1' Name =  'Start' Content = 'Start'  Height = '20' Margin = '5'/>
+                    <Button    Grid.Column = '2' Name = 'Cancel' Content = 'Cancel' Height = '20' Margin = '5'/>
+                    <GroupBox Header = 'Script/Module' Margin = '5' Grid.Column='3'>
+                        <TextBlock Name ='ScriptLabel' TextAlignment = 'Center' Margin = '5' />
+                    </GroupBox>
                 </Grid>
             </Grid>
         </Window>
 "@
 
-        # May change this 'mess' to a Hashtable/Custom Object
-
-        $Named = @( "MenuConfig" ;
-        @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
+        $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
         @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub"   | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
         "Search" , "Select" , "Grid"                                          | % { "ServiceDialog$_" } ;
+        "OS" , "Profile" , "Build" , "Chassis"                                | % { "Current$_"       } ;
         'Active' , 'Inactive' , 'Skipped'                                     | % { "Display$_"       } ; 
         'Simulate' , 'Xbox' , 'Change' , 'StopDisabled'                       | % { "Misc$_"          } ; 
         'DiagErrors' , 'Log' , 'Console' , 'DiagReport'                       | % { "Devel$_"         } ; 
         'Build' , 'Edition' , 'Laptop'                                        | % { "Bypass$_"        } ; 
-        'Service' , 'Script'    | % { "$_`Switch" , "$_`Browse" , "$_`File" } | % { "Logging$_"       } ; 
-        'Registry' , 'Template' | % { "$_`Switch" , "$_`Browse" , "$_`File" } | % { "Backup$_"        } ; 
-        'Service' , 'Script'                                                  | % { "$_`Profile"      } ; 'Start' , 'Cancel' )
+        'Service' , 'Script'    | % { "$_`Browse" , "$_`File" }               | % { "Logging$_"       } ; 
+        'Registry' , 'Template' | % { "$_`Browse" , "$_`File" }               | % { "Backup$_"        } ; 
+        'Service' , 'Script'                                                  | % { "$_`Profile" , "$_`Label" } ; 
+        'Start' , 'Cancel' )
 
         $GUI   = Convert-XAMLToWindow -Xaml $Xaml -NE $Named -Passthru
     }
@@ -996,7 +1071,7 @@
             [ Parameter ( ) ] [ String ] $Custom )
 
         $C      = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-        $X      = @( 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (Delayed)' )
+        $X      = @( '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)' )
 
         If ( ! $Custom )
         {
@@ -1144,36 +1219,49 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Start-DiagnosticCheck #____________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        $Script               = Resolve-Script -Version
-
-        Resolve-ScriptVars    | % {
-    
-            $Defaults         = $_.Defaults
-            $Environment      = $_.Environment
-            $Filebase         = $_.FileBase
-            $Service          = $_.Service
-        }
-
-        $Section              = @(  "Script" , "System" | % { "$_ Information" } ; "Initialization" ; "Display" , "Miscellaneous" , 
-                                    "Development" , "Bypass/Force" , "Logging" , "Backup" | % { "$_ Settings" } ; "Version Control" ) | % { "[ $_ ]" }
+        
+        $Section              = @( "Script" , "System" | % { "$_ Information" } ; "Initialization" ; "Display" , "Miscellaneous" , 
+                                   "Development" , "Bypass/Force" , "Logging" , "Backup" | % { "$_ Settings" } ; "Version Control" ) | % { "[ $_ ]" }
 
         $Subtable             = 0..9
+        
+        #---------------------------------------------#
+        
+        $Script               = Resolve-Script -Version
 
         $Splat                = @{ 
             
-            Items             = "Script Version" , "Release Date" , "Release Type" , "Service File" , "Minimum Version" , "Maximum Version"
-            Values            = $Script.Version , $Script.Release , $Filebase.Service , "1507 ( Threshold 1 )" , "1909 ( 19H2 ) "
+            Items             = "Version" , "Date" , "Script" , "Service" , "Release"
+            Values            = Resolve-Script -Version | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
         }
 
         $Subtable[0]          = New-SubTable @Splat
+        
+        #---------------------------------------------#
+
+        $MSInfo               = Resolve-Windows -MSInfo  | % { "$( $_.Caption ) [$( $_.OSArchitecture )]" }
+
+        $SKU                  = Resolve-Windows -SKU     | % { $_.SKU }
+
+                                Resolve-Windows -Edition | % { 
+
+            $Build            = $_.Build
+            $Version          = $_.Version 
+        }
+
+        $Chassis              = Resolve-Windows -Type    | % { $_.Chassis }
 
         $Splat                = @{ 
 
             Items             = "Operating System" , "Edition / SKU" , "Build" , "Version" , "Chassis Type"
-            Values            = $Environment | % { "$( $_.MSInfo.Caption ) [$( $_.MSInfo.OSArchitecture )]" , $_.SKU.SKU , $_.Edition.Build , $_.Edition.Version , $_.Type.Chassis }
+            Values            = $MSInfo  , $SKU , $Build , $Version , $Chassis
         }
 
         $Subtable[1]          = New-SubTable @Splat
+
+        #---------------------------------------------#
+
+        $Control              = Resolve-Script -Control
 
         $Splat                = @{
 
@@ -1217,31 +1305,32 @@
 
         $Splat                = @{
 
-            Items             = "Service" , "Script" | % { "Log $_" , "Log $_ File" }
-            Values            = $Control | % { $_.LoggingService , $_.LoggingServiceFile , $_.LoggingScript , $_.LoggingScriptFile }
+            Items             = "Service" , "Script" | % { "Log $_ File" }
+            Values            = $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile }
         }
 
         $Subtable[7]          = New-SubTable @Splat
 
         $Splat                = @{ 
 
-            Items             = "Registry" , "(.reg) File" , "Template" , "(.csv) File" | % { "Backup $_" }
-            Values            = $Control | % { $_.BackupRegistry , $_.BackupRegistryPath , $_.BackupTemplate , $_.BackupTemplatePath }
+            Items             = "Registry" , "Template" | % { "Backup $_" }
+            Values            = $Control | % { $_.BackupRegistryFile , $_.BackupTemplateFile }
         }
 
         $Subtable[8]          = New-SubTable @Splat
 
         $Splat                = @{
 
-            Items             = "Service" ,"Script" | % { "$_ Config" , "$_ Profile" }
-            Values            = $Control | % { $_.ServiceConfig , $_.ServiceProfile , $_.ScriptConfig , $_.ScriptProfile }
+            Items             = "Service" ,"Script" | % { "$_ Config" }
+            Values            = $Control | % { $_.ServiceConfig , $_.ScriptConfig }
         }
 
         $Subtable[9]          = New-Subtable @Splat
 
         $Table                = New-Table -Title "Diagnostic/Startup Panel" -Depth 10 -ID $Section -Table $Subtable
         
-        Write-Theme -Table $Table -Prompt "Press Enter to Continue, CTRL+C to Exit" #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        Write-Theme -Table $Table -Prompt "Press Enter to Continue, CTRL+C to Exit" 
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -1252,11 +1341,12 @@
             [ ValidateSet ( 0 , 5 )   ]
             [ Parameter ( Mandatory ) ] [ Int ] $Mode )
 
-    Add-Type -Name Window -Namespace Console -MemberDefinition '
+    Add-Type -Name Window -Namespace Console -MemberDefinition @"
         [DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();
-        [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);'
+        [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
+"@
 
-    [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , 0 )
+    [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , 5 )
     
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -1265,7 +1355,7 @@
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
-       # $Console                          = Show-Console -Mode 5
+     #  $Console                           = Show-Console -Mode 5
         
         $Services                          = Get-ServiceProfile
 
@@ -1276,14 +1366,22 @@
             $Named                         = $_.Named
         }
 
+        $Arch  = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
+
         $GUI.ServiceDialogGrid.ItemsSource = $Services.'10H:D+'
+        $GUI.CurrentProfile.Text           = "Win10 Home | Default Max"
+        $GUI.CurrentOS.Text                = Resolve-Windows -MSInfo  | % { $_.Caption , "($Arch)" -join ' ' }
+        $GUI.CurrentBuild.Text             = Resolve-Windows -Edition | % { "v{0}.{1}" -f $_.Build , $_.Version }
+        $GUI.CurrentChassis.Text           = Resolve-Windows -Type    | % { $_.Chassis }
+
 
         $GUI.MenuConfigHomeDefaultMax.Add_Click(
         {
             $GUI.ServiceDialogGrid         | % { 
                 
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."10H:D+"
+                $_.ItemsSource             = $Services.'10H:D+'
+                $GUI.CurrentProfile.Text   = "Win10 Home | Default Max"
                 $_.Items.Refresh()
             }
         })
@@ -1293,7 +1391,8 @@
             $GUI.ServiceDialogGrid         | % { 
                 
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."10H:D-"
+                $_.ItemsSource             = $Services.'10H:D-'
+                $GUI.CurrentProfile.Text   = "Win10 Home | Default Min"
                 $_.Items.Refresh()
             }
         })
@@ -1303,7 +1402,8 @@
             $GUI.ServiceDialogGrid         | % {
                 
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."10P:D+"
+                $_.ItemsSource             = $Services.'10P:D+'
+                $GUI.CurrentProfile.Text   = "Win10 Pro | Default Max"
                 $_.Items.Refresh()
             }
         })
@@ -1313,17 +1413,19 @@
             $GUI.ServiceDialogGrid         | % { 
                 
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."10P:D-"
+                $_.ItemsSource             = $Services.'10P:D-'
+                $GUI.CurrentProfile.Text   = "Win10 Pro | Default Min"
                 $_.Items.Refresh()
             }
         })
         
         $GUI.MenuConfigDesktopSafeMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % { 
+            $GUI.ServiceDialogGrid         | % {
                 
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."DT:S+"
+                $_.ItemsSource             = $Services.'DT:S+'
+                $GUI.CurrentProfile.Text   = "Desktop | Safe Max"
                 $_.Items.Refresh()
             }
         })
@@ -1333,7 +1435,8 @@
             $GUI.ServiceDialogGrid         | % {
             
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."DT:S-"
+                $_.ItemsSource             = $Services.'DT:S-'
+                $GUI.CurrentProfile.Text   = "Desktop | Safe Min"
                 $_.Items.Refresh()
             }
         })
@@ -1343,7 +1446,8 @@
             $GUI.ServiceDialogGrid         | % {
             
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."DT:T+"
+                $_.ItemsSource             = $Services.'DT:T+'
+                $GUI.CurrentProfile.Text   = "Desktop | Tweaked Max"
                 $_.Items.Refresh()
             }
         })
@@ -1353,7 +1457,8 @@
             $GUI.ServiceDialogGrid         | % {
 
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."DT:T-"
+                $_.ItemsSource             = $Services.'DT:T-'
+                $GUI.CurrentProfile.Text   = "Desktop | Tweaked Min"
                 $_.Items.Refresh()
             }
         })
@@ -1364,7 +1469,8 @@
             $GUI.ServiceDialogGrid         | % {
             
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."LT:S+"
+                $_.ItemsSource             = $Services.'LT:S+'
+                $GUI.CurrentProfile.Text   = "Laptop | Safe Max"
                 $_.Items.Refresh()
             }
         })
@@ -1374,13 +1480,14 @@
             $GUI.ServiceDialogGrid         | % {
         
                 $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services."LT:S-"
+                $_.ItemsSource             = $Services.'LT:S-'
+                $GUI.CurrentProfile.Text   = "Laptop | Safe Min"
                 $_.Items.Refresh()
             }
         })
 
-        $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Start "https://raw.GitHub.com/madbomb122/BlackViperScript/master/" }) }
-        $GUI.MenuInfoFAQ                       | % { $_.Add_Click({ Start "https://GitHub.com/madbomb122/BlackViperScript/blob/master/README.md" }) }
+        $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
+        $GUI.MenuInfoFAQ                       | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About }}) }
         $GUI.MenuInfoAbout                     | % { 
         
             $_.Add_Click(
@@ -1397,10 +1504,10 @@
         }
 
         $GUI.MenuInfoCopyright                 | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
-        $GUI.MenuInfoMadBombDonate             | % { $_.Add_Click{ Start "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/" } }
-        $GUI.MenuInfoMadBombGitHub             | % { $_.Add_Click{ Start "https://GitHub.com/madbomb122/BlackViperScript" } }
-        $GUI.MenuInfoBlackViper                | % { $_.Add_Click{ Start "http://www.BlackViper.com" } }
-        $GUI.MenuInfoSecureDigitsPlus          | % { $_.Add_Click{ Start "https://www.securedigitsplus.com" } }
+        $GUI.MenuInfoMadBombDonate             | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Donate  } } }
+        $GUI.MenuInfoMadBombGitHub             | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Base    } } }
+        $GUI.MenuInfoBlackViper                | % { $_.Add_Click{ Resolve-Script -Sparks  | % { Start $_.WebSite } } }
+        $GUI.MenuInfoSecureDigitsPlus          | % { $_.Add_Click{ Resolve-Script -Company | % { Start $_.Site    } } }
 
         #--------------------------#
         # Logging Service Handling #
@@ -1408,7 +1515,7 @@
 
         $GUI.LoggingServiceBrowse.Add_Click(
         {
-            $GUI.LoggingServiceFile                  | % {
+            $GUI.LoggingServiceFile                 | % {
                     
                 $_.IsEnabled                        = $True
                 $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingServiceFile } ) -join '_'
@@ -1431,7 +1538,7 @@
                 $GUI.LoggingServiceFile.Text    = $Dialog.Filename
             }
 
-            If ( $X -ne "OK" )
+            Else
             {
                 $GUI.LoggingServiceFile         | % {
                           
@@ -1472,7 +1579,7 @@
                 $GUI.LoggingScriptFile.Text     = $Dialog.Filename
             }
 
-            If ( $X -ne "OK" )
+            Else
             {
                 $GUI.LoggingScriptFile          | % {
                           
@@ -1513,7 +1620,7 @@
                 $GUI.BackupRegistryFile.Text    = $Dialog.Filename
             }
 
-            If ( $X -ne "OK" )
+            Else
             {
                 $GUI.BackupRegistryFile         | % {
                           
@@ -1554,7 +1661,7 @@
                 $GUI.BackupTemplateFile.Text    = $Dialog.Filename
             }
 
-            If ( $X -ne "OK" )
+            Else
             {
                 $GUI.BackupTemplateFile         | % {
                           
@@ -1564,6 +1671,11 @@
             }
 
             $Dialog.Dispose()
+        })
+
+        $GUI.ServiceDialogSelect.Add_SelectionChanged(
+        {
+            $ComboFilter = $GUI.ServiceDialogSelect.SelectedItem.Content
         })
 
         #$GUI.DisplayActive
@@ -1583,9 +1695,26 @@
         #$GUI.BypassBuild
         #$GUI.BypassEdition
         #$GUI.BypassLaptop
-            
-        #$GUI.ServiceProfile
-        #$GUI.ScriptProfile
+        
+        # ------------------------ #
+
+        $GUI.ServiceLabel.Text                = $GUI.ServiceProfile.SelectedItem.Content
+
+        $GUI.ServiceProfile.Add_SelectionChanged(
+        {
+            $GUI.ServiceLabel.Text            = $GUI.ServiceProfile.SelectedItem.Content
+        })
+
+        # ------------------------ #
+
+        $GUI.ScriptLabel.Text                 =  $GUI.ScriptProfile.SelectedItem.Content
+
+        $GUI.ScriptProfile.Add_SelectionChanged(
+        {
+            $GUI.ScriptLabel.Text             =  $GUI.ScriptProfile.SelectedItem.Content
+        })
+
+        # ------------------------ #
 
         #$GUI.ConsoleOutput
         #$GUI.DiagnosticOutput
@@ -1596,7 +1725,7 @@
 
         $GUI | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } | % { 
         
-            $_.Text = "<Activate to designate a different file name/path>" 
+            $_.Text = "<Activate to designate a different file name/path>"
         }
 
         Show-WPFWindow -GUI $GUI
@@ -1617,6 +1746,6 @@
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
         IPMO Hybrid-DSC -Force # What Free Actually Means _______________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-     #¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯       
+     #¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
 #StartScript -Global $Control
