@@ -473,8 +473,8 @@
                                         <ColumnDefinition Width = '200'/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column = '0' Margin = '5' FontSize='12' >Search:</TextBlock>
-                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping      = 'Wrap'/>
-                                    <ComboBox  Grid.Column = '2' Margin = '5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center' Height="22">
+                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping = 'Wrap' />
+                                    <ComboBox  Grid.Column = '2' Margin = '5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center' Height='22'>
                                         <ComboBoxItem Content = 'Name' IsSelected = 'True'/>
                                         <ComboBoxItem Content = 'DisplayName'/>
                                         <ComboBoxItem Content = 'PathName'/>
@@ -616,6 +616,7 @@
                                                             IsReadOnly              = 'True'/>
                                     </DataGrid.Columns>
                                 </DataGrid>
+                                <TextBlock Grid.Row = '2' Name = 'ServiceDialogEmpty' Margin = '20' VerticalAlignment = 'Center' HorizontalAlignment = 'Center' FontSize = '20'/>
                             </Grid>
                         </TabItem>
                         <TabItem                            Header                  = 'Preferences'>
@@ -801,7 +802,7 @@
 
         $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
         @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub"   | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
-        "Search" , "Select" , "Grid"                                          | % { "ServiceDialog$_" } ;
+        "Search" , "Select" , "Grid" , "Empty"                                | % { "ServiceDialog$_" } ;
         "OS" , "Profile" , "Build" , "Chassis"                                | % { "Current$_"       } ;
         'Active' , 'Inactive' , 'Skipped'                                     | % { "Display$_"       } ; 
         'Simulate' , 'Xbox' , 'Change' , 'StopDisabled'                       | % { "Misc$_"          } ; 
@@ -1355,140 +1356,172 @@
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
-     #  $Console                           = Show-Console -Mode 5
+     #  $Console                                   = Show-Console -Mode 5
         
-        $Services                          = Get-ServiceProfile
+        $Services                                  = Get-ServiceProfile
 
-        Return-ViperBombGUI -Main          | % {
+        Return-ViperBombGUI -Main                  | % {
         
-            $Xaml                          = $_.Xaml
-            $GUI                           = $_.GUI
-            $Named                         = $_.Named
+            $Xaml                                  = $_.Xaml
+            $GUI                                   = $_.GUI
+            $Named                                 = $_.Named
         }
 
-        $Arch  = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
+        $Arch                                      = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
 
-        $GUI.ServiceDialogGrid.ItemsSource = $Services.'10H:D+'
-        $GUI.CurrentProfile.Text           = "Win10 Home | Default Max"
-        $GUI.CurrentOS.Text                = Resolve-Windows -MSInfo  | % { $_.Caption , "($Arch)" -join ' ' }
-        $GUI.CurrentBuild.Text             = Resolve-Windows -Edition | % { "v{0}.{1}" -f $_.Build , $_.Version }
-        $GUI.CurrentChassis.Text           = Resolve-Windows -Type    | % { $_.Chassis }
+        $GUI.CurrentOS.Text                        = Resolve-Windows -MSInfo  | % { $_.Caption , "($Arch)" -join ' ' }
+        $GUI.CurrentBuild.Text                     = Resolve-Windows -Edition | % { "v{0}.{1}" -f $_.Build , $_.Version }
+        $GUI.CurrentChassis.Text                   = Resolve-Windows -Type    | % { $_.Chassis }
 
+        $GUI.ServiceDialogEmpty.Text               = "Select a profile from the configuration menu to begin"
+        $GUI.ServiceDialogSearch.IsEnabled         = $False
+
+        $DisableBox = {
+
+            $GUI.ServiceDialogSearch.IsEnabled     = $True
+            $GUI.ServiceDialogEmpty.Visibility     = "Collapsed"
+            $GUI.ServiceDialogEmpty.Text           = ""
+        }
 
         $GUI.MenuConfigHomeDefaultMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % { 
+            $ServiceProfile                        = @( $Services.'10H:D+' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Win10 Home | Default Max"
+
+            $GUI.ServiceDialogGrid                 | % { 
                 
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'10H:D+'
-                $GUI.CurrentProfile.Text   = "Win10 Home | Default Max"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
             }
         })
 
         $GUI.MenuConfigHomeDefaultMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % { 
+            $ServiceProfile                        = @( $Services.'10H:D-' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Win10 Home | Default Min"
+
+            $GUI.ServiceDialogGrid                 | % { 
                 
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'10H:D-'
-                $GUI.CurrentProfile.Text   = "Win10 Home | Default Min"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
             }
         })
 
         $GUI.MenuConfigProDefaultMax.Add_Click(
         { 
-            $GUI.ServiceDialogGrid         | % {
+            $ServiceProfile                        = @( $Services.'10P:D+' )
+            & $DisableBox.Invoke
+            $GUI.CurrentProfile.Text               = "Win10 Pro | Default Max"
+
+            $GUI.ServiceDialogGrid                 | % {
                 
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'10P:D+'
-                $GUI.CurrentProfile.Text   = "Win10 Pro | Default Max"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
             }
         })
 
         $GUI.MenuConfigProDefaultMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % { 
+            $ServiceProfile                        = @( $Services.'10P:D-' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Win10 Pro | Default Min"
+
+            $GUI.ServiceDialogGrid                 | % { 
                 
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'10P:D-'
-                $GUI.CurrentProfile.Text   = "Win10 Pro | Default Min"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
+                
+                
             }
         })
         
         $GUI.MenuConfigDesktopSafeMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % {
+            $ServiceProfile                        = @( $Services.'DT:S+' )
+            &$DisableBox
+            $GUI.CurrentProfile.Text               = "Desktop | Safe Max"
+
+            $GUI.ServiceDialogGrid                 | % {
                 
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'DT:S+'
-                $GUI.CurrentProfile.Text   = "Desktop | Safe Max"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
+                
+                
             }
         })
 
         $GUI.MenuConfigDesktopSafeMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % {
+            $ServiceProfile                        = @( $Services.'DT:S-' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Desktop | Safe Min"
+
+            $GUI.ServiceDialogGrid                 | % {
             
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'DT:S-'
-                $GUI.CurrentProfile.Text   = "Desktop | Safe Min"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
             }
         })
 
         $GUI.MenuConfigDesktopTweakedMax.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % {
+            $ServiceProfile                        = @( $Services.'DT:T+' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Desktop | Tweaked Max"
+
+            $GUI.ServiceDialogGrid                 | % {
             
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'DT:T+'
-                $GUI.CurrentProfile.Text   = "Desktop | Tweaked Max"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
             }
         })
 
         $GUI.MenuConfigDesktopTweakedMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % {
+            $ServiceProfile                        = @( $Services.'DT:T-' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Desktop | Tweaked Min"
 
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'DT:T-'
-                $GUI.CurrentProfile.Text   = "Desktop | Tweaked Min"
-                $_.Items.Refresh()
+            $GUI.ServiceDialogGrid                 | % {
+
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
+                
             }
         })
 
         $GUI.MenuConfigLaptopSafeMax.Add_Click(
         {
+            $ServiceProfile                        = @( $Services.'LT:S+' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Laptop | Safe Max"
 
-            $GUI.ServiceDialogGrid         | % {
+            $GUI.ServiceDialogGrid                 | % {
             
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'LT:S+'
-                $GUI.CurrentProfile.Text   = "Laptop | Safe Max"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
+                
             }
         })
 
         $GUI.MenuConfigLaptopSafeMin.Add_Click(
         {
-            $GUI.ServiceDialogGrid         | % {
+            $ServiceProfile                        = @( $Services.'LT:S-' )
+            & $DisableBox
+            $GUI.CurrentProfile.Text               = "Laptop | Safe Min"
+            
+            $GUI.ServiceDialogGrid                 | % {
         
-                $_.ItemsSource             = $Null
-                $_.ItemsSource             = $Services.'LT:S-'
-                $GUI.CurrentProfile.Text   = "Laptop | Safe Min"
-                $_.Items.Refresh()
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $ServiceProfile
             }
         })
 
-        $GUI.MenuInfoFeedback                  | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
-        $GUI.MenuInfoFAQ                       | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About }}) }
-        $GUI.MenuInfoAbout                     | % { 
+        $GUI.MenuInfoFeedback                      | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
+        $GUI.MenuInfoFAQ                           | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About }}) }
+        $GUI.MenuInfoAbout                         | % { 
         
             $_.Add_Click(
             { 
@@ -1503,11 +1536,11 @@
             }) 
         }
 
-        $GUI.MenuInfoCopyright                 | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
-        $GUI.MenuInfoMadBombDonate             | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Donate  } } }
-        $GUI.MenuInfoMadBombGitHub             | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Base    } } }
-        $GUI.MenuInfoBlackViper                | % { $_.Add_Click{ Resolve-Script -Sparks  | % { Start $_.WebSite } } }
-        $GUI.MenuInfoSecureDigitsPlus          | % { $_.Add_Click{ Resolve-Script -Company | % { Start $_.Site    } } }
+        $GUI.MenuInfoCopyright                      | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
+        $GUI.MenuInfoMadBombDonate                  | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Donate  } } }
+        $GUI.MenuInfoMadBombGitHub                  | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Base    } } }
+        $GUI.MenuInfoBlackViper                     | % { $_.Add_Click{ Resolve-Script -Sparks  | % { Start $_.WebSite } } }
+        $GUI.MenuInfoSecureDigitsPlus               | % { $_.Add_Click{ Resolve-Script -Company | % { Start $_.Site    } } }
 
         #--------------------------#
         # Logging Service Handling #
@@ -1535,15 +1568,15 @@
 
             If ( $X -eq "OK" )
             {
-                $GUI.LoggingServiceFile.Text    = $Dialog.Filename
+                $GUI.LoggingServiceFile.Text        = $Dialog.Filename
             }
 
             Else
             {
-                $GUI.LoggingServiceFile         | % {
+                $GUI.LoggingServiceFile             | % {
                           
-                    $_.IsEnabled                = $False
-                    $_.Text                     = "<Activate to designate a different file name/path>"
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
                 }
             }
 
@@ -1576,15 +1609,15 @@
 
             If ( $X -eq "OK" )
             {
-                $GUI.LoggingScriptFile.Text     = $Dialog.Filename
+                $GUI.LoggingScriptFile.Text         = $Dialog.Filename
             }
 
             Else
             {
-                $GUI.LoggingScriptFile          | % {
+                $GUI.LoggingScriptFile              | % {
                           
-                    $_.IsEnabled                = $False
-                    $_.Text                     = "<Activate to designate a different file name/path>"
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
                 }
             }
 
@@ -1617,15 +1650,15 @@
 
             If ( $X -eq "OK" )
             {
-                $GUI.BackupRegistryFile.Text    = $Dialog.Filename
+                $GUI.BackupRegistryFile.Text        = $Dialog.Filename
             }
 
             Else
             {
-                $GUI.BackupRegistryFile         | % {
+                $GUI.BackupRegistryFile             | % {
                           
-                    $_.IsEnabled                = $False
-                    $_.Text                     = "<Activate to designate a different file name/path>"
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
                 }
             }
 
@@ -1658,24 +1691,63 @@
 
             If ( $X -eq "OK" )
             {
-                $GUI.BackupTemplateFile.Text    = $Dialog.Filename
+                $GUI.BackupTemplateFile.Text        = $Dialog.Filename
             }
 
             Else
             {
-                $GUI.BackupTemplateFile         | % {
+                $GUI.BackupTemplateFile             | % {
                           
-                    $_.IsEnabled                = $False
-                    $_.Text                     = "<Activate to designate a different file name/path>"
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
                 }
             }
 
             $Dialog.Dispose()
         })
 
-        $GUI.ServiceDialogSelect.Add_SelectionChanged(
+        $GUI.ServiceDialogSearch.Add_TextChanged(
         {
-            $ComboFilter = $GUI.ServiceDialogSelect.SelectedItem.Content
+            If ( $GUI.ServiceDialogSearch.Text -ne "" )
+            {
+                $GUI.ServiceDialogSelect.IsEnabled  = $False
+
+                $Filter                             = $GUI.ServiceDialogSelect.SelectedItem.Content
+            }
+
+                $GUI.ServiceDialogGrid.ItemsSource  = $Null
+
+                $Array                              = @( )
+
+                $ServiceProfile | ? { $_.$Filter -match $GUI.ServiceDialogSearch.Text } | % { $Array += $_ }
+
+                If ( $Array.Count -lt 1 )
+                {
+                    $GUI.ServiceDialogGrid.Visibility   = "Collapsed"
+                        
+                    $GUI.ServiceDialogEmpty.Visibility  = "Visible"
+    
+                    $GUI.ServiceDialogEmpty.Text        = "No results found"
+                }
+
+                If ( $Array.Count -ge 1 )
+                {
+                    $GUI.ServiceDialogGrid.Visibility   = "Visible"
+
+                    $GUI.ServiceDialogGrid.ItemsSource  = $Array
+
+                    $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
+
+                    $GUI.ServiceDialogEmpty.Text        = ""
+                }
+
+            If ( ( $Filter -ne $Null ) -and ( $GUI.ServiceDialogSearch.Text -eq "" ) )
+            {
+                $Filter                             = $Null
+                $GUI.ServiceDialogSelect.IsEnabled  = $True
+                $GUI.ServiceDialogGrid.ItemsSource  = $Null
+                $GUI.ServiceDialogGrid.ItemsSource  = $ServiceProfile
+            }
         })
 
         #$GUI.DisplayActive
@@ -1698,20 +1770,20 @@
         
         # ------------------------ #
 
-        $GUI.ServiceLabel.Text                = $GUI.ServiceProfile.SelectedItem.Content
+        $GUI.ServiceLabel.Text                      = $GUI.ServiceProfile.SelectedItem.Content
 
         $GUI.ServiceProfile.Add_SelectionChanged(
         {
-            $GUI.ServiceLabel.Text            = $GUI.ServiceProfile.SelectedItem.Content
+            $GUI.ServiceLabel.Text                  = $GUI.ServiceProfile.SelectedItem.Content
         })
 
         # ------------------------ #
 
-        $GUI.ScriptLabel.Text                 =  $GUI.ScriptProfile.SelectedItem.Content
+        $GUI.ScriptLabel.Text                       = $GUI.ScriptProfile.SelectedItem.Content
 
         $GUI.ScriptProfile.Add_SelectionChanged(
         {
-            $GUI.ScriptLabel.Text             =  $GUI.ScriptProfile.SelectedItem.Content
+            $GUI.ScriptLabel.Text                   = $GUI.ScriptProfile.SelectedItem.Content
         })
 
         # ------------------------ #
@@ -1721,7 +1793,7 @@
 
         #$GUI.Start
 
-        $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
+        $GUI.Cancel.Add_Click({ $GUI.DialogResult   = $False })
 
         $GUI | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } | % { 
         
