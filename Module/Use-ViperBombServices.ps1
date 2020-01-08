@@ -291,7 +291,6 @@
                                                Width = '800'
                                             MinWidth = '800'
                                                 Icon = '$( $GWF.Icon )'
-                                             Topmost = 'True'
                                          BorderBrush = 'Black'
                                           ResizeMode = 'CanResize'
                                  HorizontalAlignment = 'Center'
@@ -318,7 +317,7 @@
                 </Style>
                 <Style TargetType    = '{x:Type ToolTip}'>
                     <Setter Property = 'Background' 
-                            Value    = '#FFFFFFBF'/>
+                            Value    = '#000000'/>
                 </Style>
             </Window.Resources>
             <Window.Effect>
@@ -426,7 +425,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height = '60'/>
-                                    <RowDefinition Height = '32'/>
+                                    <RowDefinition Height = '35'/>
                                     <RowDefinition Height =  '*'/>
                                 </Grid.RowDefinitions>
                                 <Grid Grid.Row = '0' >
@@ -472,23 +471,24 @@
                                         <ColumnDefinition Width = '150'/>
                                         <ColumnDefinition Width = '200'/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column = '0' Margin = '5' FontSize='12' >Search:</TextBlock>
-                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping = 'Wrap' />
+                                    <TextBlock Grid.Column = '0' Margin = '5' VerticalAlignment = 'Center' FontSize = '12' >Search:</TextBlock>
+                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping = 'Wrap' Height = '22'/>
                                     <ComboBox  Grid.Column = '2' Margin = '5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center' Height='22'>
                                         <ComboBoxItem Content = 'Name' IsSelected = 'True'/>
                                         <ComboBoxItem Content = 'DisplayName'/>
                                         <ComboBoxItem Content = 'PathName'/>
                                         <ComboBoxItem Content = 'Description'/>
                                     </ComboBox>
-                                    <TextBlock Grid.Column    = '3' 
-                                               Margin         = '5' 
-                                               TextAlignment  = 'Center'>
-							            <Run   Background     = '#66FF66' 
-                                               Text           = 'Scoped'/>
-                                        <Run   Background     = '#FFFF66' 
-                                               Text           = 'Unspecified'/>
-                                        <Run   Background     = '#FF6666' 
-                                               Text           = 'Non Scoped'/>
+                                    <TextBlock Grid.Column       = '3' 
+                                               Margin            = '5' 
+                                               TextAlignment     = 'Center'
+                                               VerticalAlignment = 'Center'>
+							            <Run   Background        = '#66FF66' 
+                                               Text              = 'Scoped'/>
+                                        <Run   Background        = '#FFFF66' 
+                                               Text              = 'Unspecified'/>
+                                        <Run   Background        = '#FF6666' 
+                                               Text              = 'Non Scoped'/>
                                     </TextBlock>
                                 </Grid>
                                 <DataGrid Grid.Row                   = '2'
@@ -506,16 +506,6 @@
                                     <DataGrid.RowStyle>
                                         <Style TargetType            = '{x:Type DataGridRow}'>
                                             <Style.Triggers>
-                                                <Trigger Property    = 'AlternationIndex'
-                                                         Value       = '0'>
-                                                    <Setter Property = 'Background'
-                                                            Value    = 'White'/>
-                                                </Trigger>
-                                                <Trigger Property    = 'AlternationIndex'
-                                                         Value       = '1'>
-                                                    <Setter Property = 'Background'
-                                                            Value    = '#FFD8D8D8'/>
-                                                </Trigger>
                                                 <Trigger Property    = 'IsMouseOver'
                                                          Value       = 'True'>
                                                     <Setter Property = 'ToolTip'>
@@ -523,43 +513,28 @@
                                                             <TextBlock Text         = '{Binding Description}'
                                                                        TextWrapping = 'Wrap'
                                                                        Width        = '400'
-                                                                       Background   = '#FFFFFFBF'
-                                                                       Foreground   = 'Black'/>
+                                                                       Background   = '#000000'
+                                                                       Foreground   = '#FFFFFF'/>
                                                         </Setter.Value>
                                                     </Setter>
                                                     <Setter Property                = 'ToolTipService.ShowDuration'
                                                             Value                   = '360000000'/>
                                                 </Trigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding          = '{Binding Compliance}'
-                                                                   Value            = 'True'/>
-                                                        <Condition Binding          = '{Binding Matches}'
-                                                                   Value            = 'False'/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property                = 'Background' 
-                                                            Value                   = '#F08080'/>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding          = '{Binding Compliance}'
-                                                                   Value            = 'False'/>
-                                                        <Condition Binding          = '{Binding Matches}'
-                                                                   Value            = 'False'/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property                = 'Background' 
-                                                            Value                   = '#FFFF66'/>
-                                                </MultiDataTrigger>
-                                                <MultiDataTrigger>
-                                                    <MultiDataTrigger.Conditions>
-                                                        <Condition Binding          = '{Binding Compliance}'
-                                                                   Value            = 'True'/>
-                                                        <Condition Binding          = '{Binding Matches}'
-                                                                   Value            = 'True'/>
-                                                    </MultiDataTrigger.Conditions>
-                                                    <Setter Property                = 'Background'
-                                                            Value                   = '#66FF66'/>
-                                                </MultiDataTrigger>
+                                                <DataTrigger      Binding           = "{Binding Scoped}"
+                                                                  Value             = "@">
+                                                    <Setter       Property          = 'Background'
+                                                                  Value             = '#66FF66'/>
+                                                </DataTrigger>
+                                                <DataTrigger      Binding           = "{Binding Scoped}"
+                                                                  Value             = "+">
+                                                    <Setter       Property          = 'Background'
+                                                                  Value             = '#FFFF66'/>
+                                                </DataTrigger>
+                                                <DataTrigger      Binding           = "{Binding Scoped}"
+                                                                  Value             = "-">
+                                                    <Setter       Property          = 'Background'
+                                                                  Value             = '#FF6666'/>
+                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </DataGrid.RowStyle>
@@ -765,10 +740,12 @@
                             </Grid>
                         </TabItem>
                         <TabItem Header = 'Console'>
-                            <Grid Background = '#FFE5E5E5'>
-                                <ScrollViewer VerticalScrollBarVisibility = 'Visible'>
-                                    <TextBlock Name = 'ConsoleOutput' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>
+                            <Grid Margin = '5'>
+                                <GroupBox Header= 'Embedded Console'>
+                                <ScrollViewer VerticalScrollBarVisibility = 'Visible' Margin = '5'>
+                                    <TextBlock Name = 'ConsoleOutput' TextTrimming = 'CharacterEllipsis' Foreground = 'White' Background = 'DarkBlue' FontFamily = 'Lucida Console'/>
                                 </ScrollViewer>
+                                </GroupBox>
                             </Grid>
                         </TabItem>
                         <TabItem Header = 'Diagnostics'>
@@ -792,8 +769,8 @@
                     </GroupBox>
                     <Button    Grid.Column = '1' Name =  'Start' Content = 'Start'  Height = '20' Margin = '5'/>
                     <Button    Grid.Column = '2' Name = 'Cancel' Content = 'Cancel' Height = '20' Margin = '5'/>
-                    <GroupBox Header = 'Script/Module' Margin = '5' Grid.Column='3'>
-                        <TextBlock Name ='ScriptLabel' TextAlignment = 'Center' Margin = '5' />
+                    <GroupBox Header = 'Script/Module' Margin = '5' Grid.Column = '3'>
+                        <TextBlock Name = 'ScriptLabel' TextAlignment = 'Center' Margin = '5' />
                     </GroupBox>
                 </Grid>
             </Grid>
@@ -1208,10 +1185,20 @@
             $Type | % { 
 
                 $Collect.$_[$L] = $Push[$C]
+
+                $Push[$C] | % { 
+                
+                    If ( $_.Scoped -eq "+" )
+                    {
+                        If ( ( $_.Profile -eq $_.StartType ) -or ( $_.Profile -match "(DS)" -and $_.DelayedAutoStart -eq 1 ) )
+                        {
+                            $_.Scoped = "@"
+                        }
+                    }
+                }
+
                 $C ++
             }
-
-                
         }
 
         $Collect                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
