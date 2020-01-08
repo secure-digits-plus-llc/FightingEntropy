@@ -1359,6 +1359,7 @@
      #  $Console                                   = Show-Console -Mode 5
         
         $Services                                  = Get-ServiceProfile
+        $ServiceProfile                            = $Services.'10H:D+'
 
         Return-ViperBombGUI -Main                  | % {
         
@@ -1386,7 +1387,7 @@
         $GUI.MenuConfigHomeDefaultMax.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'10H:D+' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Win10 Home | Default Max"
 
             $GUI.ServiceDialogGrid                 | % { 
@@ -1399,7 +1400,7 @@
         $GUI.MenuConfigHomeDefaultMin.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'10H:D-' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Win10 Home | Default Min"
 
             $GUI.ServiceDialogGrid                 | % { 
@@ -1412,7 +1413,7 @@
         $GUI.MenuConfigProDefaultMax.Add_Click(
         { 
             $ServiceProfile                        = @( $Services.'10P:D+' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Win10 Pro | Default Max"
 
             $GUI.ServiceDialogGrid                 | % {
@@ -1425,7 +1426,7 @@
         $GUI.MenuConfigProDefaultMin.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'10P:D-' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Win10 Pro | Default Min"
 
             $GUI.ServiceDialogGrid                 | % { 
@@ -1440,7 +1441,7 @@
         $GUI.MenuConfigDesktopSafeMax.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'DT:S+' )
-            &$DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Desktop | Safe Max"
 
             $GUI.ServiceDialogGrid                 | % {
@@ -1455,7 +1456,7 @@
         $GUI.MenuConfigDesktopSafeMin.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'DT:S-' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Desktop | Safe Min"
 
             $GUI.ServiceDialogGrid                 | % {
@@ -1468,7 +1469,7 @@
         $GUI.MenuConfigDesktopTweakedMax.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'DT:T+' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Desktop | Tweaked Max"
 
             $GUI.ServiceDialogGrid                 | % {
@@ -1481,7 +1482,7 @@
         $GUI.MenuConfigDesktopTweakedMin.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'DT:T-' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Desktop | Tweaked Min"
 
             $GUI.ServiceDialogGrid                 | % {
@@ -1495,7 +1496,7 @@
         $GUI.MenuConfigLaptopSafeMax.Add_Click(
         {
             $ServiceProfile                        = @( $Services.'LT:S+' )
-            & $DisableBox
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
             $GUI.CurrentProfile.Text               = "Laptop | Safe Max"
 
             $GUI.ServiceDialogGrid                 | % {
@@ -1715,31 +1716,31 @@
                 $Filter                             = $GUI.ServiceDialogSelect.SelectedItem.Content
             }
 
-                $GUI.ServiceDialogGrid.ItemsSource  = $Null
+            $GUI.ServiceDialogGrid.ItemsSource      = $Null
 
-                $Array                              = @( )
+            $Array                                  = @( )
 
-                $ServiceProfile | ? { $_.$Filter -match $GUI.ServiceDialogSearch.Text } | % { $Array += $_ }
+            $Array += $ServiceProfile | ? { $_.$Filter -match $GUI.ServiceDialogSearch.Text }
 
-                If ( $Array.Count -lt 1 )
-                {
-                    $GUI.ServiceDialogGrid.Visibility   = "Collapsed"
+            If ( ( $Array -eq $Null ) -or ( $Array.Count -eq 0 ) )
+            {
+                $GUI.ServiceDialogGrid.Visibility   = "Collapsed"
                         
-                    $GUI.ServiceDialogEmpty.Visibility  = "Visible"
+                $GUI.ServiceDialogEmpty.Visibility  = "Visible"
     
-                    $GUI.ServiceDialogEmpty.Text        = "No results found"
-                }
+                $GUI.ServiceDialogEmpty.Text        = "No results found"
+            }
 
-                If ( $Array.Count -ge 1 )
-                {
-                    $GUI.ServiceDialogGrid.Visibility   = "Visible"
+            If ( ( $Array -ne $Null ) -or ( $Array.Count -ge 1 ) )
+            {
+                $GUI.ServiceDialogGrid.Visibility   = "Visible"
 
-                    $GUI.ServiceDialogGrid.ItemsSource  = $Array
+                $GUI.ServiceDialogGrid.ItemsSource  = $Array
 
-                    $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
+                $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
 
-                    $GUI.ServiceDialogEmpty.Text        = ""
-                }
+                $GUI.ServiceDialogEmpty.Text        = ""
+            }
 
             If ( ( $Filter -ne $Null ) -and ( $GUI.ServiceDialogSearch.Text -eq "" ) )
             {
