@@ -1412,7 +1412,7 @@
         $GUI.MenuConfigProDefaultMax.Add_Click(
         { 
             $ServiceProfile                        = @( $Services.'10P:D+' )
-            & $DisableBox.Invoke
+            & $DisableBox
             $GUI.CurrentProfile.Text               = "Win10 Pro | Default Max"
 
             $GUI.ServiceDialogGrid                 | % {
