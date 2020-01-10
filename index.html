@@ -11,37 +11,61 @@
             --root: 0px;
             --side: 0px;
             --main: 0px;
-            --tall: 0px;
         }
 
         body
         {
+            margin: 0px;
             height: 100vh;
             font-family : 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image : url( background.jpg );
             background-size : cover;
         }
 
-        #logo
+        #top
+        {
+            width: var(--root);
+            height: var(--side);
+            background-image : linear-gradient( 90deg, rgb( 0, 192, 255 ) 0%, rgb( 8, 64, 192 ) 70% );
+        }
+
+        #toplogo
         {
             width: var(--side);
             height: var(--side);
             background-image : url( logo.png );
-            background-size : contain;
+            background-size : cover;
+            order: 0;
         }
-
-        #top
+        
+        #topbar
         {
             width: var(--main);
             height: var(--side);
-            background-image : linear-gradient( 90deg, rgb( 0, 192, 255 ) 0%, rgb( 8, 64, 192 ) 70% );
+            order: 1;
         }
 
         #side
         {
             width: var(--side);
-            height: calc( 100vh - var(--side) );
+            height: 100vh;
             background-image : linear-gradient( 180deg, rgb( 0, 192, 255 ) 0%, rgb( 8, 64, 192 ) 70% );
+            flex-direction: column;
+        }
+
+        #sidelogo
+        {
+            width: var(--side);
+            height: var(--side);
+            background-image : url( logo.png );
+            background-size : cover;
+            order: 0;
+        }
+        
+        #sidebar
+        {
+            width: var(--side);
+            order: 1;
         }
 
         #main
@@ -52,10 +76,13 @@
 </head>
 
 <body>
-    <div>
-<div id = "logo"></div>
-<div id = "top"></div>
-<div id = "side"></div>
+<div id = "top">
+    <div id = "toplogo"></div>
+    <div id = "topbar"></div>
+</div>
+<div id = "side">
+    <div id = "sidelogo"></div>
+    <div id = "sidebar"></div>
 </div>
 <div id = "main"></div>
     <script >
@@ -76,26 +103,35 @@
         
                 side         = width * 0.15;
                 main         = width * 0.85;
-                tall         = height - side;
                 
                 var root     = document.querySelector( ':root' );
                 root.style.setProperty( '--root' , width  + "px" );
         
                 if ( width   <  720 )
                 {
-                    document.querySelector( '#top' ).style.setProperty('display','block')
-                    document.querySelector( '#side').style.setProperty('display','none')
+                    [ '#side' , '#sidelogo' , '#sidebar' ].forEach( function( item , index , array )
+                    { document.querySelector( item ).style.setProperty( 'display' , 'none' ) } );
+                    
+                    document.querySelector( '#top' ).style.setProperty( 'display' , 'flex' );
+
+                    [ '#toplogo' , '#topbar' ].forEach( function( item , index , array )
+                    { document.querySelector( item ).style.setProperty( 'display' , 'block' ) });
+                    
                 }
         
                 if ( width   >= 720 )
                 {
-                    document.querySelector( '#top' ).style.setProperty('display','none')
-                    document.querySelector( '#side').style.setProperty('display','block')
+                    [ '#top' , '#toplogo' , '#topbar' ].forEach( function( item , index , array )
+                    { document.querySelector( item ).style.setProperty( 'display' , 'none' ) } );
+
+                    document.querySelector( '#side' ).style.setProperty( 'display' , 'flex' );
+                    [ '#sidelogo' , '#sidebar' ].forEach( function( item , index , array )
+                    { document.querySelector( item ).style.setProperty( 'display' , 'block' ) } );
+
                 }
         
-                root.style.setProperty( '--side' , side   + "px" );
-                root.style.setProperty( '--main' , main   + "px" );
-                root.style.setProperty( '--tall' , height + "px" );
+                root.style.setProperty( '--side' , side + "px" );
+                root.style.setProperty( '--main' , main + "px" );
             }
         
             setTimeout( () =>
