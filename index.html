@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width"/>
+    <title>Secure Digits Plus LLC - Fighting Entropy</title>
+    <style>
+        :root
+        {
+            --root: 0px;
+            --side: 0px;
+            --main: 0px;
+            --tall: 0px;
+        }
+
+        body
+        {
+            height: 100vh;
+            font-family : 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image : url( background.jpg );
+            background-size : cover;
+        }
+
+        #logo
+        {
+            width: var(--side);
+            height: var(--side);
+            background-image : url( logo.png );
+            background-size : contain;
+        }
+
+        #top
+        {
+            width: var(--main);
+            height: var(--side);
+            background-image : linear-gradient( 90deg, rgb( 0, 192, 255 ) 0%, rgb( 8, 64, 192 ) 70% );
+        }
+
+        #side
+        {
+            width: var(--side);
+            height: calc( 100vh - var(--side) );
+            background-image : linear-gradient( 180deg, rgb( 0, 192, 255 ) 0%, rgb( 8, 64, 192 ) 70% );
+        }
+
+        #main
+        {
+            width: var(--main)
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+<div id = "logo"></div>
+<div id = "top"></div>
+<div id = "side"></div>
+</div>
+<div id = "main"></div>
+    <script >
+        var startwidth       = window.innerWidth;
+        var startheight      = window.innerHeight;
+        var width            = startwidth;
+        var height           = startheight;
+        var wait             = false;
+        
+        function getWindowWidth()
+        {
+            if ( wait       == false )
+            {
+                wait         = true;
+        
+                width        = window.innerWidth;
+                height       = window.innerHeight;
+        
+                side         = width * 0.15;
+                main         = width * 0.85;
+                tall         = height - side;
+                
+                var root     = document.querySelector( ':root' );
+                root.style.setProperty( '--root' , width  + "px" );
+        
+                if ( width   <  720 )
+                {
+                    document.querySelector( '#top' ).style.setProperty('display','block')
+                    document.querySelector( '#side').style.setProperty('display','none')
+                }
+        
+                if ( width   >= 720 )
+                {
+                    document.querySelector( '#top' ).style.setProperty('display','none')
+                    document.querySelector( '#side').style.setProperty('display','block')
+                }
+        
+                root.style.setProperty( '--side' , side   + "px" );
+                root.style.setProperty( '--main' , main   + "px" );
+                root.style.setProperty( '--tall' , height + "px" );
+            }
+        
+            setTimeout( () =>
+            {
+                wait = false;
+                
+            }, 200 );
+        }
+            
+        getWindowWidth();
+            
+        window.addEventListener( 'resize' , getWindowWidth );
+    </script>
+</body>
+
+</html>
