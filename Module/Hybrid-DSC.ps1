@@ -4132,7 +4132,7 @@
 
             $X = @( 2 ; @( 11 ) * 4 ; 10 , 11 , 11 , 12 ,10 , 10 , 8 , 7 ) | % { $SP[$_] }
                 
-            $Y = "<Window " , "   xmlns = '$Schema/presentation'" , " xmlns:x = '$Schema'" , "   Title = '$Author | Hybrid @ $Title" , 
+            $Y = "<Window " , "   xmlns = '$Schema/presentation'" , " xmlns:x = '$Schema'" , "   Title = '$Author | Hybrid @ $Title'" , 
             "  $H = '600'" , "   Min$H = '600'" , "   $W = '800'" , "Min$W = '800'" , "Icon = '$( $GFX.Icon )'" , " BorderBrush = 'Black'" , "  ResizeMode = 'CanResize'" , 
             " $( $HAL[1] )" , "   WindowStartupLocation = 'CenterScreen'>"
 
@@ -4157,7 +4157,7 @@
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
              $X = @( 3 , 4 , 5 , 5 , 5 , 4 ) | % { $SP[$_] }
-             $Y = @( "<$G>" , "<$GRD>" ; 20 , "*" , 60 | % { "<$RD $H        = '$_'/>" } ; "</$G.$RD>" )
+             $Y = @( "<$G>" , "<$GRD>" ; 20 , "*" , 60 | % { "<$RD $H        = '$_'/>" } ; "</$GRD>" )
 
              $XML[2] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
 
@@ -4230,15 +4230,15 @@
              $X = @(9,7,8,9,9,9,8,8,9;@(10)*4;@(9,9,11,11,10,12,12,9,9,11,11,10,12,12)*2;9,8,8,9;@(10)*4;@(9)*4;@(10)*4;9,9,11,11,11,10,11,10,11,10,11,9,8,8;@(10)*11;
                     9,10,11,12,14,13,14,15;@(17)*4;14,13,13,15,12,12,16,13,16,12,12,16,13,16,12,12,16,13,16,12,11,10,9,9;@(10;@(15)*4)*10;9,8,8,7,6) | % { $SP[$_] }
 
-             $Y = @( " <TabItem Header = 'Service Dialog'>" , "<$G>" , "<$G.$RD>" ; 60 , 35 , "*" | % { "<$RD $H = '$_'/>" } ; "</$G.$RD>" , "<$G $GR = '0' >" , "<$G.$CD>" ; 
-                     1.25 , 1.75 , 0.75 , 0.75 | % { "<$CD $W = '$_*' />" } ; "</$G.$CD>" , "<$GB $GC         = '0'" , "  $HD              = 'Selected Profile' " , 
+             $Y = @( " <TabItem Header = 'Service Dialog'>" , "<$G>" , "<$GRD>" ; 60 , 35 , "*" | % { "<$RD $H = '$_'/>" } ; "</$GRD>" , "<$G $GR = '0' >" , "<$GCD>" ; 
+                     1.25 , 1.75 , 0.75 , 0.75 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GB $GC         = '0'" , "  $HD              = 'Selected Profile' " , 
                      "  $MA              = '5'>" , "<$TBL $Q           = 'CurrentProfile'" , "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , 
                      "<$GB $GC         = '1' " , "  $HD              = 'Operating System' " , "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentOS'" , 
                      "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "<$GB $GC         = '2' " , "  $HD              = 'Current Build' " , 
                      "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentBuild'" , "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , 
                      "<$GB $GC         = '3' " , "  $HD              = 'Chassis' " , "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentChassis'" , 
-                     "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "</$G>" , "<$G $GR                  = '1'>" , "<$G.$CD>" ; 
-                     50 , "*" , 150 , 200 | % { "<$CD $W = '$_'/>" } ; "</$G.$CD>" , "<$TBL $GC = '0' $MA = '5' $( $VAL[1] ) FontSize = '12' >Search:</$TBL>" ; 
+                     "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "</$G>" , "<$G $GR                  = '1'>" , "<$GCD>" ; 
+                     50 , "*" , 150 , 200 | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$TBL $GC = '0' $MA = '5' $( $VAL[1] ) FontSize = '12' >Search:</$TBL>" ; 
                      ( "$TB " , 1 , "Search' TextWrapping = 'Wrap' /" ) , ( "$CB" , 2 , "Select' $( $VAL[1] )" ) | % {  
                      "<$( $_[0] )  $GC = '$( $_[1] )' $MA = '5' $H = '22' $Q = 'ServiceDialog$( $_[2] )>" } ; 
                      "$Q' IsSelected = 'True" , "Display$Q" , "Path$Q" , "Description" | % { "<$CBI $CO = '$_'/>" } ; 
@@ -4276,20 +4276,20 @@
             "</$GRD>" , "<$GB $GR = '0' $HD = 'Bypass / Checks [ Risky Options ]' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '*'/>" } ; 
             "</$GRD>" , "<$CB   $GR = '0' $( $VAL[1] ) $H = '24' $Q = 'BypassEdition'>" ; @( "Override Edition Check' IsSelected = 'True" ; 
             "Home" , "Pro" | % { "Windows 10 $_" } ) | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" ; ( 1 , "Build" , "Skip Build/Version Check" ) ,
-            ( 2 , "Laptop" , "Enable Laptop Tweaks" ) | % { "<$CB   $GR = '$( $_[0] )' $MA = '5' $Q = 'Bypass$( $_[1] )' $CO = '$( $_[2] )'/>" } ; 
+            ( 2 , "Laptop" , "Enable Laptop Tweaks" ) | % { "<$CHK   $GR = '$( $_[0] )' $MA = '5' $Q = 'Bypass$( $_[1] )' $CO = '$( $_[2] )'/>" } ; 
             "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Display' $MA = '5' >" , "<$G>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; ( 0 , "Active" ) , 
-            ( 1 , "Inactive" ) , ( 2 , "Skipped" ) | % { "<$CB  $GR = '$( $_[0] )' $MA = '5' $Q = 'Display$( $_[1] )' $CO = 'Show $( $_[1] ) Services' />" } ; 
+            ( 1 , "Inactive" ) , ( 2 , "Skipped" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Display$( $_[1] )' $CO = 'Show $( $_[1] ) Services' />" } ; 
             "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '0'>" , "<$GRD>" ; "" , 2 | % { "<$RD $H = '*'/>" } ; "</$GRD>" ; 
             "<$GB $GR = '0' $HD = 'Service Configuration' $MA = '5'>" , "<$CB  $GR = '1' $Q = 'ServiceProfile' $H ='24'>" ; 
             "Black Viper (Sparks v1.0)' IsSelected = 'True" , "DevOPS (MD/SDP v1.0)' IsEnabled = 'False" | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , 
             "<$GB $GR = '1' $HD = 'Miscellaneous' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..3 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; 
             ( 0 , "Simulate" , "Simulate Changes [ Dry Run ]" ) , ( 1 , "Xbox" , "Skip All Xbox Services" ) , ( 2 , "Change" , "Allow Change of Service State" ) , 
-            ( 3 , "StopDisabled" , "Stop Disabled Services" ) | % { "<$CB  $GR = '$( $_[0] )' $MA = '5' $Q = 'Misc$( $_[1] )'     $CO = '$( $_[2] )'   />" } ; 
+            ( 3 , "StopDisabled" , "Stop Disabled Services" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Misc$( $_[1] )'     $CO = '$( $_[2] )'   />" } ; 
             "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '1'>" , "<$GRD>" ; "" , 2 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , "<$GB $GR = '0' $HD = 'User Interface' $MA = '5'>" , 
             "<$CB  $GR = '1' $Q = 'ScriptProfile' $H = '24' >" ; "DevOPS (MC/SDP v1.0)' IsSelected =  'True" , "MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False" | % { 
             "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Development' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..3 | % { "<$RD $H = '30'/>" } ; 
             "</$GRD>" ; ( 0 , "DiagErrors" , "Diagnostic Output [ On Error ]" ) , ( 1 , "Log" , "Enable Development Logging" ) , ( 2 , "Console" , "Enable Console" ) , 
-            ( 3 , "DiagReport" , "Enable Diagnostic" ) | % { "<$CB  $GR = '$( $_[0] )' $MA = '5' $Q = 'Devel$( $_[1] )'  $CO = '$( $_[2] )' />" } ; "</$G>" , "</$GB>" , 
+            ( 3 , "DiagReport" , "Enable Diagnostic" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Devel$( $_[1] )'  $CO = '$( $_[2] )' />" } ; "</$G>" , "</$GB>" , 
             "</$G>" , "</$G>" , "<$G $GR = '1'>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , 
             "<$GB $GR = '0' $HD = 'Logging: Create logs for all changes made via this utility' $MA = '5'>" , "<$G>" , "<$GCD>" ; 75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; 
             "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; ( 0 , "Service" ) , ( 1 , "Script" ) | % { 
@@ -7012,40 +7012,6 @@
                 Free         = "{0:n2}GB ({1:n2}%)" -f $Free
                 Used         = "{0:n2}GB ({1:n2}%)" -f $Used
             }
-        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-        Write-Theme -Free # What Free Actually Means ____________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-     #¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯                                                __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-     Function Register-PDCTimeSource # What Free Actually Means _________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ Parameter ( Position = 0 , Mandatory = $True ) ] [ String [] ] $Servers        ,
-            [ Parameter ( Position = 1 ) ]                     [    Int    ] $Phase   = 3600 )
-
-        $Time = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time"
-
-        ( "Parameters"              , "Type"                  ,    "NTP" ) ,
-        ( "Config"                  , "AnnounceFlags"         ,        5 ) ,
-        ( "TimeProviders\NTPServer" , "Enabled"               ,        1 ) ,
-        ( "Parameters"              , "NTPServer"             , $Servers ) ,
-        ( "Config"                  , "MaxPosPhaseCorrection" ,     3600 ) | % {
-
-            $Splat    = @{ 
-            
-                Path  = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\$( $_[0] )"
-                Name  = $_[1]
-                Value = $_[2]
-            }
-
-            SP @Splat
-
-            Write-Theme -Action   $_[1] $_[2] 
-            Write-Theme -Function $Splat.Path
         }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
