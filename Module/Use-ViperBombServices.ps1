@@ -264,7 +264,7 @@
                               "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { "$_`_?????" } ; 'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
                               'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 
                               'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
-	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' )
+	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' ) | Sort
             }
         }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -277,505 +277,7 @@
             [ Parameter ( Mandatory , ParameterSetName =  'Main' ) ][ Switch ] $Main  ,
             [ Parameter ( Mandatory , ParameterSetName = 'Alert' ) ][ Switch ] $Alert )
 
-    $GWF  = Resolve-HybridDSC -Graphics
-
-    If ( $Main )
-    {
-        $Xaml = @"
-        <Window                               
-                                               xmlns = 'http://schemas.microsoft.com/winfx/2006/xaml/presentation'
-                                             xmlns:x = 'http://schemas.microsoft.com/winfx/2006/xaml'
-                                               Title = 'Secure Digits Plus LLC | Hybrid @ ViperBomb Service Configuration Utility'
-                                              Height = '600'
-                                           MinHeight = '600'
-                                               Width = '800'
-                                            MinWidth = '800'
-                                                Icon = '$( $GWF.Icon )'
-                                         BorderBrush = 'Black'
-                                          ResizeMode = 'CanResize'
-                                 HorizontalAlignment = 'Center'
-                               WindowStartupLocation = 'CenterScreen'>
-            <Window.Resources>
-                <Style x:Key         = 'SeparatorStyle1' 
-                       TargetType    = '{x:Type Separator}'>
-                    <Setter Property = 'SnapsToDevicePixels' 
-                            Value    = 'True'/>
-                    <Setter Property = 'Margin' 
-                            Value    = '0,0,0,0'/>
-                    <Setter Property = 'Template'>
-                        <Setter.Value>
-                            <ControlTemplate TargetType     = '{x:Type Separator}'>
-                                <Border Height              = '24' 
-                                        SnapsToDevicePixels = 'True' 
-                                        Background          = '#FF4D4D4D' 
-                                        BorderBrush         = 'Azure' 
-                                        BorderThickness     = '1,1,1,1' 
-                                        CornerRadius        = '5,5,5,5'/>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-                <Style TargetType    = '{x:Type ToolTip}'>
-                    <Setter Property = 'Background' 
-                            Value    = '#000000'/>
-                </Style>
-            </Window.Resources>
-            <Window.Effect>
-                <DropShadowEffect/>
-            </Window.Effect>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height        = '20'/>
-                    <RowDefinition Height        = '*'/>
-                    <RowDefinition Height        = '60'/>
-                </Grid.RowDefinitions>
-                <Menu Grid.Row                   = '0'
-                              IsMainMenu         = 'True'>
-                    <MenuItem     Header         = 'Configuration'>
-                        <MenuItem Header         = 'Home'>
-                            <MenuItem Name       = 'MenuConfigHomeDefaultMax'
-                                      Header     = 'Default Maximum'/>
-                            <MenuItem Name       = 'MenuConfigHomeDefaultMin'
-                                      Header     = 'Default Minimum'/>
-                        </MenuItem>
-                        <MenuItem Header         = 'Pro'>
-                            <MenuItem Name       = 'MenuConfigProDefaultMax' 
-                                      Header     = 'Default Maximum'/>
-                            <MenuItem Name       = 'MenuConfigProDefaultMin' 
-                                      Header     = 'Default Minimum'/>
-                        </MenuItem>
-                        <MenuItem     Header     = 'Desktop'>
-                            <MenuItem Name       = 'MenuConfigDesktopSafeMax' 
-                                      Header     = 'Safe Maximum'/>
-                            <MenuItem Name       = 'MenuConfigDesktopSafeMin' 
-                                      Header     = 'Safe Minimum'/>
-                            <MenuItem Name       = 'MenuConfigDesktopTweakedMax' 
-                                      Header     = 'Tweaked Maximum'/>
-                            <MenuItem Name       = 'MenuConfigDesktopTweakedMin' 
-                                      Header     = 'Tweaked Minimum'/>
-                        </MenuItem>
-                        <MenuItem     Header     = 'Laptop'>
-                            <MenuItem Name       = 'MenuConfigLaptopSafeMax' 
-                                      Header     = 'Safe Maximum'/>
-                            <MenuItem Name       = 'MenuConfigLaptopSafeMin' 
-                                      Header     = 'Safe Minimum'/>
-                        </MenuItem>
-                    </MenuItem>
-                    <MenuItem     Header         = 'Info'>
-                        <MenuItem Name           = 'MenuInfoFeedback'
-                                  Header         = 'Feedback'/>
-                        <MenuItem Name           = 'MenuInfoFAQ'
-                                  Header         = 'FAQ'/>
-                        <MenuItem Name           = 'MenuInfoAbout'
-                                  Header         = 'About'/>
-                        <MenuItem Name           = 'MenuInfoCopyright'
-                                  Header         = 'Copyright'/>
-                        <MenuItem Header         = 'MadBomb122'>
-                            <MenuItem Name       = 'MenuInfoMadBombDonate'
-                                      Header     = 'Donate to MadBomb122'/>
-                            <MenuItem Name       = 'MenuInfoMadBombGitHub'
-                                      Header     = 'Original GUI/Script Source -> GitHub'/>
-                        </MenuItem>
-                        <MenuItem     Name       = 'MenuInfoBlackViper'
-                                      Header     = 'BlackViper Service Configuration Website'/>
-                        <MenuItem     Name       = 'MenuInfoSecureDigitsPlus'
-                                      Header     = 'Secure Digits Plus: Fighting Entropy'/>
-                    </MenuItem>
-                </Menu>
-                <Grid Grid.Row                   = '1'>
-                    <TabControl BorderBrush      = 'Gainsboro' 
-                                Grid.Row         = '1' 
-                                Name             = 'TabControl'>
-                        <TabControl.Resources>
-                            <Style TargetType    = 'TabItem'>
-                                <Setter Property = 'Template'>
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType                   = 'TabItem'>
-                                            <Border Name                              = 'Border' 
-                                                    BorderThickness                   = '1,1,1,0' 
-                                                    BorderBrush                       = 'Gainsboro' 
-                                                    CornerRadius                      = '4,4,0,0' 
-                                                    Margin                            = '2,0'>
-                                                <ContentPresenter x:Name              = 'ContentSite' 
-                                                                  VerticalAlignment   = 'Center' 
-                                                                  HorizontalAlignment = 'Center' 
-                                                                  ContentSource       = 'Header' 
-                                                                  Margin              = '10,2'/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property      = 'IsSelected' 
-                                                         Value         = 'True'>
-                                                    <Setter TargetName = 'Border' 
-                                                            Property   = 'Background' 
-                                                            Value      = 'LightSkyBlue'/>
-                                                </Trigger>
-                                                <Trigger Property      = 'IsSelected' 
-                                                         Value         = 'False'>
-                                                    <Setter TargetName = 'Border' 
-                                                            Property   = 'Background' 
-                                                            Value      = 'GhostWhite'/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TabControl.Resources>
-                        <TabItem Header = 'Service Dialog'>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height = '60'/>
-                                    <RowDefinition Height = '35'/>
-                                    <RowDefinition Height =  '*'/>
-                                </Grid.RowDefinitions>
-                                <Grid Grid.Row = '0' >
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width = '1.25*' />
-                                        <ColumnDefinition Width = '1.75*'/>
-                                        <ColumnDefinition Width = '0.75*' />
-                                        <ColumnDefinition Width = '0.75*' />
-                                    </Grid.ColumnDefinitions>
-                                    <GroupBox Grid.Column         = '0'
-                                              Header              = 'Selected Profile' 
-                                              Margin              = '5'>
-                                        <TextBlock Name           = 'CurrentProfile'
-                                                   TextAlignment  = 'Center'
-                                                   Margin         = '5'/>
-                                    </GroupBox>
-                                    <GroupBox Grid.Column         = '1' 
-                                              Header              = 'Operating System' 
-                                              Margin              = '5' >
-                                        <TextBlock Name           = 'CurrentOS'
-                                                   TextAlignment  = 'Center'
-                                                   Margin         = '5'/>
-                                    </GroupBox>
-                                    <GroupBox Grid.Column         = '2' 
-                                              Header              = 'Current Build' 
-                                              Margin              = '5' >
-                                        <TextBlock Name           = 'CurrentBuild'
-                                                   TextAlignment  = 'Center'
-                                                   Margin         = '5'/>
-                                    </GroupBox>
-                                    <GroupBox Grid.Column         = '3' 
-                                              Header              = 'Chassis' 
-                                              Margin              = '5' >
-                                        <TextBlock Name           = 'CurrentChassis'
-                                                   TextAlignment  = 'Center'
-                                                   Margin         = '5'/>
-                                    </GroupBox>
-                                </Grid>
-                                <Grid Grid.Row                  = '1'>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width = '50'/>
-                                        <ColumnDefinition Width = '*'/>
-                                        <ColumnDefinition Width = '150'/>
-                                        <ColumnDefinition Width = '200'/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column = '0' Margin = '5' VerticalAlignment = 'Center' FontSize = '12' >Search:</TextBlock>
-                                    <TextBox   Grid.Column = '1' Margin = '5' Name = 'ServiceDialogSearch' TextWrapping = 'Wrap' Height = '22'/>
-                                    <ComboBox  Grid.Column = '2' Margin = '5' Name = 'ServiceDialogSelect' VerticalAlignment = 'Center' Height='22'>
-                                        <ComboBoxItem Content = 'Name' IsSelected = 'True'/>
-                                        <ComboBoxItem Content = 'DisplayName'/>
-                                        <ComboBoxItem Content = 'PathName'/>
-                                        <ComboBoxItem Content = 'Description'/>
-                                    </ComboBox>
-                                    <TextBlock Grid.Column       = '3' 
-                                               Margin            = '5' 
-                                               TextAlignment     = 'Center'
-                                               VerticalAlignment = 'Center'>
-							            <Run   Background        = '#66FF66' 
-                                               Text              = 'Scoped'/>
-                                        <Run   Background        = '#FFFF66' 
-                                               Text              = 'Unspecified'/>
-                                        <Run   Background        = '#FF6666' 
-                                               Text              = 'Non Scoped'/>
-                                    </TextBlock>
-                                </Grid>
-                                <DataGrid Grid.Row                   = '2'
-                                          Grid.Column                = '0'
-                                          Name                       = 'ServiceDialogGrid'
-                                          FrozenColumnCount          = '2' 
-                                          AutoGenerateColumns        = 'False' 
-                                          AlternationCount           = '2' 
-                                          HeadersVisibility          = 'Column' 
-                                          CanUserResizeRows          = 'False' 
-                                          CanUserAddRows             = 'False' 
-                                          IsTabStop                  = 'True'
-                                          IsTextSearchEnabled        = 'True'
-                                          SelectionMode              = 'Extended'>
-                                    <DataGrid.RowStyle>
-                                        <Style TargetType            = '{x:Type DataGridRow}'>
-                                            <Style.Triggers>
-                                                <Trigger Property    = 'IsMouseOver'
-                                                         Value       = 'True'>
-                                                    <Setter Property = 'ToolTip'>
-                                                        <Setter.Value>
-                                                            <TextBlock Text         = '{Binding Description}'
-                                                                       TextWrapping = 'Wrap'
-                                                                       Width        = '400'
-                                                                       Background   = '#000000'
-                                                                       Foreground   = '#FFFFFF'/>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                    <Setter Property                = 'ToolTipService.ShowDuration'
-                                                            Value                   = '360000000'/>
-                                                </Trigger>
-                                                <DataTrigger      Binding           = "{Binding Scoped}"
-                                                                  Value             = "@">
-                                                    <Setter       Property          = 'Background'
-                                                                  Value             = '#66FF66'/>
-                                                </DataTrigger>
-                                                <DataTrigger      Binding           = "{Binding Scoped}"
-                                                                  Value             = "+">
-                                                    <Setter       Property          = 'Background'
-                                                                  Value             = '#FFFF66'/>
-                                                </DataTrigger>
-                                                <DataTrigger      Binding           = "{Binding Scoped}"
-                                                                  Value             = "-">
-                                                    <Setter       Property          = 'Background'
-                                                                  Value             = '#FF6666'/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </DataGrid.RowStyle>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header                  = 'Index'
-                                                            Width                   = '40'
-                                                            Binding                 = '{Binding Index}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = '@' 
-                                                            Width                   = '20'
-                                                            Binding                 = '{Binding Scoped}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'Profile' 
-                                                            Width                   = '75'
-                                                            Binding                 = '{Binding Profile}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'Name'
-                                                            Width                   = '150'
-                                                            Binding                 = '{Binding Name}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'Status'
-                                                            Width                   = '75'
-                                                            Binding                 = '{Binding Status}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'StartType' 
-                                                            Width                   = '75' 
-                                                            Binding                 = '{Binding StartType}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'Delay'
-                                                            Width                   = '50'
-                                                            Binding                 = '{Binding DelayedAutoStart}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'DisplayName'
-                                                            Width                   = '150'
-                                                            Binding                 = '{Binding DisplayName}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'PathName'
-                                                            Width                   = '150'
-                                                            Binding                 = '{Binding PathName}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                        <DataGridTextColumn Header                  = 'Description'
-                                                            Width                   = '150'
-                                                            Binding                 = '{Binding Description}'
-                                                            CanUserSort             = 'True'
-                                                            IsReadOnly              = 'True'/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                                <TextBlock Grid.Row = '2' Name = 'ServiceDialogEmpty' Margin = '20' VerticalAlignment = 'Center' HorizontalAlignment = 'Center' FontSize = '20'/>
-                            </Grid>
-                        </TabItem>
-                        <TabItem                            Header                  = 'Preferences'>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height = '1.25*'/>
-                                    <RowDefinition Height = '*'/>
-                                </Grid.RowDefinitions>
-                                <Grid Grid.Row = '0'>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width = '*'/>
-                                        <ColumnDefinition Width = '*'/>
-                                        <ColumnDefinition Width = '*'/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid Grid.Column = '2'>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height = '*'/>
-                                            <RowDefinition Height = '*'/>
-                                        </Grid.RowDefinitions>
-                                        <GroupBox Grid.Row = '0' Header = 'Bypass / Checks [ Risky Options ]' Margin = '5'>
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height = '*'/>
-                                                    <RowDefinition Height = '*'/>
-                                                    <RowDefinition Height = '*'/>
-                                                </Grid.RowDefinitions>
-                                                <CheckBox   Grid.Row = '1' Margin = '5' Name = 'BypassBuild' Content = "Skip Build/Version Check"/>
-                                                <ComboBox   Grid.Row = '0' VerticalAlignment = 'Center' Height = '24' Name = 'BypassEdition'>
-                                                    <ComboBoxItem Content = 'Override Edition Check' IsSelected = 'True'/>
-                                                    <ComboBoxItem Content = 'Windows 10 Home'/>
-                                                    <ComboBoxItem Content = 'Windows 10 Pro'/>
-                                                </ComboBox>
-                                                <CheckBox   Grid.Row = '2' Margin = '5' Name = 'BypassLaptop' Content = 'Enable Laptop Tweaks'/>
-                                            </Grid>
-                                        </GroupBox>
-                                        <GroupBox Grid.Row = '1' Header = 'Display' Margin = '5' >
-                                            <Grid >
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                </Grid.RowDefinitions>
-                                                <CheckBox  Grid.Row = '0' Margin = '5' Name = 'DisplayActive'    Content = "Show Active Services"           />
-                                                <CheckBox  Grid.Row = '1' Margin = '5' Name = 'DisplayInactive'  Content = "Show Inactive Services"         />
-                                                <CheckBox  Grid.Row = '2' Margin = '5' Name = 'DisplaySkipped'   Content = "Show Skipped Services"          />
-                                            </Grid>
-                                        </GroupBox>
-                                    </Grid>
-                                    <Grid Grid.Column = '0'>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height = '*'/>
-                                            <RowDefinition Height = '2*'/>
-                                        </Grid.RowDefinitions>
-                                        <GroupBox Grid.Row = '0' Header = 'Service Configuration' Margin = '5'>
-                                            <ComboBox  Grid.Row = '1' Name = 'ServiceProfile' Height ='24'>
-                                                <ComboBoxItem Content = 'Black Viper (Sparks v1.0)' IsSelected = 'True'/>
-                                                <ComboBoxItem Content = 'DevOPS (MC/SDP v1.0)' IsEnabled = 'False'/>
-                                            </ComboBox>
-                                        </GroupBox>
-                                        <GroupBox Grid.Row = '1' Header = 'Miscellaneous' Margin = '5'>
-                                            <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                </Grid.RowDefinitions>
-                                                <CheckBox  Grid.Row = '0' Margin = '5' Name = 'MiscSimulate'     Content = "Simulate Changes [ Dry Run ]"   />
-                                                <CheckBox  Grid.Row = '1' Margin = '5' Name = 'MiscXbox'         Content = "Skip All Xbox Services"         />
-                                                <CheckBox  Grid.Row = '2' Margin = '5' Name = 'MiscChange'       Content = "Allow Change of Service State"  />
-                                                <CheckBox  Grid.Row = '3' Margin = '5' Name = 'MiscStopDisabled' Content = "Stop Disabled Services"         />
-                                            </Grid>
-                                        </GroupBox>
-                                    </Grid>
-                                    <Grid Grid.Column = '1'>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height = '*'/>
-                                            <RowDefinition Height = '2*'/>
-                                        </Grid.RowDefinitions>
-                                        <GroupBox Grid.Row = '0' Header = 'User Interface' Margin = '5'>
-                                            <ComboBox  Grid.Row = '1' Name = 'ScriptProfile' Height = '24' >
-                                                <ComboBoxItem Content = 'DevOPS (MC/SDP v1.0)' IsSelected =  'True'/>
-                                                <ComboBoxItem Content = 'MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False' />
-                                            </ComboBox>
-                                        </GroupBox>
-                                        <GroupBox Grid.Row = '1' Header = 'Development' Margin = '5'>
-                                            <Grid >
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                    <RowDefinition Height = '30'/>
-                                                </Grid.RowDefinitions>
-                                                <CheckBox  Grid.Row = '0' Margin = '5' Name = 'DevelDiagErrors'  Content = "Diagnostic Output [ On Error ]" />
-                                                <CheckBox  Grid.Row = '1' Margin = '5' Name = 'DevelLog'         Content = "Enable Development Logging"     />
-                                                <CheckBox  Grid.Row = '2' Margin = '5' Name = 'DevelConsole'     Content = "Enable Console"                 />
-                                                <CheckBox  Grid.Row = '3' Margin = '5' Name = 'DevelDiagReport'  Content = "Enable Diagnostic"              />
-                                            </Grid>
-                                        </GroupBox>
-                                    </Grid>
-                                </Grid>
-                                <Grid Grid.Row = '1'>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height = '*'/>
-                                        <RowDefinition Height = '*'/>
-                                    </Grid.RowDefinitions>
-                                    <GroupBox Grid.Row = '0' Header = 'Logging: Create logs for all changes made via this utility' Margin = '5'>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width = '75'/>
-                                                <ColumnDefinition Width = '*'/>
-                                                <ColumnDefinition Width = '6*'/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height = '*' />
-                                                <RowDefinition Height = '*' />
-                                            </Grid.RowDefinitions>
-                                            <Label    Grid.Row = '0' Grid.Column = '0' Content = 'Services:' VerticalAlignment = 'Center' HorizontalAlignment = 'Right'/>
-                                            <Button   Grid.Row = '0' Grid.Column = '1' Margin  = '5' Name = 'LoggingServiceBrowse' Content   = 'Browse'  />
-                                            <TextBox  Grid.Row = '0' Grid.Column = '2' Margin  = '5' Name = 'LoggingServiceFile'   IsEnabled = 'False'   />
-                                            <Label    Grid.Row = '1' Grid.Column = '0' Content = 'Script:'   VerticalAlignment = 'Center' HorizontalAlignment = 'Right'/>
-                                            <Button   Grid.Row = '1' Grid.Column = '1' Margin  = '5' Name = 'LoggingScriptBrowse'  Content   = 'Browse'  />
-                                            <TextBox  Grid.Row = '1' Grid.Column = '2' Margin  = '5' Name = 'LoggingScriptFile'    IsEnabled = 'False'   />
-                                        </Grid>
-                                    </GroupBox>
-                                    <GroupBox Grid.Row = '1' Header = 'Backup: Save your current Service Configuration' Margin = '5'>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width = '75'/>
-                                                <ColumnDefinition Width = '*'/>
-                                                <ColumnDefinition Width = '6*'/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height = '*' />
-                                                <RowDefinition Height = '*' />
-                                            </Grid.RowDefinitions>
-                                            <Label    Grid.Row = '0' Grid.Column = '0' Content = 'Registry:' VerticalAlignment = 'Center' HorizontalAlignment = 'Right' />
-                                            <Button   Grid.Row = '0' Grid.Column = '1' Margin  = '5' Name = 'BackupRegistryBrowse' Content   = 'Browse'  />
-                                            <TextBox  Grid.Row = '0' Grid.Column = '2' Margin  = '5' Name = 'BackupRegistryFile'   IsEnabled = 'False'   />
-                                            <Label    Grid.Row = '1' Grid.Column = '0' Content = 'Template:' VerticalAlignment = 'Center' HorizontalAlignment = 'Right' />
-                                            <Button   Grid.Row = '1' Grid.Column = '1' Margin  = '5' Name = 'BackupTemplateBrowse' Content   = 'Browse'  />
-                                            <TextBox  Grid.Row = '1' Grid.Column = '2' Margin  = '5' Name = 'BackupTemplateFile'   IsEnabled = 'False'   />
-                                        </Grid>
-                                    </GroupBox>
-                                </Grid>
-                            </Grid>
-                        </TabItem>
-                        <TabItem Header = 'Console'>
-                            <Grid Margin = '5'>
-                                <GroupBox Header= 'Embedded Console'>
-                                <ScrollViewer VerticalScrollBarVisibility = 'Visible' Margin = '5'>
-                                    <TextBlock Name = 'ConsoleOutput' TextTrimming = 'CharacterEllipsis' Foreground = 'White' Background = 'DarkBlue' FontFamily = 'Lucida Console'/>
-                                </ScrollViewer>
-                                </GroupBox>
-                            </Grid>
-                        </TabItem>
-                        <TabItem Header = 'Diagnostics'>
-                            <Grid Background = '#FFE5E5E5'>
-                                <ScrollViewer VerticalScrollBarVisibility = 'Visible'>
-                                    <TextBlock Name = 'DiagnosticOutput' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>
-                                </ScrollViewer>
-                            </Grid>
-                        </TabItem>
-                    </TabControl>
-                </Grid>
-                <Grid Grid.Row = '2'>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width = '*'/>
-                        <ColumnDefinition Width = '0.5*'/>
-                        <ColumnDefinition Width = '0.5*'/>
-                        <ColumnDefinition Width = '*'/>
-                    </Grid.ColumnDefinitions>
-                    <GroupBox Header = 'Service Config' Margin = '5' Grid.Column = '0'>
-                        <TextBlock Name ='ServiceLabel' TextAlignment = 'Center' Margin = '5'/>
-                    </GroupBox>
-                    <Button    Grid.Column = '1' Name =  'Start' Content = 'Start'  Height = '20' Margin = '5'/>
-                    <Button    Grid.Column = '2' Name = 'Cancel' Content = 'Cancel' Height = '20' Margin = '5'/>
-                    <GroupBox Header = 'Script/Module' Margin = '5' Grid.Column = '3'>
-                        <TextBlock Name = 'ScriptLabel' TextAlignment = 'Center' Margin = '5' />
-                    </GroupBox>
-                </Grid>
-            </Grid>
-        </Window>
-"@
+        $XAML = Get-XAML -Service 
 
         $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
         @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub"   | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
@@ -1220,7 +722,7 @@
         $Splat                = @{ 
             
             Items             = "Version" , "Date" , "Script" , "Service" , "Release"
-            Values            = Resolve-Script -Version | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
+            Values            = $Script | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
         }
 
         $Subtable[0]          = New-SubTable @Splat
@@ -1342,11 +844,130 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
-     #  $Console                                   = Show-Console -Mode 5
         
-        $Services                                  = Get-ServiceProfile
-        $ServiceProfile                            = $Services.'10H:D+'
+        # ------------------------------------------------------ #
+        # Collect environment variables and script prerequisites #
+        # ------------------------------------------------------ #
+
+        # OS Version
+
+        [ Environment ]::OSVersion.Version.Major | % {
+        
+            If ( $_ -ne 10 )
+            {
+                Write-Theme -Action "Exception [!]" "Only Windows 10 Client is currently supported" 12 4 15
+                Read-Host "Press Enter to Exit"
+                Break
+            }
+        }
+
+        # Administrative Rights
+
+        "Security.Principal.Windows" | % { IEX "( [ $_`Principal ][ $_`Identity ]::GetCurrent() ).IsInRole( 'Administrator' )" } | % {
+
+            If ( $False ) 
+            {                
+                Write-Theme -Action "Access [!]" "Limited, attempting elevation" 12 4 15
+
+                SAPS PowerShell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" $PassedArg" -Verb RunAs
+                
+                If ( $False )
+                { 
+                    Write-Theme -Action "Exception [!]" "Elevation has failed" 12 4 15
+                    Read-Host "Press Enter to Exit"
+                    Break
+                }
+            }
+
+            If ( $True )
+            { 
+                Write-Theme -Action "Confirmed [+]" "Administrative Rights" 11 11 15 
+            }
+        }
+
+        $Control                                   = Resolve-Script -Control
+
+        If ( $Control.TermsOfService -eq 0 )
+        {
+            Write-Theme -Array ( Resolve-Script -Copyright ) -Title "Terms of Service / Copyright" -Prompt "Press Enter to Continue" | % { 
+
+                If ( $_ -eq $True )
+                {
+                    Write-Theme -Action "Accepted [+]" "Terms of Service" 11 11 15
+                    $Control.TermsOfService = 1
+                }
+
+                Else 
+                {
+                    Write-Theme -Action "Exception [!]" "Terms of Service was not accepted, aborting" 12 4 15
+                    Read-Host "Press Enter to Exit"
+                    Break
+                }
+            }
+        }
+
+        # --------------------------------- #
+        # Load Service Profiles and the GUI #
+        # --------------------------------- #
+
+        #  $Console                                = Show-Console -Mode 5
+        
+        $Config                                    = Get-ServiceProfile
+        $Object                                    = $Config | GM | ? MemberType -eq NoteProperty | % { $_.Name }
+        $Filter                                    = Resolve-Script -Services
+
+        #$GUI.MiscSimulate   [ What If ]
+        # Produce a list of services and corresponding changes
+        
+        #$GUI.MiscChange [ Change the service state ]
+        # If running, and non compliant, change the state
+
+        #$GUI.MiscStopDisabled 
+        # If a disabled service is running, stop them?
+
+        #$GUI.DevelDiagErrors
+
+        #$GUI.DevelLog
+
+        #$GUI.DevelConsole
+        #$GUI.DevelDiagReport
+
+        #$GUI.BypassBuild
+        #$GUI.BypassEdition
+        #$GUI.BypassLaptop
+
+        $Service                                   = 0..9 | % { 
+        
+            $X = $Object[$_]
+
+            [ PSCustomObject ]@{ 
+                
+                Profile  = $X
+
+                #$GUI.DisplayInactive
+                Active   = $Config.$X | ? { $_.Status -eq "Running"    }
+
+                #$GUI.DisplayInactive
+                Inactive = $Config.$X | ? { $_.Status -eq "Stopped"    }
+
+                #$GUI.DisplaySkipped
+                Skipped  = $Config.$X | ? { $_.Status -eq "-"          }
+
+                #$GUI.MiscXbox
+                Xbox     = $Config.$X | ? { $_.Name   -in $Filter.Xbox }
+                    
+            }
+        }
+
+        
+        
+        
+        
+
+
+
+        $ServiceProfile                            = $Service | % { $_.Config.$( $_.Object ) }
+
 
         Return-ViperBombGUI -Main                  | % {
         
@@ -1355,14 +976,20 @@
             $Named                                 = $_.Named
         }
 
-        $Arch                                      = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
+        # -------- #
+        # Defaults #
+        # -------- #
 
+        $Arch                                      = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
         $GUI.CurrentOS.Text                        = Resolve-Windows -MSInfo  | % { $_.Caption , "($Arch)" -join ' ' }
         $GUI.CurrentBuild.Text                     = Resolve-Windows -Edition | % { "v{0}.{1}" -f $_.Build , $_.Version }
         $GUI.CurrentChassis.Text                   = Resolve-Windows -Type    | % { $_.Chassis }
-
         $GUI.ServiceDialogEmpty.Text               = "Select a profile from the configuration menu to begin"
         $GUI.ServiceDialogSearch.IsEnabled         = $False
+
+        # -------------------- #
+        # Datagrid ScriptBlock #
+        # -------------------- #
 
         $DisableBox = {
 
@@ -1370,6 +997,10 @@
             $GUI.ServiceDialogEmpty.Visibility     = "Collapsed"
             $GUI.ServiceDialogEmpty.Text           = ""
         }
+
+        # ---------- #
+        # Menu Items #
+        # ---------- #
 
         $GUI.MenuConfigHomeDefaultMax.Add_Click(
         {
@@ -1508,7 +1139,7 @@
         })
 
         $GUI.MenuInfoFeedback                      | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
-        $GUI.MenuInfoFAQ                           | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About }}) }
+        $GUI.MenuInfoFAQ                           | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About } }) }
         $GUI.MenuInfoAbout                         | % { 
         
             $_.Add_Click(
@@ -1530,169 +1161,9 @@
         $GUI.MenuInfoBlackViper                     | % { $_.Add_Click{ Resolve-Script -Sparks  | % { Start $_.WebSite } } }
         $GUI.MenuInfoSecureDigitsPlus               | % { $_.Add_Click{ Resolve-Script -Company | % { Start $_.Site    } } }
 
-        #--------------------------#
-        # Logging Service Handling #
-        #--------------------------#
-
-        $GUI.LoggingServiceBrowse.Add_Click(
-        {
-            $GUI.LoggingServiceFile                 | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingServiceFile } ) -join '_'
-            }
-
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Service Logging Output"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'log (*.log) | *.log'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.LoggingServiceFile.Text        = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.LoggingServiceFile             | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
-
-        #-------------------------#
-        # Logging Script Handling #
-        #-------------------------# 
-
-        $GUI.LoggingScriptBrowse.Add_Click(
-        {
-            $GUI.LoggingScriptFile                  | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingScriptFile } ) -join '_'
-            }
-
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Script Logging Output"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'log (*.log) | *.log'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Script.log"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.LoggingScriptFile.Text         = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.LoggingScriptFile              | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
-
-        #------------------------#
-        # Backup Registry (.reg) #
-        #------------------------#
-
-        $GUI.BackupRegistryBrowse.Add_Click(
-        {
-            $GUI.BackupRegistryFile                 | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupRegistryFile } ) -join '_'
-            }
-
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Registry Backup File"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'reg (*.reg) | *.reg'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Backup.reg"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.BackupRegistryFile.Text        = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.BackupRegistryFile             | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
-
-        #------------------------#
-        # Backup Template (.csv) #
-        #------------------------#
-
-        $GUI.BackupTemplateBrowse.Add_Click(
-        {
-            $GUI.BackupTemplateFile                 | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupTemplateFile } ) -join '_'
-            }
-
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Template Backup File"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'csv (*.csv) | *.csv'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Template.csv"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.BackupTemplateFile.Text        = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.BackupTemplateFile             | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
+        # ----------------- #
+        # Datagrid Handling #
+        # ----------------- #
 
         $GUI.ServiceDialogSearch.Add_TextChanged(
         {
@@ -1732,13 +1203,180 @@
             If ( ( $Filter -ne $Null ) -and ( $GUI.ServiceDialogSearch.Text -eq "" ) )
             {
                 $Filter                             = $Null
+
                 $GUI.ServiceDialogSelect.IsEnabled  = $True
+
                 $GUI.ServiceDialogGrid.ItemsSource  = $Null
+
                 $GUI.ServiceDialogGrid.ItemsSource  = $ServiceProfile
             }
         })
 
-        #$GUI.DisplayActive
+        # ----------- #
+        # Preferences #
+        # ----------- #
+
+        # Save Custom Logging Service File
+
+        $GUI.LoggingServiceBrowse.Add_Click(
+        {
+            $GUI.LoggingServiceFile                 | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingServiceFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Service Logging Output"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'log (*.log) | *.log'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
+            }
+
+            $X = $Dialog.ShowDialog()
+
+            If ( $X -eq "OK" )
+            {
+                $GUI.LoggingServiceFile.Text        = $Dialog.Filename
+            }
+
+            Else
+            {
+                $GUI.LoggingServiceFile             | % {
+                          
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        # Save Custom Logging Script File
+
+        $GUI.LoggingScriptBrowse.Add_Click(
+        {
+            $GUI.LoggingScriptFile                  | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingScriptFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Script Logging Output"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'log (*.log) | *.log'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Script.log"
+            }
+
+            $X = $Dialog.ShowDialog()
+
+            If ( $X -eq "OK" )
+            {
+                $GUI.LoggingScriptFile.Text         = $Dialog.Filename
+            }
+
+            Else
+            {
+                $GUI.LoggingScriptFile              | % {
+                          
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        # Save Custom Backup Registry File ( *.reg )
+
+        $GUI.BackupRegistryBrowse.Add_Click(
+        {
+            $GUI.BackupRegistryFile                 | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupRegistryFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Registry Backup File"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'reg (*.reg) | *.reg'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Backup.reg"
+            }
+
+            $X = $Dialog.ShowDialog()
+
+            If ( $X -eq "OK" )
+            {
+                $GUI.BackupRegistryFile.Text        = $Dialog.Filename
+            }
+
+            Else
+            {
+                $GUI.BackupRegistryFile             | % {
+                          
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        # Save Custom Backup Template File ( *.reg )
+
+        $GUI.BackupTemplateBrowse.Add_Click(
+        {
+            $GUI.BackupTemplateFile                 | % {
+                    
+                $_.IsEnabled                        = $True
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupTemplateFile } ) -join '_'
+            }
+
+            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Designate Template Backup File"
+                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
+                $_.Filter                           = 'csv (*.csv) | *.csv'
+                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Template.csv"
+            }
+
+            $X = $Dialog.ShowDialog()
+
+            If ( $X -eq "OK" )
+            {
+                $GUI.BackupTemplateFile.Text        = $Dialog.Filename
+            }
+
+            Else
+            {
+                $GUI.BackupTemplateFile             | % {
+                          
+                    $_.IsEnabled                    = $False
+                    $_.Text                         = "<Activate to designate a different file name/path>"
+                }
+            }
+
+            $Dialog.Dispose()
+        })
+
+        $GUI.DisplayActive.Add_Click(
+        {
+            If ( $GUI.DisplayActive.IsChecked )
+            {
+                
         #$GUI.DisplayInactive
         #$GUI.DisplaySkipped
 
