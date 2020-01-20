@@ -1,4 +1,4 @@
-﻿<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -26,8 +26,7 @@
         
             IEX "Using Namespace System.$_"
         
-        }
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 # ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -373,7 +372,20 @@
         Begin
         {
             $GX = $Edge , $Center , $Font , $Back , 15 , 12 , 9 , 0 , 10 ; $S = " // " , " \\ " ; $F = "/¯¯\" , "\__/" ; $PI = "($( [ Char ] 960 ))" ;
-            $L  = $S[1..0] ; $R = $S ; $M = 0..3 | % { IEX "`$M$_ = 0..120 | % { @( '¯' , '_' , ' ' , '-' )[$_] * `$_ }" }
+            $L  = $S[1..0] ; $R = $S ; 
+            
+            $M = 0..3 | % { IEX "`$M$_ = [ PSCustomObject ]@{ Char = '$( @( '¯' , '_' , ' ' , '-' )[$_] )' };" }
+
+            ForEach ( $I in $M0 , $M1 , $M2 , $M3 )
+            {
+                0..120   | % { 
+
+                    $I   | Add-Member -MemberType NoteProperty -Name $_ -Value "$( ( $I.Char * $_ ) -join '' )"
+                }
+            }
+
+            $M = 0..3 | % { IEX "`$M$_ = 0..120 | % { @( '¯' , '_' , ' ' , '-' )[$_] * `$_ }" }
+
         }
 
         Process
@@ -492,8 +504,6 @@
                 
                 $LL0 = "\$S10" ; $LL1 = "/$S10" ; $LR0 = "$S10/" ; $LR1 = "$S10\" ; $N5 = "$( "     *" * 5 )      "
                 $N6  = "  *   " * 6 ; 0..1 | % { IEX "`$F$_ = '$( $F[$_] )'" } ; 1..0 | % { IEX "`$R$_ = '$( $F[$_] )'" }
-                    
-                
 
                 $Title        = $FX.Title | % { If ( $_.Length -gt 83 ) { "$( $_.Substring( 0 , 78 ) )..." } Else { $_ } } | % { "[ $_ ]" }
 
@@ -744,8 +754,8 @@
                 $Return[34]   | % { 
                            
                     $_.ST     = " \" , "\___" + $S72 + @( 0..3 | % { "____" , "    " } ) + "___// "
-                    $_.FG     = 0 , 0 , 0 , 0, 0, 0, 0, 0, 0 ,0 ,0 ,0, 0 , 0
-                    $_.BG     = 7 , 7 , 7 , 7 , 7 ,7 ,7 ,7 ,7 ,7 ,7 , 7 , 7
+                    $_.FG     = 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0
+                    $_.BG     = 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7 , 7
                 }
 
                 $Return[35]   | % { 
@@ -866,7 +876,7 @@
                 $Top                     = 5
                 $Bottom                  = @( 6 , 5 )[ $Array.Count % 2 ]
                 
-                $Return                  = 0..( $Top + $Array.Count - 1 + $Bottom )
+                $Return                  = 0..( $Top + ( $Array.Count - 1 ) + $Bottom )
 
                 $Return                  | % {
                 
@@ -878,11 +888,11 @@
                     } 
                 }
 
-                $Title                   = $Title | % { If ( $_.Length -gt 83 ) { "$( $_.Substring( 0 , 78 ) )..." } Else { $_ } } | % { "[ $_ ]" }
+                $Header                  = $Title  | % { If ( $_.Length -gt 83 ) { "$( $_.Substring( 0 , 78 ) )..." } Else { $_ } } | % { "[ $_ ]" }
 
-                $Recurse                 = $Title | % { 92 - $_.Length | % { $_ ; $_ % 2 ; ( $_ - ( $_ % 2 ) ) / 2 } }
+                $Rec                     = $Header | % { 92 - $_.Length | % { $_ ; $_ % 2 ; ( $_ - ( $_ % 2 ) ) / 2 } }
 
-                $Output                  = $M1[$Recurse[2]] , $M1[$Recurse[1]] , $Title , $M1[$Recurse[2]] -join ''
+                $OP                      = $M1[$Rec[2]] , $M1[$Rec[1]] , $Header , $M1[$Rec[2]] -join ''
 
                 $Z                       = 0
 
@@ -906,7 +916,7 @@
 
                 $Return[$Z]              | % {
 
-                    $_.ST                = " \" , $F[1] , "/¯¯¯  " , $Output , "  ___/" , $F[0] , "\ "
+                    $_.ST                = " \" , $F[1] , "/¯¯¯  " , $OP , "  ___/" , $F[0] , "\ "
                     $_.FG                = 0 , 1 , 1 , 2 , 1 , 1 , 0
                     $_.BG                = @( 3 ) * 7
                 }
@@ -935,13 +945,13 @@
                 {
                     $Line                = $Array[$I] | % { If ( $_.Length -gt 108 ) { "$( $_.Substring( 0 , 105 ) )..." } Else { $_ } }
 
-                    $Recurse             = $Line | % { 108 - $_.Length | % { $_ ; $_ % 2 ; ( $_ - ( $_ % 2 ) ) / 2 } }
+                    $Rec                 = $Line | % { 108 - $_.Length | % { $_ ; $_ % 2 ; ( $_ - ( $_ % 2 ) ) / 2 } }
 
-                    $Output              = $M2[$Recurse[2]] , $M2[$Recurse[1]] , $Line , $M2[$Recurse[2]] -join ''
+                    $OP                  = $M2[$Rec[2]] , $M2[$Rec[1]] , $Line , $M2[$Rec[2]] -join ''
 
                     $Return[$Z]          | % { 
 
-                        $_.ST            = $L[ $Z % 2 ] , $Output , $R[ $Z % 2 ]
+                        $_.ST            = $L[ $Z % 2 ] , $OP , $R[ $Z % 2 ]
                         $_.FG            = 0 , 2 , 0 
                         $_.BG            = @( 3 ) * 3
                     }
@@ -981,7 +991,7 @@
 
                 $Return[$Z]              | % { 
 
-                    $_.ST                = @( " \" , $F[1] , "/$( $M0[70] )\" ; @( $F[ 1 , 0 ] ) * 4 ; $F[1] , "/ " ) -join ''
+                    $_.ST                = @( " \" , $F[1] , "/$( $M0[70] )\" ; @( $F[ 1 , 0 ] ) * 4 ; $F[1] , "/ " )
                     $_.FG                = @( 0 ; @( 1 ) * 11 ; 0 )
                     $_.BG                = @( 3 ) * 13
                 }
@@ -1775,9 +1785,7 @@
         
         Write-Theme -Action "Searching [~]" "For Valid Domain Controllers"
         
-        $Report                           = Get-NBTScan 
-        $DomainController                 = $Report | ? { $_.ID -eq "<1C>" }
-        $MasterBrowser                    = $Report | ? { $_.ID -eq "<1B>" }
+        $Report                           = Start-NetworkInfo -All
 
         $ST                               = Get-DSCFeatureState -All
 
@@ -3374,7 +3382,17 @@
             PreferredLifeTime            = [ TimeSpan ]::MaxValue 
         }
 
-        New-NetIpAddress @IPAddress            $Splat                           = @{                        InterfaceIndex               = $Adapter            ServerAddresses              = "1.1.1.1" , "1.0.0.1"         }        Set-DNSClientServerAddress @Splat            0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
+        New-NetIpAddress @IPAddress
+    
+        $Splat                           = @{    
+        
+            InterfaceIndex               = $Adapter
+            ServerAddresses              = "1.1.1.1" , "1.0.0.1" 
+        }
+
+        Set-DNSClientServerAddress @Splat
+    
+        0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
 
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -3448,7 +3466,8 @@
             [ Parameter ( ParameterSetName =  "HybridDSCPromo" ) ][ Switch ] $HybridDSCPromo ,
             [ Parameter ( ParameterSetName =         "DCFound" ) ][ Switch ] $DCFound        ,
             [ Parameter ( ParameterSetName =         "DSCRoot" ) ][ Switch ] $DSCRoot        ,
-            [ Parameter ( ParameterSetName =    "ProvisionDSC" ) ][ Switch ] $ProvisionDSC   )
+            [ Parameter ( ParameterSetName =    "ProvisionDSC" ) ][ Switch ] $ProvisionDSC   ,
+            [ Parameter ( ParameterSetName =         "Service" ) ][ Switch ] $Service        )
 
             $XML                        = @{ }
             $Schema                     = "http://schemas.microsoft.com/winfx/2006/xaml"
@@ -3457,6 +3476,8 @@
             $CS                         = GCIM Win32_OperatingSystem | % { $_.Caption }
             $B                          = $False , $True 
             $YZ                         = "[X]" , "[_]"
+
+            $M                          = 0..3 | % { IEX "`$M$_ = 0..120 | % { @( '¯' , '_' , ' ' , '-' )[$_] * `$_ }" }
 
             $Glossary                   = 
             "   `$W = 'Width'             " , "   `$H = 'Height'            " , "  `$MA = 'Margin'          " , 
@@ -3467,8 +3488,9 @@
             "  `$CD = 'ColumnDefinition'  " , "  `$GC = 'Grid.Column'       " , " `$GCS = 'Grid.ColumnSpan' " , 
             "  `$GR = 'Grid.Row'          " , " `$GRS = 'Grid.RowSpan'      " , "  `$SI = 'SelectedIndex'   " , 
             "  `$LA = 'Label'             " , "  `$BU = 'Button'            " , "  `$CO = 'Content'         " , 
-            "   `$Q = 'Name'              " , "  `$SE = 'Setter'            " , "  `$PR = 'Property'        " ,
-            "  `$BG = 'Background'        " , "  `$RB = 'RadioButton'       " , "  `$TW = 'TextWrapping'    "
+            "   `$Q = 'Name'              " , "  `$SE = 'Setter'            " , "  `$PR = 'Property'        " , 
+            "  `$BG = 'Background'        " , "  `$RB = 'RadioButton'       " , "  `$TW = 'TextWrapping'    " , 
+            "  `$BO = 'Border'            "
             
             $Glossary                   | % { IEX $_ }
 
@@ -3484,7 +3506,7 @@
             
             $VCAL                       =  $VAL | % { $_.Replace( 'lA' , 'lContentA' ) } 
 
-            $SP                         = 0..14 | % { "    " * $_ }
+            $SP                         = 0..20 | % { "    " * $_ }
 
             $VC , $VV                   = "Collapsed" , "Visible" | % { "Visibility = '$_'" }
 
@@ -4097,6 +4119,236 @@
 
                 $XML[8] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
         }
+
+        #/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\
+        If ( $Service ) # ViperBomb Service Configuration Utility                    [
+        {#___________________________________________________________________________/
+
+            $Title                      = "ViperBomb Service Configuration Utility"
+
+             # ____   _________________________
+             #//¯¯\\__[_______ Header ________] 
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            $X = @( 2 ; @( 11 ) * 4 ; 10 , 11 , 11 , 12 ,10 , 10 , 8 , 7 ) | % { $SP[$_] }
+                
+            $Y = "<Window " , "   xmlns = '$Schema/presentation'" , " xmlns:x = '$Schema'" , "   Title = '$Author | Hybrid @ $Title" , 
+            "  $H = '600'" , "   Min$H = '600'" , "   $W = '800'" , "Min$W = '800'" , "Icon = '$( $GFX.Icon )'" , " BorderBrush = 'Black'" , "  ResizeMode = 'CanResize'" , 
+            " $( $HAL[1] )" , "   WindowStartupLocation = 'CenterScreen'>"
+
+            $XML[0] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[__ Window Resources ___] 
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            $X = @( 3 , 4 , 5 , 5 , 7 , 5 , 7 , 5 , 6 , 7 , 8 ; @( 10 ) * 5 ; 7 , 6 , 5 , 4 , 4 , 5 , 7 , 4 , 3 , 3 , 4 , 3 ) | % { $SP[$_] }
+            $Y = @( "<Window.Resources> " , "<Style x:Key         = 'SeparatorStyle1' " , "   TargetType    = '{x:Type Separator}'>" , 
+                    "<$SE $PR = 'SnapsToDevicePixels' " , "Value    = 'True'/>" , "<$SE $PR = '$MA'" , "Value    = '0,0,0,0'/>" , "<$SE $PR = 'Template'>" , 
+                    "<$SE.Value>" , "<ControlTemplate TargetType     = '{x:Type Separator}'>" , "<Border $H        = '24' " , "SnapsToDevicePixels = 'True' " , 
+                    "$BG          = '#FF4D4D4D'" , "$BO`Brush         = 'Azure'" , "$BO`Thickness     = '1,1,1,1'" , "CornerRadius        = '5,5,5,5'/>" , 
+                    "</ControlTemplate>" , "</$SE.Value>" , "</Setter>" , "</Style>" , "<Style TargetType    = '{x:Type ToolTip}'>" , "<$SE $PR = '$BG'" , 
+                    "Value    = '#000000'/>" , "</Style>" , "</Window.Resources>" , "<Window.Effect>" , "<DropShadowEffect/>" , "</Window.Effect>" )
+
+            $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+            
+             # ____   _________________________
+             #//¯¯\\__[_______ Framing _______]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @( 3 , 4 , 5 , 5 , 5 , 4 ) | % { $SP[$_] }
+             $Y = @( "<$G>" , "<$GRD>" ; 20 , "*" , 60 | % { "<$RD $H        = '$_'/>" } ; "</$G.$RD>" )
+
+             $XML[2] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[____ Menu Controls ____]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @( 4,7,5,6,7,9,7,9,6,6,7,9,7,9,6,6,7,9,7,9,7,9,7,9,6,6,7,9,7,9,6,5,5,6,8,6,8,6,8,6,8,6,7,9,7,9,6,6,9,6,9,5,4 ) | % { $SP[$_] }
+
+             $Y = @( "<$MN $GR                   = '0'" , "  IsMainMenu         = 'True'>" , "<$MNI     $HD         = 'Configuration'>" ) ;
+
+                $Slot = [ PSCustomObject ]@{ 
+                
+                    Home    = "Default" 
+                    Pro     = "Default" 
+                    Desktop = "Safe" , "Tweaked"
+                    Laptop  = "Safe" 
+                }
+
+             $Y += "Home" , "Pro" , "Desktop" , "Laptop" | % { 
+
+                "<$MNI $HD         = '$_'>" ;
+
+                    ForEach ( $J in $Slot.$_ )
+                    {
+                        ForEach ( $K in "Max" , "Min" )
+                        {
+                            "<$MNI $Q       = 'MenuConfig$_$J$K'" ,
+                            "  $HD     = '$J $K`imum'/>"
+                        }
+                    }
+
+                    "</$MNI>" ;
+                }
+
+            $Y += @( "</$MNI>" , "<$MNI     $HD         = 'Info'>" ; "Feedback" , "FAQ" , "About" , "Copyright" | % { "<$MNI $Q           = 'MenuInfo$_'" , "  $HD         = '$_'/>" } ; 
+            
+                     "<$MNI $HD         = 'MadBomb122'>" ; ( "Donate" , "Donate to MadBomb122" ) , ( "GitHub" , "Original GUI/Script Source -> GitHub" ) | % { 
+                     
+                     "<$MNI $Q       = 'MenuInfoMadBomb$( $_[0] )'" , "  $HD     = '$( $_[1] )'/>" } ; "</$MNI>" ; 
+
+                     ( "BlackViper" , "BlackViper Service Configuration Website" ) , ( "SecureDigitsPlus" , "Secure Digits Plus: Fighting Entropy" ) | % {
+
+                        "<$MNI     $Q       = 'MenuInfo$( $_[0] )'" , "  $HD     = '$( $_[1] )'/>" } ; "</$MNI>" , "</$MN>" )
+
+            $XML[3] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[_______ Framing _______]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @( 4,5,8,8,6,7,8,9,10,11,13,13,13,13,12,16,16,16,16,11,11,12,14,13,15,15,12,12,14,13,15,15,12,11,10,9,8,7,6 ) | % { $SP[$_] } 
+
+             $Y = @( "<$G $GR                   = '1'>" , "<TabControl $BO`Brush      = 'Gainsboro' " , "$GR         = '1'" , "$Q             = 'TabControl'>" , 
+                     "<TabControl.Resources>" , "<Style TargetType    = 'TabItem'>" , "<$SE $PR = 'Template'>" , "<$SE.Value>" , 
+                     "<ControlTemplate TargetType                   = 'TabItem'>" , "<$BO $Q                              = '$BO'" , 
+                     "$BO`Thickness                   = '1,1,1,0'" , "$BO`Brush                       = 'Gainsboro'" , "CornerRadius                      = '4,4,0,0'" ,
+                     "$MA                            = '2,0'>" , "<ContentPresenter x:Name              = 'ContentSite'" , "  $( $VAL[1] )", "  $( $HAL[1] )" , 
+                     "  ContentSource       = '$HD'" , "  $MA              = '10,2'/>" , "</$BO>" , "<ControlTemplate.Triggers>" , "<Trigger $PR      = 'IsSelected'" , 
+                     " Value         = 'True'>" , "<$SE TargetName = 'Border'" , "$PR   = '$BG'" , "Value      = 'LightSkyBlue'/>" , "</Trigger>" , 
+                     "<Trigger $PR      = 'IsSelected'" , " Value         = 'False'>" , "<$SE TargetName = '$BO'" , "$PR   = '$BG'" , "Value      = 'GhostWhite'/>" , 
+                     "</Trigger>" , "</ControlTemplate.Triggers>" , "</ControlTemplate>" , "</$SE.Value>" , "</$SE>" , "</Style>" , "</TabControl.Resources>" )
+
+             $XML[4] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[___ Service Dialog ____]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @(9,7,8,9,9,9,8,8,9;@(10)*4;@(9,9,11,11,10,12,12,9,9,11,11,10,12,12)*2;9,8,8,9;@(10)*4;@(9)*4;@(10)*4;9,9,11,11,11,10,11,10,11,10,11,9,8,8;@(10)*11;
+                    9,10,11,12,14,13,14,15;@(17)*4;14,13,13,15,12,12,16,13,16,12,12,16,13,16,12,12,16,13,16,12,11,10,9,9;@(10;@(15)*4)*10;9,8,8,7,6) | % { $SP[$_] }
+
+             $Y = @( " <TabItem Header = 'Service Dialog'>" , "<$G>" , "<$G.$RD>" ; 60 , 35 , "*" | % { "<$RD $H = '$_'/>" } ; "</$G.$RD>" , "<$G $GR = '0' >" , "<$G.$CD>" ; 
+                     1.25 , 1.75 , 0.75 , 0.75 | % { "<$CD $W = '$_*' />" } ; "</$G.$CD>" , "<$GB $GC         = '0'" , "  $HD              = 'Selected Profile' " , 
+                     "  $MA              = '5'>" , "<$TBL $Q           = 'CurrentProfile'" , "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , 
+                     "<$GB $GC         = '1' " , "  $HD              = 'Operating System' " , "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentOS'" , 
+                     "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "<$GB $GC         = '2' " , "  $HD              = 'Current Build' " , 
+                     "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentBuild'" , "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , 
+                     "<$GB $GC         = '3' " , "  $HD              = 'Chassis' " , "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentChassis'" , 
+                     "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "</$G>" , "<$G $GR                  = '1'>" , "<$G.$CD>" ; 
+                     50 , "*" , 150 , 200 | % { "<$CD $W = '$_'/>" } ; "</$G.$CD>" , "<$TBL $GC = '0' $MA = '5' $( $VAL[1] ) FontSize = '12' >Search:</$TBL>" ; 
+                     ( "$TB " , 1 , "Search' TextWrapping = 'Wrap' /" ) , ( "$CB" , 2 , "Select' $( $VAL[1] )" ) | % {  
+                     "<$( $_[0] )  $GC = '$( $_[1] )' $MA = '5' $H = '22' $Q = 'ServiceDialog$( $_[2] )>" } ; 
+                     "$Q' IsSelected = 'True" , "Display$Q" , "Path$Q" , "Description" | % { "<$CBI $CO = '$_'/>" } ; 
+                     "</$CB>" , "<$TBL $GC       = '3' " , "   $MA            = '5' " , "   TextAlignment     = 'Center'" , "   $( $VAL[1] )>" ;
+                     ( "66FF66" , "Scoped" ) , ( "FFFF66" , "Unspecified" ) , ( "FF6666" , "Non Scoped" ) | % {
+                     "<Run   $BG        = '#$( $_[0] )'" , "   Text              = '$( $_[1] )'/>" } ; 
+                     "</$TBL>" , "</$G>" , "<Data$G $GR                   = '2'" , "  $GC                = '0'" , "  $Q                       = 'ServiceDialogGrid'" , 
+                     "  FrozenColumnCount          = '2' " , "  AutoGenerateColumns        = 'False' " , "  AlternationCount           = '2' " , 
+                     "  HeadersVisibility          = 'Column' " , "  CanUserResizeRows          = 'False' " , "  CanUserAddRows             = 'False' " , 
+                     "  IsTabStop                  = 'True'" , "  IsTextSearchEnabled        = 'True'" , "  SelectionMode              = 'Extended'>" , 
+                     "<Data$GR`Style>" , "<Style TargetType            = '{x:Type DataGridRow}'>" , "<Style.Triggers>" , "<Trigger Property    = 'IsMouseOver'" , 
+                     " Value       = 'True'>" , "<$SE $PR = 'ToolTip'>" , "<$SE.Value>" , "<$TBL Text         = '{Binding Description}'" , "   TextWrapping = 'Wrap'" , 
+                     "   $W        = '400'" , "   $BG   = '#000000'" , "   Foreground   = '#FFFFFF'/>" , "</$SE.Value>" , "</$SE>" , 
+                     "<$SE $PR                = 'ToolTipService.ShowDuration'" , "Value                   = '360000000'/>" , "</Trigger>" ; 
+                     ( "@" , "66FF66" ) , ( "+" , "FFFF66" ) , ( "-" , "FF6666" ) | % { "<DataTrigger      Binding           = '{Binding Scoped}'" , 
+                     "  Value             = '$( $_[0] )'>" ,  "<$SE       $PR          = '$BG'" , "  Value             = '#$( $_[1] )'/>" , "</DataTrigger>" } ;
+                     "</Style.Triggers>" , "</Style>" , "</Data$GR`Style>" , "<Data$GC`s>" ; ( "Index" , 40 ) , ( "Scoped" , 20 ) , ( "Profile" , 75 ) , ( $Q , 150 ) , 
+                     ( "Status" , 75 ) , ( "StartType" , 75 ) , ( "Delay" , 50 ) , ( "Display$Q" , 150 ) , ( "Path$Q" , 150 ) , ( "Description" , 150 ) | % { 
+                        $Z = $( If ( $_[0] -eq "Scoped" ) { "@" } If ( $_[0] -eq "Delay" ) { "DelayedAutoStart" } Else { $_[0] } )
+                        "<Data$G`TextColumn $HD                  = '$Z'" , "$W                   = '$( $_[1] )'" , "Binding                 = '{Binding $( $_[0] )}'" , 
+                        "CanUserSort             = 'True'" , "IsReadOnly              = 'True'/>" } ; "</Data$GC`s>" , "</Data$G>" , 
+                        "<$TBL $GR = '2' $Q = 'ServiceDialogEmpty' $MA = '20' $( $VAL[1] ) $( $HAL[1] ) FontSize = '20'/>" , "</$G>" , "</TabItem>" )
+
+            $XML[5] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[____ Preferences ______]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            $X = @(6..9;9,8,8,9;@(10)*3;9;9..11;11,10;10..13;@(13,13,12,12,13)*2;11,10;10..12;@(13)*3;@(@(12)*4;11..9;9..11;11,10;10..12;12..10;10..12;
+            @(13)*4;12)*2;@(12)*4;11..8;8..10;10;@(9;9..12;12,12,11,11,12,12;@(11)*7;10)*2;9..6) | % { $SP[$_] }
+
+            $Y = @( "<TabItem $HD = 'Preferences'>" , "<$G>" , "<$GRD>" ; 1.25 , "" | % { "<$RD $H = '$_*'/>" } ; "</$GRD>" , "<$G $GR = '0'>" , "<$GCD>" ; 
+            0..2 | % { "<$CD $W = '*'/>" } ; "</$GCD>" , "<$G $GC = '2'>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*'/>" } ; 
+            "</$GRD>" , "<$GB $GR = '0' $HD = 'Bypass / Checks [ Risky Options ]' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '*'/>" } ; 
+            "</$GRD>" , "<$CB   $GR = '0' $( $VAL[1] ) $H = '24' $Q = 'BypassEdition'>" ; @( "Override Edition Check' IsSelected = 'True" ; 
+            "Home" , "Pro" | % { "Windows 10 $_" } ) | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" ; ( 1 , "Build" , "Skip Build/Version Check" ) ,
+            ( 2 , "Laptop" , "Enable Laptop Tweaks" ) | % { "<$CB   $GR = '$( $_[0] )' $MA = '5' $Q = 'Bypass$( $_[1] )' $CO = '$( $_[2] )'/>" } ; 
+            "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Display' $MA = '5' >" , "<$G>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; ( 0 , "Active" ) , 
+            ( 1 , "Inactive" ) , ( 2 , "Skipped" ) | % { "<$CB  $GR = '$( $_[0] )' $MA = '5' $Q = 'Display$( $_[1] )' $CO = 'Show $( $_[1] ) Services' />" } ; 
+            "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '0'>" , "<$GRD>" ; "" , 2 | % { "<$RD $H = '*'/>" } ; "</$GRD>" ; 
+            "<$GB $GR = '0' $HD = 'Service Configuration' $MA = '5'>" , "<$CB  $GR = '1' $Q = 'ServiceProfile' $H ='24'>" ; 
+            "Black Viper (Sparks v1.0)' IsSelected = 'True" , "DevOPS (MD/SDP v1.0)' IsEnabled = 'False" | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , 
+            "<$GB $GR = '1' $HD = 'Miscellaneous' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..3 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; 
+            ( 0 , "Simulate" , "Simulate Changes [ Dry Run ]" ) , ( 1 , "Xbox" , "Skip All Xbox Services" ) , ( 2 , "Change" , "Allow Change of Service State" ) , 
+            ( 3 , "StopDisabled" , "Stop Disabled Services" ) | % { "<$CB  $GR = '$( $_[0] )' $MA = '5' $Q = 'Misc$( $_[1] )'     $CO = '$( $_[2] )'   />" } ; 
+            "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '1'>" , "<$GRD>" ; "" , 2 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , "<$GB $GR = '0' $HD = 'User Interface' $MA = '5'>" , 
+            "<$CB  $GR = '1' $Q = 'ScriptProfile' $H = '24' >" ; "DevOPS (MC/SDP v1.0)' IsSelected =  'True" , "MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False" | % { 
+            "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Development' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..3 | % { "<$RD $H = '30'/>" } ; 
+            "</$GRD>" ; ( 0 , "DiagErrors" , "Diagnostic Output [ On Error ]" ) , ( 1 , "Log" , "Enable Development Logging" ) , ( 2 , "Console" , "Enable Console" ) , 
+            ( 3 , "DiagReport" , "Enable Diagnostic" ) | % { "<$CB  $GR = '$( $_[0] )' $MA = '5' $Q = 'Devel$( $_[1] )'  $CO = '$( $_[2] )' />" } ; "</$G>" , "</$GB>" , 
+            "</$G>" , "</$G>" , "<$G $GR = '1'>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , 
+            "<$GB $GR = '0' $HD = 'Logging: Create logs for all changes made via this utility' $MA = '5'>" , "<$G>" , "<$GCD>" ; 75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; 
+            "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; ( 0 , "Service" ) , ( 1 , "Script" ) | % { 
+
+                "<$LA    $GR = '$( $_[0] )' $GC = '0' $CO = '$( $_[1] ):' $( $VAL[1] ) $( $HAL[2] )/>" , 
+                "<$BU   $GR = '0' $GC = '1' $MA  = '5' $Q = 'Logging$( $_[1] )Browse' $CO = 'Browse'  />" , 
+                "<$TB  $GR = '0' $GC = '2' $MA  = '5' $Q = 'Logging$( $_[1] )File' IsEnabled = 'False' />" } ; 
+                
+            "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Backup: Save your current Service Configuration' $MA = '5'>" , "<$G>" , "<$GCD>" ; 
+
+            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
+            
+            ( 0 , "Registry" ) , ( 1 , "Template" ) | % {
+
+                "<$LA    $GR = '$( $_[0] )' $GC = '0' $CO = '$( $_[1] ):' $( $VAL[1] ) $( $HAL[2] )/>" , 
+                "<$BU   $GR = '0' $GC = '1' $MA  = '5' $Q = 'Backup$( $_[1] )Browse' $CO   = 'Browse'  />" , 
+                "<$TB  $GR = '0' $GC = '2' $MA  = '5' $Q = 'Backup$( $_[1] )File'   IsEnabled = 'False'   />" } ;
+
+            "</$G>" , "</$GB>" , "</$G>" , "</$G>" , "</TabItem>" )
+
+            $XML[6] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[__ Integrated Console _]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @( 6..8;8,9,8;8..6 ) | % { $SP[$_] } 
+
+             $Y = @( "<TabItem $HD = 'Console'>" , "<$G $MA = '5'>" , "<$GB $HD = 'Embedded Console'>" , "<ScrollViewer VerticalScrollBarVisibility = 'Visible' $MA = '5'>" , 
+             "<$TBL $Q = 'ConsoleOutput' TextTrimming = 'CharacterEllipsis' Foreground = 'White' $BG = 'DarkBlue' FontFamily = 'Lucida Console'/>" , "</ScrollViewer>" , 
+             "</$GB>" , "</$G>" , "</TabItem>" ) 
+
+            $XML[7] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[__ Diagnostics Panel __]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @( 6..8;9..4 ) | % { $SP[$_] }
+
+             $Y = @( "<TabItem Header = 'Diagnostics'>" , "<$G $BG = '#FFE5E5E5'>" , "<ScrollViewer VerticalScrollBarVisibility = 'Visible'>" , 
+             "<TextBlock Name = 'DiagnosticOutput' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>" , "</ScrollViewer>" , 
+             "</$G>" , "</TabItem>" , "</TabControl>" , "</$G>" )
+
+             $XML[8] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[_______ Framing _______]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+             $X = @( 4..6;6,6,6,5,5,6;@(5)*4;6..2) | % { $SP[$_] }
+
+             $Y = @( "<$G $GR = '2'>" , "<$GCD>" ; "" , 0.5 , 0.5 , "" | % { "<$CD $W = '$_*'/>" } ; "</$GCD>" , "<$GB $HD = 'Service Config' $MA = '5' $GC = '0'>" ; 
+             "<$TBL $Q ='ServiceLabel' TextAlignment = 'Center' $MA = '5'/>" , "</$GB>" ; ( 1 , "Start" ) , ( 2 , "Cancel" ) | % { 
+             "<$BU    $GC = '$( $_[0] )' $Q =  '$( $_[1] )' $CO  = '$( $_[1] )'  $H = '20' $MA = '5'/>" } ; "<$GB $HD = 'Script/Module' Margin = '5' $GC = '3'>" , 
+             "<$TBL $Q = 'ScriptLabel' TextAlignment = 'Center' $MA = '5' />" , "</$GB>" , "</$G>" , "</$G>" , "</Window>" )
+
+             $XML[9] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+        }
         
         $Item   = ForEach ( $i in 0..( $XML.Count - 1 ) ) { 0..( $XML[$I].Count - 1 ) | % { $XML[$I][$_] } } 
         $Return = ""
@@ -4110,12 +4362,13 @@
         If ( $DSCRoot        ) { Write-Theme -Action "Loaded [+]" "Desired State Controller Root Install" }
         If ( $DCFound        ) { Write-Theme -Action "Loaded [+]" "Domain Controller Found" }
         If ( $ProvisionDSC   ) { Write-Theme -Action "Loaded [+]" "Provision Desired State Controller Server" }
+        If ( $Service        ) { Write-Theme -Action "Loaded [+]" "ViperBomb Service Configuration Tool" }
         
         Return $Return                                                           
                                                                                       #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                              __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\____________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯       ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Show-Message # Returns a messagebox ________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
@@ -6513,20 +6766,24 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        # Based on MadBomb122/Black Viper's Service Configurations in 'Use-ViperBombServices'
-
         [ CmdLetBinding () ] Param (
 
             [ Parameter ( ParameterSetName = "Theme" ) ] [ Switch ] $Display )
 
-        $Return                  = GCIM Win32_Service | % { [ PSCustomObject ]@{ 
+        $CCS                     = "HKLM:\SYSTEM\CurrentControlSet\Services"
+
+        $Return                  = GCIM Win32_Service | % {
+
+            [ PSCustomObject ]@{ 
             
+                Name             = $_.Name 
                 Status           = $_.State
                 StartType        = $_.StartMode
-                Name             = $_.Name 
+                DelayedAutoStart = GP "$CCS\$( $_.Name )" | % { $_.DelayedAutoStart }
                 DisplayName      = $_.DisplayName
                 PathName         = $_.PathName
                 Description      = $_.Description
+            
             }
         }
 
@@ -6546,21 +6803,107 @@
         
                 $Splat           = @{ 
 
-                    Items        = 0..4 | % {       $Names[$_] }
-                    Values       = 0..4 | % { $X.$( $Names[$_] )    }
+                    Items        = 0..4 | % {       $Names[$_]   }
+                    Values       = 0..4 | % { $X.$( $Names[$_] ) }
 
                 }
 
                 $SubTable[$I]    = New-SubTable @Splat
             }
 
-            $Table               = New-Table -Depth $Range.Count -Title "Current Services" -ID $Section -Table $SubTable
+            $Table = New-Table -Depth $Range.Count -Title "Current Services" -ID $Section -Table $SubTable
     
             Write-Theme -Table $Table -Prompt "Press Enter to Continue"
         }
 
-        Return $Return   
-                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        $Return
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Resolve-Windows # CIM / Edition Collection Table __________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding ( ) ] Param (
+
+            [ Parameter ( ParameterSetName =  "System" ) ] [ Switch ] $System  ,
+            [ Parameter ( ParameterSetName =      "OS" ) ] [ Switch ] $MSInfo  ,
+            [ Parameter ( ParameterSetName = "Edition" ) ] [ Switch ] $Edition ,
+            [ Parameter ( ParameterSetName =     "SKU" ) ] [ Switch ] $SKU     ,
+            [ Parameter ( ParameterSetName =    "Type" ) ] [ Switch ] $Type    )
+
+        $OS , $CS           = "Operating" , "Computer" | % { GCIM Win32_$_`System }
+
+        If ( $System )
+        {
+            $CS
+        }
+
+        If ( $MSInfo )
+        {
+            $OS
+        }
+
+        If ( $Edition )
+        {   
+            
+            $X = ( [ PSCustomObject ]@{ 
+            
+                    1507 = "1507,10240,Threshold 1,Release To Manufacturing"
+                    1511 = "1511,10586,Threshold 2,November Update"
+                    1607 = "1607,14393,Redstone 1,Anniversary Update"
+                    1703 = "1703,15063,Redstone 2,Creators Update"
+                    1709 = "1703,16299,Redstone 3,Fall Creators Update"
+                    1803 = "1803,17134,Redstone 4,April 2018 Update"
+                    1809 = "1809,17763,Redstone 5,October 2018 Update"
+                    1903 = "1903,18362,19H1,May 2019 Update"
+                    1909 = "1909,18363,19H2,November 2019 Update"
+                    2004 = "2004,19000,20H1,Unreleased" 
+            
+                } ).( GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID } ).Split( ',' )
+
+            [ PSCustomObject ]@{
+
+                Version  = $X[0]
+                Build    = 10 , 0 , $X[1] -join '.'
+                CodeName = $X[2]
+                Name     = $X[3]
+            }
+        }
+
+        If ( $SKU )
+        {
+            $X = ( "Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter # !,Small Business # !," , 
+            "$ # !,Starter !,Datacenter # Core !,Standard # Core !,$ # Core !,$ # IA64 !,Business N !,Web # !,Cluster # !,Home # !,Storage Express # !," , 
+            "Storage Standard # !,Storage Workgroup # !,Storage $ # !,# For Small Business !,Small Business # Premium !,TBD,@ $,@ Ultimate,Web # Core," ,
+            "-,-,-,# Foundation,@ Home #,-,@ # Standard No Hyper-V Full,@ # Datacenter No Hyper-V Full,@ # $ No Hyper-V Full,@ # Datacenter No Hyper-V Core," ,
+            "@ # Standard No Hyper-V Core,@ # $ No Hyper-V Core,Microsoft Hyper-V #,Storage # Express Core,Storage # Standard Core,# Workgroup Core," , 
+            "Storage # $ Core,Starter N,Professional,Professional N,@ Small Business # 2011 Essentials,-,-,-,-,-,-,-,-,-,-,-,-,Small Business # Premium Core," , 
+            "@ # Hyper Core V,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,@ Thin PC,-,@ Embedded Industry,-,-,-,-,-,-,-,@ RT,-,-,Single Language N,@ Home,-," , 
+            "@ Professional with Media Center,@ Mobile,-,-,-,-,-,-,-,-,-,-,-,-,-,@ Embedded Handheld,-,-,-,-,@ IoT Core" -join '' | % { 
+            
+            $_.Replace( "!" , "Edition" ).Replace( "@" , "Windows" ).Replace( "#" , "Server" ).Replace( "$" , "Enterprise" ) } | % { $_.Split( ',' ) } )
+
+            $OS.OperatingSystemSKU | % { 
+            
+                [ PSCustomObject ]@{
+
+                    ID  = $_
+                    SKU = $X[$_]
+                }
+            }
+        }
+
+        If ( $Type )
+        {
+            $CS.PCSystemType | % { 
+                
+                [ PSCustomObject ]@{
+
+                    ID      = $_
+                    Chassis = @( "" , "Desktop" , "Mobile/Laptop" , "Workstation" , "Server" , "Server" , "Appliance" , "Server" , "Maximum" )[ $_ ]
+                }
+            }
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -6616,6 +6959,65 @@
                 }
             }                                                                        #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+     Function Register-PDCTimeSource # What Free Actually Means _________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( Position = 0 , Mandatory = $True ) ] [ String [] ] $Servers        ,
+            [ Parameter ( Position = 1 ) ]                     [    Int    ] $Phase   = 3600 )
+
+        $Time = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time"
+
+        ( "Parameters"              , "Type"                  ,    "NTP" ) ,
+        ( "Config"                  , "AnnounceFlags"         ,        5 ) ,
+        ( "TimeProviders\NTPServer" , "Enabled"               ,        1 ) ,
+        ( "Parameters"              , "NTPServer"             , $Servers ) ,
+        ( "Config"                  , "MaxPosPhaseCorrection" ,     3600 ) | % {
+
+            $Splat    = @{ 
+            
+                Path  = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\$( $_[0] )"
+                Name  = $_[1]
+                Value = $_[2]
+            }
+
+            SP @Splat
+
+            Write-Theme -Action   $_[1] $_[2] 
+            Write-Theme -Function $Splat.Path
+        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+     Function Get-DiskInfo # Report consumable disk info ________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param ( 
+        
+            [ Parameter ( ValueFromPipeline ) ] [ String ] $ComputerName = $env:COMPUTERNAME )
+ 
+        GWMI Win32_LogicalDisk -ComputerName $ComputerName | % {
+
+            $Size = ( $_.Size / 1GB )
+            $Free = ( $_.FreeSpace / 1GB ) | % { $_ , ( ( $_ * 100 ) / $Size ) }
+            $Used = ( ( $_.Size - $_.FreeSpace ) / 1GB ) | % { $_ , ( ( $_ * 100 ) / $Size ) }
+
+            [ PSCustomObject ]@{ 
+    
+                ComputerName = $ComputerName
+                DriveLetter  = $_.DeviceID
+                DriveLabel   = $_.VolumeName | % { If ( !$_ ) { "N/A" } Else { $_ } }
+                Total        = "{0:n2}GB" -f $Size
+                Free         = "{0:n2}GB ({1:n2}%)" -f $Free
+                Used         = "{0:n2}GB ({1:n2}%)" -f $Used
+            }
+        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+        Write-Theme -Free # What Free Actually Means ____________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+     #¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯                                                __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
      Function Register-PDCTimeSource # What Free Actually Means _________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
