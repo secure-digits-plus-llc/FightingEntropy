@@ -252,6 +252,8 @@
 
         If ( $Services )
         {
+            $Config                          = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+
             [ PSCustomObject ]@{
 
                 Xbox     = 'XblAuthManager' , 'XblGameSave' , 'XboxNetApiSvc' , 'XboxGipSvc' , 'xbgm'
@@ -261,7 +263,7 @@
                 DataGrid = 'Index' , 'Scoped' , 'Profile' , 'Name' , 'Status' , 'StartType' , 'DelayedAutoStart' , 'DisplayName' , 'PathName' , 'Description'
 
                 Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , "PrintWorkflowUserSvc" , 
-                              "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { "$_`_?????" } ; 'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
+                              "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { "$_`_$Config" } ; 'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
                               'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 
                               'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
 	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' ) | Sort
@@ -277,6 +279,8 @@
             [ Parameter ( Mandatory , ParameterSetName =  'Main' ) ][ Switch ] $Main  ,
             [ Parameter ( Mandatory , ParameterSetName = 'Alert' ) ][ Switch ] $Alert )
 
+    If ( $Main )
+    {
         $XAML = Get-XAML -Service 
 
         $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
@@ -606,7 +610,7 @@
 
         Write-Theme -Action "Collecting [+]" "[ Service Configuration ]: Current Profile"
 
-        $Skipped                         = Resolve-ScriptVars  | % { $_.Service.Skip } | % { $_.Replace( '?????' , $Config ) } | Sort
+        $Skipped                         = Resolve-ScriptVars  | % { $_.Service.Skip }
         $Current                         = Get-CurrentServices | Sort Name
 
         Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
@@ -709,7 +713,10 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Start-DiagnosticCheck #____________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( ) ] [ PSCustomObject ] $Model )
+
         $Section              = @( "Script" , "System" | % { "$_ Information" } ; "Initialization" ; "Display" , "Miscellaneous" , 
                                    "Development" , "Bypass/Force" , "Logging" , "Backup" | % { "$_ Settings" } ; "Version Control" ) | % { "[ $_ ]" }
 
@@ -751,7 +758,7 @@
 
         #---------------------------------------------#
 
-        $Control              = Resolve-Script -Control
+        $Control              = $( $Model | % { If ( $_ -ne $Null ) { $_ } Else { Resolve-Script -Control } } )
 
         $Splat                = @{
 
@@ -842,6 +849,53 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Filter-Services #__________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( Position = 0 , Mandatory , ValueFromPipeline ) ] [ PSCustomObject ] $Config   ,
+            [ ValidateSet ('10H:D+','10H:D-','10P:D+','10P:D-','DT:S+','DT:S-','DT:T+','DT:T-','LT:S+','LT:S-')]
+            [ Parameter ( Position = 1 , Mandatory , ValueFromPipeline ) ] [         String ] $Type     ,
+            [ Parameter ( Position = 2 , Mandatory , ValueFromPipeline ) ] [ PSCustomObject ] $Model  )
+
+        $ServiceState = $Config.$Type
+
+        $Return       = [ PSCustomObject ]@{
+        
+            Profile   = $Type
+            Active    = @( )
+            Inactive  = @( )
+            Skipped   = @( )
+            Xbox      = @( )
+        }
+        
+        $Return | % { 
+
+            If ( $Control.DisplayActive -eq 1 ) 
+            { 
+                $_.Active    = $ServiceState | ? { $_.Status -eq "Running"    }
+            }
+
+            If ( $Control.DisplayInactive -eq 1 )
+            { 
+                $_.Inactive  = $ServiceState | ? { $_.Status -eq "Running"    }
+            }
+
+            If ( $Control.DisplaySkipped -eq 1 )
+            {
+                $_.Skipped   = $ServiceState | ? { $_.Status -eq "-"          }
+            }
+
+            If ( $Control.MiscXbox -eq 1 )
+            {
+                $_.Xbox      = @( $ServiceState | ? { $_.Name -in ( Resolve-Script -Services | % { $_.Xbox } ) } ) 
+            }
+        }
+
+        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         
@@ -915,59 +969,6 @@
         $Config                                    = Get-ServiceProfile
         $Object                                    = $Config | GM | ? MemberType -eq NoteProperty | % { $_.Name }
         $Filter                                    = Resolve-Script -Services
-
-        #$GUI.MiscSimulate   [ What If ]
-        # Produce a list of services and corresponding changes
-        
-        #$GUI.MiscChange [ Change the service state ]
-        # If running, and non compliant, change the state
-
-        #$GUI.MiscStopDisabled 
-        # If a disabled service is running, stop them?
-
-        #$GUI.DevelDiagErrors
-
-        #$GUI.DevelLog
-
-        #$GUI.DevelConsole
-        #$GUI.DevelDiagReport
-
-        #$GUI.BypassBuild
-        #$GUI.BypassEdition
-        #$GUI.BypassLaptop
-
-        $Service                                   = 0..9 | % { 
-        
-            $X = $Object[$_]
-
-            [ PSCustomObject ]@{ 
-                
-                Profile  = $X
-
-                #$GUI.DisplayInactive
-                Active   = $Config.$X | ? { $_.Status -eq "Running"    }
-
-                #$GUI.DisplayInactive
-                Inactive = $Config.$X | ? { $_.Status -eq "Stopped"    }
-
-                #$GUI.DisplaySkipped
-                Skipped  = $Config.$X | ? { $_.Status -eq "-"          }
-
-                #$GUI.MiscXbox
-                Xbox     = $Config.$X | ? { $_.Name   -in $Filter.Xbox }
-                    
-            }
-        }
-
-        
-        
-        
-        
-
-
-
-        $ServiceProfile                            = $Service | % { $_.Config.$( $_.Object ) }
-
 
         Return-ViperBombGUI -Main                  | % {
         
@@ -1372,16 +1373,71 @@
             $Dialog.Dispose()
         })
 
-        $GUI.DisplayActive.Add_Click(
+        If ( $GUI.DisplayActive.IsChecked -eq $False )
         {
-            If ( $GUI.DisplayActive.IsChecked )
-            {
-                
-        #$GUI.DisplayInactive
-        #$GUI.DisplaySkipped
+            $GUI.DisplayActive.Add_Click(
+            { 
+                $Control.DisplayActive = 0 
+            })
+        }
+            
+        If ( $GUI.DisplayActive.IsChecked -eq $True  )
+        {
+            $GUI.DisplayActive.Add_Click(
+            { 
+                $Control.DisplayActive = 1 
+            })
+        }
+
+        If ( $GUI.DisplayInactive.IsChecked -eq $False )
+        {
+            $GUI.DisplayInactive.Add_Click(
+            { 
+                $Control.DisplayInactive = 0 
+            })
+        }
+            
+        If ( $GUI.DisplayInactive.IsChecked -eq $True  )
+        {
+            $GUI.DisplayInactive.Add_Click(
+            { 
+                $Control.DisplayInactive = 1 
+            })
+        }
+
+        If ( $GUI.DisplaySkipped.IsChecked -eq $False )
+        {
+            $GUI.DisplaySkipped.Add_Click(
+            { 
+                $Control.DisplaySkipped = 0 
+            })
+        }
+            
+        If ( $GUI.DisplaySkipped.IsChecked -eq $True  )
+        {
+            $GUI.DisplaySkipped.Add_Click(
+            { 
+                $Control.DisplaySkipped = 1 
+            })
+        }
+
+        If ( $GUI.MiscXbox.IsChecked -eq $False )
+        {
+            $GUI.MiscXbox.Add_Click(
+            { 
+                $Control.MiscXbox = 0 
+            })
+        }
+            
+        If ( $GUI.MiscXbox.IsChecked -eq $True  )
+        {
+            $GUI.MiscXbox.Add_Click(
+            { 
+                $Control.MiscXbox = 1 
+            })
+        }
 
         #$GUI.MiscSimulate
-        #$GUI.MiscXbox
         #$GUI.MiscChange
         #$GUI.MiscStopDisabled
 
@@ -1393,6 +1449,26 @@
         #$GUI.BypassBuild
         #$GUI.BypassEdition
         #$GUI.BypassLaptop
+
+        #$GUI.BypassBuild
+        #$GUI.BypassEdition
+        #$GUI.BypassLaptop
+
+        #$GUI.MiscSimulate   [ What If ]
+        # Produce a list of services and corresponding changes
+        
+        #$GUI.MiscChange [ Change the service state ]
+        # If running, and non compliant, change the state
+
+        #$GUI.MiscStopDisabled 
+        # If a disabled service is running, stop them?
+
+        #$GUI.DevelDiagErrors
+
+        #$GUI.DevelLog
+
+        #$GUI.DevelConsole
+        #$GUI.DevelDiagReport
         
         # ------------------------ #
 
