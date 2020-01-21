@@ -30,12 +30,19 @@ Guess what Azure and AWS feature collectively, it's called "An Operating System 
 
 # List of Non-Operating Systems (and reasons)
 Fushia: It's still vaporware...
+
 Android: It's a loosely strung together background process that pretends like it isn't ChromeOS
+
 ChromeOS: It's a browser... with some slight caching capabilities and COM properties... not much else.
+
 iOS: A lot better than Android, but still has plenty of security vulnerabilities that slip through the toughest vetting...
+
 MacOS: It would be cooler if you stopped trying to make iOS and MacOS the same thing...
+
 Linux: We're still trying to get WINE/Steam to 100% work... Until then, most people will use Windows.
+
 RHEL / CentOS: This is the best offering of Linux there is IMO... Worthy of being a fully qualified [ Operating System ] ( behind Windows of course... )
+
 Ubuntu: Yes, it's gotten more support over the years, but, it still happens to 100% be Linux and 100% not RHEL/CentOS, so that should tell you something.
 
 # There can be only one (Operating System/Highlander)
