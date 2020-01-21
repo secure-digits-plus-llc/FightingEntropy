@@ -3467,7 +3467,8 @@
             [ Parameter ( ParameterSetName =         "DCFound" ) ][ Switch ] $DCFound        ,
             [ Parameter ( ParameterSetName =         "DSCRoot" ) ][ Switch ] $DSCRoot        ,
             [ Parameter ( ParameterSetName =    "ProvisionDSC" ) ][ Switch ] $ProvisionDSC   ,
-            [ Parameter ( ParameterSetName =         "Service" ) ][ Switch ] $Service        )
+            [ Parameter ( ParameterSetName =         "Service" ) ][ Switch ] $Service        ,       
+            [ Parameter ( ) ]                                     [ Switch ] $Testing        )
 
             $XML                        = @{ }
             $Schema                     = "http://schemas.microsoft.com/winfx/2006/xaml"
@@ -4147,7 +4148,7 @@
                     "<$SE $PR = 'SnapsToDevicePixels' " , "Value    = 'True'/>" , "<$SE $PR = '$MA'" , "Value    = '0,0,0,0'/>" , "<$SE $PR = 'Template'>" , 
                     "<$SE.Value>" , "<ControlTemplate TargetType     = '{x:Type Separator}'>" , "<Border $H        = '24' " , "SnapsToDevicePixels = 'True' " , 
                     "$BG          = '#FF4D4D4D'" , "$BO`Brush         = 'Azure'" , "$BO`Thickness     = '1,1,1,1'" , "CornerRadius        = '5,5,5,5'/>" , 
-                    "</ControlTemplate>" , "</$SE.Value>" , "</Setter>" , "</Style>" , "<Style TargetType    = '{x:Type ToolTip}'>" , "<$SE $PR = '$BG'" , 
+                    "</ControlTemplate>" , "</$SE.Value>" , "</Setter>" , "</Style>" , "<Style  TargetType    = '{x:Type ToolTip}'>" , "<$SE $PR = '$BG'" , 
                     "Value    = '#000000'/>" , "</Style>" , "</Window.Resources>" , "<Window.Effect>" , "<DropShadowEffect/>" , "</Window.Effect>" )
 
             $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
@@ -4169,13 +4170,7 @@
 
              $Y = @( "<$MN $GR                   = '0'" , "  IsMainMenu         = 'True'>" , "<$MNI     $HD         = 'Configuration'>" ) ;
 
-                $Slot = [ PSCustomObject ]@{ 
-                
-                    Home    = "Default" 
-                    Pro     = "Default" 
-                    Desktop = "Safe" , "Tweaked"
-                    Laptop  = "Safe" 
-                }
+             $Slot = [ PSCustomObject ]@{ Home = "Default" ; Pro = "Default" ; Desktop = "Safe" , "Tweaked" ; Laptop  = "Safe" }
 
              $Y += "Home" , "Pro" , "Desktop" , "Laptop" | % { 
 
@@ -4189,7 +4184,6 @@
                             "  $HD     = '$J $K`imum'/>"
                         }
                     }
-
                     "</$MNI>" ;
                 }
 
@@ -4268,7 +4262,7 @@
              #//¯¯\\__[____ Preferences ______]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-            $X = @(6..9;9,8,8,9;@(10)*3;9;9..11;11,10;10..13;@(13,13,12,12,13)*2;11,10;10..12;@(13)*3;@(@(12)*4;11..9;9..11;11,10;10..12;12..10;10..12;
+            $X = @(6..9;9,8,8,9;@(10)*3;9;9..11;11,10,10,11;@(12,13,13,13,12)*2;12,12,11,10;10..12;@(13)*3;@(@(12)*4;11..9;9..11;11,10;10..12;12..10;10..12;
             @(13)*4;12)*2;@(12)*4;11..8;8..10;10;@(9;9..12;12,12,11,11,12,12;@(11)*7;10)*2;9..6) | % { $SP[$_] }
 
             $Y = @( "<TabItem $HD = 'Preferences'>" , "<$G>" , "<$GRD>" ; 1.25 , "" | % { "<$RD $H = '$_*'/>" } ; "</$GRD>" , "<$G $GR = '0'>" , "<$GCD>" ; 
@@ -4291,22 +4285,25 @@
             "</$GRD>" ; ( 0 , "DiagErrors" , "Diagnostic Output [ On Error ]" ) , ( 1 , "Log" , "Enable Development Logging" ) , ( 2 , "Console" , "Enable Console" ) , 
             ( 3 , "DiagReport" , "Enable Diagnostic" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Devel$( $_[1] )'  $CO = '$( $_[2] )' />" } ; "</$G>" , "</$GB>" , 
             "</$G>" , "</$G>" , "<$G $GR = '1'>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , 
-            "<$GB $GR = '0' $HD = 'Logging: Create logs for all changes made via this utility' $MA = '5'>" , "<$G>" , "<$GCD>" ; 75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; 
-            "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; ( 0 , "Service" ) , ( 1 , "Script" ) | % { 
+            "<$GB $GR = '0' $HD = 'Logging: Create logs for all changes made via this utility' $MA = '5'>" , "<$G>" , "<$GCD>" ; 
+            
+            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 1.5 , 2.0 | % { "<$RD $H = '$_*' />" } ; "</$GRD>" ; 
+            
+            ( 0 , "Service" ) , ( 1 , "Script" ) | % { 
 
                 "<$LA    $GR = '$( $_[0] )' $GC = '0' $CO = '$( $_[1] ):' $( $VAL[1] ) $( $HAL[2] )/>" , 
-                "<$BU   $GR = '0' $GC = '1' $MA  = '5' $Q = 'Logging$( $_[1] )Browse' $CO = 'Browse'  />" , 
-                "<$TB  $GR = '0' $GC = '2' $MA  = '5' $Q = 'Logging$( $_[1] )File' IsEnabled = 'False' />" } ; 
+                "<$BU   $GR = '$( $_[0] )' $GC = '1' $MA  = '5' $Q = 'Logging$( $_[1] )Browse' $CO = 'Browse'  />" , 
+                "<$TB  $GR = '$( $_[0] )' $GC = '2' $MA  = '5' $Q = 'Logging$( $_[1] )File' IsEnabled = 'False' />" } ; 
                 
             "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Backup: Save your current Service Configuration' $MA = '5'>" , "<$G>" , "<$GCD>" ; 
 
-            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
+            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 1.5 , 2.0 | % { "<$RD $H = '$_*' />" } ; "</$GRD>" ; 
             
             ( 0 , "Registry" ) , ( 1 , "Template" ) | % {
 
                 "<$LA    $GR = '$( $_[0] )' $GC = '0' $CO = '$( $_[1] ):' $( $VAL[1] ) $( $HAL[2] )/>" , 
-                "<$BU   $GR = '0' $GC = '1' $MA  = '5' $Q = 'Backup$( $_[1] )Browse' $CO   = 'Browse'  />" , 
-                "<$TB  $GR = '0' $GC = '2' $MA  = '5' $Q = 'Backup$( $_[1] )File'   IsEnabled = 'False'   />" } ;
+                "<$BU   $GR = '$( $_[0] )' $GC = '1' $MA  = '5' $Q = 'Backup$( $_[1] )Browse' $CO   = 'Browse'  />" , 
+                "<$TB  $GR = '$( $_[0] )' $GC = '2' $MA  = '5' $Q = 'Backup$( $_[1] )File'   IsEnabled = 'False'   />" } ;
 
             "</$G>" , "</$GB>" , "</$G>" , "</$G>" , "</TabItem>" )
 
@@ -4350,21 +4347,29 @@
              $XML[9] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
         }
         
-        $Item   = ForEach ( $i in 0..( $XML.Count - 1 ) ) { 0..( $XML[$I].Count - 1 ) | % { $XML[$I][$_] } } 
-        $Return = ""
+        If ( $Testing )
+        {
+            $XML
+        }
 
-        0..( $Item.Count - 1 ) | % { $Return += "$( $Item[$_] )`n" } ; 
+        Else 
+        {
+            $Item   = ForEach ( $i in 0..( $XML.Count - 1 ) ) { 0..( $XML[$I].Count - 1 ) | % { $XML[$I][$_] } } 
+            $Return = ""
+            0..( $Item.Count - 1 ) | % { $Return += "$( $Item[$_] )`n" }
 
-        If ( $Certificate    ) { Write-Theme -Action "Loaded [+]" "Certificate Panel" }
-        If ( $Login          ) { Write-Theme -Action "Loaded [+]" "Login Panel" }
-        If ( $NewAccount     ) { Write-Theme -Action "Loaded [+]" "New Account Panel" }
-        If ( $HybridDSCPromo ) { Write-Theme -Action "Loaded [+]" "Hybrid-DSC Promo Panel" }
-        If ( $DSCRoot        ) { Write-Theme -Action "Loaded [+]" "Desired State Controller Root Install" }
-        If ( $DCFound        ) { Write-Theme -Action "Loaded [+]" "Domain Controller Found" }
-        If ( $ProvisionDSC   ) { Write-Theme -Action "Loaded [+]" "Provision Desired State Controller Server" }
-        If ( $Service        ) { Write-Theme -Action "Loaded [+]" "ViperBomb Service Configuration Tool" }
+            If ( $Certificate    ) { Write-Theme -Action "Loaded [+]" "Certificate Panel" }
+            If ( $Login          ) { Write-Theme -Action "Loaded [+]" "Login Panel" }
+            If ( $NewAccount     ) { Write-Theme -Action "Loaded [+]" "New Account Panel" }
+            If ( $HybridDSCPromo ) { Write-Theme -Action "Loaded [+]" "Hybrid-DSC Promo Panel" }
+            If ( $DSCRoot        ) { Write-Theme -Action "Loaded [+]" "Desired State Controller Root Install" }
+            If ( $DCFound        ) { Write-Theme -Action "Loaded [+]" "Domain Controller Found" }
+            If ( $ProvisionDSC   ) { Write-Theme -Action "Loaded [+]" "Provision Desired State Controller Server" }
+            If ( $Service        ) { Write-Theme -Action "Loaded [+]" "ViperBomb Service Configuration Tool" }
         
-        Return $Return                                                           
+            $Return 
+        
+        }                                                          
                                                                                       #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                              __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\____________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
