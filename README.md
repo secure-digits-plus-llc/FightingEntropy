@@ -1,14 +1,14 @@
+# Summary
+Using a combination of tools that are authored within this module, this project includes a command line interface as well as many WPF/XAML based GUI elements that are all 100% strictly within this module.
+
 # YouTube Channel which features this module:
 https://www.youtube.com/channel/UCaEsk04O6rcJmkLlSctGreQ?view_as=subscriber
 
 # Immediate Info, this project is forked over from my personal repository @ https://github.com/mcc85s/PSD-Remaster
-I haven't been able to make changes to Mr. Niehaus's old script library quite yet, I still have plenty of other things to complete and such in order to '*really* build this damn thing..."
+I haven't been able to make changes to Mr. Niehaus's old script library quite yet. I do have a GUI that can automate the installation of IIS/MDT, as I have the PSD-Master installation in this working. However, being able to activate the ASP.Net proxy host and Active Directory in addition to automating the server installation and deployment, requires more pieces to be built first. GPO Tool will eventually be a part of the ViperBomb Service utility, so that is also being worked on.
 
-Anyway, this shall be my last commit for 2019.
-
-It's been ONE HELL of a year.
-
-- MC
+# Because Readme's can be boring...
+I use a bit of satire in this readme. So don't take it 100% seriously... I feel like my humor flies right over people's heads that don't understand my sense of comic relief. 
 
 # Secure Digits Plus: Fighting Entropy
 Hybrid-DSC is a modification for PowerShell that is targeted to easily automate the distribution of a Secure Windows Operating System/Network topology with all dependencies/prerequisites deployed, configured, and handled appropriately for any given node(s) it generates. It *sort of* works in the same way that a quine would..? Where instead of reproducing the source code, it's just reproducing the code necessary to allow a child item to be spawned with deployment AND configuration instructions that can be executed, expanded to maturity, and then reintegrated back to the original hive cluster. (Similar to Chef, SCCM, etc.)
@@ -28,25 +28,22 @@ Microsoft. Duh. When it comes to Google/Linux/Kubernetes/Python, "Being written 
 
 Guess what Azure and AWS feature collectively, it's called "An Operating System that 1) works all the time, 2) doesn't need to be connected to the internet, 3) takes up the same amount of disk space and memory when you have engineers that know what the hell they're doing 4) stays up to date when it is connected to the internet in the same exact manner as a ChromeBook.... and 5) runs circles around anything that *tries to call itself an operating system*... 
 
-For instance,
+# List of Non-Operating Systems (and reasons)
+Fushia: It's still vaporware...
+Android: It's a loosely strung together background process that pretends like it isn't ChromeOS
+ChromeOS: It's a browser... with some slight caching capabilities and COM properties... not much else.
+iOS: A lot better than Android, but still has plenty of security vulnerabilities that slip through the toughest vetting...
+MacOS: It would be cooler if you stopped trying to make iOS and MacOS the same thing...
+Linux: We're still trying to get WINE/Steam to 100% work... Until then, most people will use Windows.
+RHEL / CentOS: This is the best offering of Linux there is IMO... Worthy of being a fully qualified [ Operating System ] ( behind Windows of course... )
+Ubuntu: Yes, it's gotten more support over the years, but, it still happens to 100% be Linux and 100% not RHEL/CentOS, so that should tell you something.
 
-Fushia [ VaporWare ]
+# There can be only one (Operating System/Highlander)
+In the business, they refer to all of these things as, "continually pretending like anyone is making a massive effort to stop making these many many failed attempts to beat the thing that the best software engineers out there MADE already", which, if you didn't know, it happens to be called [ Microsoft Windows ]. Mistakenly, every company in existence that ever thought they could make something that is better than Windows in 'some' way..? 
 
-Android [ Badly made ]
+Well, they fail [ every time ]. 
 
-ChromeOS [ Also badly made ]
-
-iOS [ Better than Android, but still, also badly made ]
-
-MacOS [ Best Windows Rip off / It would be cooler if you stopped trying to make iOS and MacOS the same thing... ]
-
-Linux [ We're still trying to get WINE/Steam to 100% work... ]
-
-RHEL / CentOS [ About the best offering Linux has... Worthy of being #2 ]
-
-Ubuntu [ Please like me more... ]... 
-
-In the business, they refer to these things as, "continually pretending like anyone is making a massive effort to stop making these many many failed attempts to beat the thing that 'the best software engineers out there MADE called Microsoft Windows, and mistakenly refer to every attempt as 'why the hell is it even called an operating system if it doesn't work...'"
+However, I like to refer to every attempt that they make as... "Why the hell is it even called an [ Operating System ] if it doesn't work..? You know? They call it an [ Operating System ] because it's supposed to be a system that operates... and if it doesn't work, then surely it falls under the title of [ Non-Operating System ]" 
 
 For your information, that "100% thing that works, that was written by the best software engineers out there? Well, it's called 'The one and only Microsoft Windows Operating System'. It features this thing called "The most secure god damn network environment you could ever hope to build or secure, called Active Directory." Ever heard of these things? Well... now you have. You can't call Google Drive anywhere near as top notch as Active Directory, especially when 'Google uses Active Directory'. 
 
@@ -64,9 +61,9 @@ Go ahead and buy a ChromeBook and don't ever connect it to the internet... I gua
 
 It's just too bad that I can't bring this smashed up excuse for a laptop back to the idiots that sold me this garbage... Because, now... I wish I just went with a *legit* computer... one that happens to have the one and only "Microsoft Windows", the only fully qualified 'operating system' that exists... then I wouldn't be sitting here looking at this garbage that I bought into which does an amazing job of 'accessing the internet' as long as I'm near an access point. But I really wish I paid more attention to the fact that it also does an amazing job of '*nothing*, when it's not connected to the internet...'"
 
-This is the story of Google relentlessly failing to realize that they will never be '1st place' material at anything...
+This is the story of Google relentlessly failing to realize that they will never be '1st place' material at anything... unless of course... you continually exclude Microsoft and THEN, list off who's in first place. But, Oracle is often 1st place... in terms of who's usually in 2nd place at software engineering. 
 
-Same with Oracle and JavaScript. They're some of the most top notch 2nd place material out there Google...
+Google: Sometimes 2nd place.
 
 # Virtual or Physical
 This is targeted to be used in live and virtual environments, together, or split, or what have you. It will absorb the updates into the images (via slipstreaming), and enable a way to bypass having to use disk cleanup since the images will already feature the latest updates and instructions... ( update engine ) whereby bypassing a need to use sysprep or unattend.xml file generation.
