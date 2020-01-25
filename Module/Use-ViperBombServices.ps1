@@ -60,9 +60,12 @@
             [ Parameter ( ParameterSetName =    "Control" ) ] [ Switch ] $Control   ,
             [ Parameter ( ParameterSetName =  "Copyright" ) ] [ Switch ] $Copyright ,
             [ Parameter ( ParameterSetName =       "Help" ) ] [ Switch ] $Help      ,
-            [ Parameter ( ParameterSetName =   "Services" ) ] [ Switch ] $Services  )
+            [ Parameter ( ParameterSetName =   "Services" ) ] [ Switch ] $Services  ,
+            [ Parameter ( ParameterSetName =      "Names" ) ] [ Switch ] $Names     ,
+            [ Parameter ( ParameterSetName =      "Types" ) ] [ Switch ] $Types     ,
+            [ Parameter ( ParameterSetName =     "Config" ) ] [ Switch ] $Config    )
 
-        $Default = [ PSCustomObject ]@{
+        $Default                 = [ PSCustomObject ]@{
 
             PassedArgs           = If ( ! $Args ) { "N/A" } Else { $Args }
             TermsOfService       = 0
@@ -89,15 +92,20 @@
 
         }
 
+        $QMark                   = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+
         If ( $Version )
         {
-            [ PSCustomObject ]@{
+            $Default | % { 
+
+                [ PSCustomObject ]@{
     
-                Version        = "ViperBomb v7.0.0"
-                Date           = "2020-01-07"
-                Script         = $Default.ScriptConfig
-                Service        = $Default.ServiceConfig
-                Release        = "Testing"
+                    Version        = "ViperBomb v7.0.0"
+                    Date           = "2020-01-23"
+                    Script         = $_.ScriptConfig
+                    Service        = $_.ServiceConfig
+                    Release        = "Development"
+                }
             }
         }
 
@@ -252,8 +260,6 @@
 
         If ( $Services )
         {
-            $Config                          = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-
             [ PSCustomObject ]@{
 
                 Xbox     = 'XblAuthManager' , 'XblGameSave' , 'XboxNetApiSvc' , 'XboxGipSvc' , 'xbgm'
@@ -262,452 +268,284 @@
 
                 DataGrid = 'Index' , 'Scoped' , 'Profile' , 'Name' , 'Status' , 'StartType' , 'DelayedAutoStart' , 'DisplayName' , 'PathName' , 'Description'
 
-                Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , "PrintWorkflowUserSvc" , 
-                              "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { "$_`_$Config" } ; 'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
+                Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , "PrintWorkflowUserSvc" , "UnistoreSvc" , 
+                              "UserDataSvc" , "WpnUserService" | % { $_ , $QMark -join '_' } ; 
+                              
+                              'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
                               'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 
                               'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
 	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' ) | Sort
             }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Return-ViperBombGUI #______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ Parameter ( Mandatory , ParameterSetName =  'Main' ) ][ Switch ] $Main  ,
-            [ Parameter ( Mandatory , ParameterSetName = 'Alert' ) ][ Switch ] $Alert )
-
-    If ( $Main )
-    {
-        $XAML = Get-XAML -Service 
-
-        $Named = @( @( "Home" , "Pro" | % { "$_`Default" } ; "DesktopSafe" , "DesktopTweaked" , "LaptopSafe" ) | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } ; 
-        @( "Feedback" , "FAQ" , "About" , "Copyright" ; "Donate" , "GitHub"   | % { "MadBomb$_" } ; "BlackViper" , "SecureDigitsPlus" ) | % { "MenuInfo$_" } ; 
-        "Search" , "Select" , "Grid" , "Empty"                                | % { "ServiceDialog$_" } ;
-        "OS" , "Profile" , "Build" , "Chassis"                                | % { "Current$_"       } ;
-        'Active' , 'Inactive' , 'Skipped'                                     | % { "Display$_"       } ; 
-        'Simulate' , 'Xbox' , 'Change' , 'StopDisabled'                       | % { "Misc$_"          } ; 
-        'DiagErrors' , 'Log' , 'Console' , 'DiagReport'                       | % { "Devel$_"         } ; 
-        'Build' , 'Edition' , 'Laptop'                                        | % { "Bypass$_"        } ; 
-        'Service' , 'Script'    | % { "$_`Browse" , "$_`File" }               | % { "Logging$_"       } ; 
-        'Registry' , 'Template' | % { "$_`Browse" , "$_`File" }               | % { "Backup$_"        } ; 
-        'Service' , 'Script'                                                  | % { "$_`Profile" , "$_`Label" } ; 
-        'Start' , 'Cancel' )
-
-        $GUI   = Convert-XAMLToWindow -Xaml $Xaml -NE $Named -Passthru
-    }
-
-    If ( $Alert )
-    {
-        $XAML = @"
-        <Window xmlns        = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-            xmlns:x          = "http://schemas.microsoft.com/winfx/2006/xaml"
-            Title            = "Notice" 
-            Height           = "225" 
-            Width            = "300" 
-            BorderBrush      = "Black" 
-            Background       = "White" 
-            WindowStyle      = "ToolWindow">
-            <Grid Background     = "#FFE5E5E5">
-                <GroupBox Header = "Caution" Margin="5">
-                    <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height = "3*" />
-                    <RowDefinition Height = "25" />
-                    <RowDefinition Height = "50" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row = "0" Margin = "5" Name = "Tbox" TextWrapping = "Wrap"/>
-                <CheckBox  Grid.Row = "1" Margin = "5" Name = "Cbox" Content = "CheckBox" HorizontalAlignment = "Left" />
-                        <Grid Grid.Row = "2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width = "*"/>
-                                <ColumnDefinition Width = "*"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Grid.Column = "0" Margin ="10" Name = "Yes" Content = "Yes"  />
-                            <Button Grid.Column = "1" Margin ="10" Name = "No"  Content = "No"  />
-                        </Grid>
-                    </Grid>
-                </GroupBox>
-            </Grid>
-        </Window>
-"@
-
-        $Named = "Tbox" , "Cbox" , "Yes" , "No"
-
-        $GUI   = Convert-XAMLToWindow -Xaml $Xaml -NE $Named -Passthru
-
-    }
-
-    [ PSCustomObject ]@{ 
-
-        XAML  = $Xaml
-        Named = $Named
-        GUI   = $GUI
-    }                                                                               #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Initialize-ScriptMode # Script Variable Collection ________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ Parameter ( ParameterSetName =     'SEC' ) ] [ Switch ] $SEC     , 
-            [ Parameter ( ParameterSetName =    'Logc' ) ] [ Switch ] $Logc    ,
-
-            # Basic Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =    'ATOS' ) ] [ Switch ] $ATOS    , # Accepts ToS
-            [ Parameter ( ParameterSetName =    'Auto' ) ] [ Switch ] $Auto    , # Implies -atos...Runs the script to be Automated.. Closes on - User Input, Errors, or End of Script
-
-            # Service Configuration Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName = 'Default' ) ] [ Switch ] $Default , # Runs the script with Services to Default Configuration
-            [ Parameter ( ParameterSetName =    'Safe' ) ] [ Switch ] $Safe    , # Runs the script with Services to Black Viper's Safe Configuration
-            [ Parameter ( ParameterSetName = 'Tweaked' ) ] [ Switch ] $Tweaked , # Runs the script with Services to Black Viper's Tweaked Configuration
-
-            #        -lcsc File.csv  Loads Custom Service Configuration, File.csv = Name of your backup/custom file
-
-            # Service Choice Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            [ Parameter ( ParameterSetName =     'All' ) ] [ Switch ] $All     , # Every windows services will change
-            [ Parameter ( ParameterSetName =     'Min' ) ] [ Switch ] $Min     , # Just the services different from the default to safe/tweaked list
-            [ Parameter ( ParameterSetName =     'SXB' ) ] [ Switch ] $SXB     , # Skips changes to all XBox Services
-
-            # Update Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =     'USC' ) ] [ Switch ] $USC     , # Checks for Update to Script file before running
-            [ Parameter ( ParameterSetName =     'USE' ) ] [ Switch ] $USE     , # Checks for Update to Service file before running
-            [ Parameter ( ParameterSetName =     'SIC' ) ] [ Switch ] $SIC     , # Skips Internet Check, if you can't ping GitHub.com for some reason
-
-            # Log Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =     'Log' ) ] [ Switch ] $Log     , # Makes a log file using default name Script.log
-
-            #        -log File.log   Makes a log file named File.log
-
-            [ Parameter ( ParameterSetName =     'BAF' ) ] [ Switch ] $BAF     , # Log File of Services Configuration Before and After the script
-
-            # Backup Service Configuration
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =    'BSCC' ) ] [ Switch ] $BSCC    , # Backup Current Service Configuration, Csv File
-            [ Parameter ( ParameterSetName =    'BSCR' ) ] [ Switch ] $BSCR    , # Backup Current Service Configuration, Reg File
-            [ Parameter ( ParameterSetName =    'BSCB' ) ] [ Switch ] $BSCB    , # Backup Current Service Configuration, Csv and Reg File
-
-            # Display Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =    'SNIS' ) ] [ Switch ] $SNIS    , # Show Already Set Services
-            [ Parameter ( ParameterSetName =     'SSS' ) ] [ Switch ] $SSS     , # Show Not Installed Services
-            [ Parameter ( ParameterSetName =     'SAS' ) ] [ Switch ] $SAS     , # Show Skipped Services
-
-            # Misc Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =     'SDS' ) ] [ Switch ] $SDS     , # Stop Disabled Service
-            [ Parameter ( ParameterSetName =     'CSS' ) ] [ Switch ] $CSS     , # Change State of Service
-            [ Parameter ( ParameterSetName =     'Dry' ) ] [ Switch ] $Dry     , # Runs the Script and Shows what services will be changed
-
-            # AT YOUR OWN RISK Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =     'SBC' ) ] [ Switch ] $SBC     , # Skips Build Check
-            [ Parameter ( ParameterSetName =    'SECH' ) ] [ Switch ] $SECH    , # Skips Edition Check by Setting Edition as Home
-            [ Parameter ( ParameterSetName =    'SECP' ) ] [ Switch ] $SECP    , # Skips Edition Check by Setting Edition as Pro
-
-            # Dev Switches
-            # ¯¯¯¯¯¯¯¯¯¯¯¯
-
-            [ Parameter ( ParameterSetName =    'Devl' ) ] [ Switch ] $Devl    , # Makes a log file with various Diagnostic information, Nothing is Changed
-
-            [ Parameter ( ParameterSetName =    'Diag' ) ] [ Switch ] $Diag    ) # Shows diagnostic information, Stops -auto
-
-            #        -diagf          Forced diagnostic information, Script does nothing else
-
-            #        Help
-            #        ¯¯¯¯
-            #        -help           Shows list of switches, then exits script.. alt -h
-
-            #        -copy           Shows Copyright/License Information, then exits script #>
-
-        $Arch     = GCIM Win32_ComputerSystem | % { $_.PCSystemType | % { $_ -eq 1  , $_ -ne 1 } }
-
-        $X        = $(
-
-            If ( $All     ) { @{ 0 = '-all'     ; 1 =  1 ; 2 = $True  ; 3 = 'All_or_Min=-Full'                              } }
-            If ( $Min     ) { @{ 0 = '-min'     ; 1 =  1 ; 2 = $True  ; 3 = 'All_or_Min=-Min'                               } }
-            If ( $BSCC    ) { @{ 0 = '-bscc'    ; 1 =  2 ; 2 = $True  ; 3 = "Config=1" , "Type=1" | % { "BackupService$_" } } }
-            If ( $BSCR    ) { @{ 0 = '-bscr'    ; 1 =  2 ; 2 = $True  ; 3 = "Config=1" , "Type=0" | % { "BackupService$_" } } }
-            If ( $BSCB    ) { @{ 0 = '-bscb'    ; 1 =  2 ; 2 = $True  ; 3 = "Config=1" , "Type=2" | % { "BackupService$_" } } }
-            If ( $BAF     ) { @{ 0 = '-baf'     ; 1 =  1 ; 2 = $True  ; 3 = 'LogBeforeAfter=1'                              } } 
-            If ( $SNIS    ) { @{ 0 = '-snis'    ; 1 =  1 ; 2 = $True  ; 3 = 'ShowNonInstalled=1'                            } }
-            If ( $SSS     ) { @{ 0 = '-sss'     ; 1 =  1 ; 2 = $True  ; 3 = 'ShowSkipped=1'                                 } }
-            If ( $SAS     ) { @{ 0 = '-sas'     ; 1 =  1 ; 2 = $True  ; 3 = 'ShowAlreadySet=1'                              } }
-            If ( $SDS     ) { @{ 0 = '-sds'     ; 1 =  1 ; 2 = $True  ; 3 = 'StopDisabled=1'                                } }
-            If ( $SIC     ) { @{ 0 = '-sic'     ; 1 =  1 ; 2 = $True  ; 3 = 'InternetCheck=1'                               } }
-            If ( $CSS     ) { @{ 0 = '-css'     ; 1 =  1 ; 2 = $True  ; 3 = 'ChangeState=1'                                 } }
-            If ( $USC     ) { @{ 0 = '-usc'     ; 1 =  1 ; 2 = $True  ; 3 = 'ScriptVerCheck=1'                              } }
-            If ( $USE     ) { @{ 0 = '-use'     ; 1 =  1 ; 2 = $True  ; 3 = 'ServiceVerCheck=1'                             } }
-            If ( $ATOS    ) { @{ 0 = '-atos'    ; 1 =  1 ; 2 = $True  ; 3 = 'AcceptToS=Accepted'                            } }
-            If ( $Dry     ) { @{ 0 = '-dry'     ; 1 =  1 ; 2 = $True  ; 3 = 'DryRun=1'                                      } }
-            If ( $Devl    ) { @{ 0 = '-devl'    ; 1 =  1 ; 2 = $True  ; 3 = 'DevLog=1'                                      } }
-            If ( $SBC     ) { @{ 0 = '-sbc'     ; 1 =  1 ; 2 = $True  ; 3 = 'BuildCheck=1'                                  } }
-            If ( $SXB     ) { @{ 0 = '-sxb'     ; 1 =  1 ; 2 = $True  ; 3 = 'XboxService=1'                                 } }
-            If ( $SECH    ) { @{ 0 = '-sech'    ; 1 =  1 ; 2 = $True  ; 3 = 'EditionCheck=Home'                             } }
-            If ( $SECP    ) { @{ 0 = '-secp'    ; 1 =  1 ; 2 = $True  ; 3 = 'EditionCheck=Pro'                              } }
-            If ( $SEC     ) { @{ 0 = '-sec'     ; 1 = -1 ; 2 = $True  ; 3 = 'EditionCheck=Pro'                              } }
-            If ( $Default ) { @{ 0 = '-default' ; 1 =  1 ; 2 = $False ; 3 = 'Black_Viper=1' , 'BV_ArgUsed=2'                } }
-            If ( $Safe    ) { @{ 0 = '-safe'    ; 1 =  1 ; 2 = $False ; 3 = 'Black_Viper=2' , 'BV_ArgUsed=2'                } }
-            If ( $Tweaked ) { @{ 0 = '-tweaked' ; 1 =  1 ; 2 = $False ; 3 = ( 0 , 3 | % { "BlackViper=$_" } )[$Arch] , ( 1 , 2 | % { "BV_ArgUsed=$_" } )[$Arch] } }
-            If ( $Auto    ) { @{ 0 = '-auto'    ; 1 =  1 ; 2 = $False ; 3 = 'Automated=1' , 'AcceptToS=Accepted'            } }
-            If ( $Diag    ) { @{ 0 = '-diag'    ; 1 =  2 ; 2 = $True  ; 3 = 'Diagnostic=1' , 'Automated=0'                  } }
-            If ( $Log     ) { @{ 0 = '-log'     ; 1 = -1 ; 2 = $True  ; 3 = 'ScriptLog=1' , 'LogName=-'                     } }
-            If ( $LogC    ) { @{ 0 = '-logc'    ; 1 = -1 ; 2 = $True  ; 3 = 'ScriptLog=2' , 'LogName=-'                     } } )
-
-        [ PSCustomObject ]@{ 
-        
-            Arg   = $X[0]
-            Match = $X[1]
-            Gui   = $X[2]
-            Var   = $X[3]
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Initialize-Script # Script Variable Collection ____________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        $PassedArg             = $args # <-- Replace $Args w/ 'Initialize-ScriptMode -$Switch'
-
-        "Security.Principal.Windows" | % { IEX "( [ $_`Principal ][ $_`Identity ]::GetCurrent() ).IsInRole( 'Administrator' )" } | % {
-
-            If ( $False ) 
-            {                
-                Write-Theme -Action "Access [!]" "Limited, attempting elevation" 12 4 15
-
-                SAPS PowerShell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`" $PassedArg" -Verb RunAs
-                
-                If ( $False )
-                { 
-                    Write-Theme -Action "Exception [!]" "Elevation has failed" 12 4 15
-                    Read-Host "Press Enter to Exit"
-                    #Exit
-                }
-            }
-
-            If ( $True )
-            { 
-                Write-Theme -Action "Access [+]" "Granted" 11 11 15 
-            }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____     
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Resolve-ScriptVars # Script Variable Collection ___________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        
-        # Operating System Delimiter
-
-        [ Environment ]::OSVersion.Version.Major | % {
-        
-            If ( $_ -ne 10 )
-            {
-                Write-Theme -Action "Exception [!]" "Only Windows 10 Client is currently supported" 12 4 15
-                Read-Host "Press Enter to Exit"
-                Exit
-            }
         }
 
-        Resolve-Script -Path | % { "$( $_.Parent )\Services" } | % {
-        
-            [ PSCustomObject ]@{
-
-                FileBase           = [ PSCustomObject ]@{
- 
-                    Settings       = "$_\BVSetting.xml"
-                    Service        = "$_\$( Resolve-Script -Control | % { $_.ServiceConfig } ).csv"
-                }
-
-                Environment        = [ PSCustomObject ]@{ 
-
-                    System         = Resolve-Windows -System
-                    MSInfo         = Resolve-Windows -MSInfo
-                    Edition        = Resolve-Windows -Edition
-                    SKU            = Resolve-Windows -SKU
-                    Type           = Resolve-Windows -Type
-                }
-
-                Service            = Resolve-Script -Services
-            }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Import-ServiceConfiguration #______________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ Parameter ( ) ] [ String ] $Custom )
-
-        $C      = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-        $X      = @( '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)' )
-
-        If ( ! $Custom )
+        If ( $Types )
         {
-            @{  
-            
-                Base = Resolve-Script -Path    | % { "$( $_.Parent        )\Services" }
-                File = Resolve-Script -Control | % { "$( $_.ServiceConfig ).csv"      }
+            @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
+        }
         
-            } | % { $_.Base , $_.File -join '\' } | % { 
+        If ( $Names )
+        {
+            @(
             
-                IPCSV $_ | % {
+            (0,4),(1,4),(2,5),(2,6),(3,5) | % { 
                 
-                    [ PSCustomObject ]@{ 
-                    
-                        Service  = $_.Service.Replace( '?????' , $C )
-                        "10H:D+" = $X[$_."10H:D+"]
-                        "10H:D-" = $X[$_."10H:D-"]
-                        "10P:D+" = $X[$_."10P:D+"]
-                        "10P:D-" = $X[$_."10P:D-"]
-                        "DT:S+"  = $X[$_."DT:S+"]
-                        "DT:S-"  = $X[$_."DT:S-"]
-                        "DT:T+"  = $X[$_."DT:T+"]
-                        "DT:T-"  = $X[$_."DT:T-"]
-                        "LT:S+"  = $X[$_."LT:S+"]
-                        "LT:S-"  = $X[$_."LT:S-"]
-                    }
-                }
-            }
+                "Home,Pro,Desktop,Laptop,Default,Safe,Tweaked".Split(',')[$_] -join '' | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } 
+            } ;
+            "Feedback,FAQ,About,Copyright,MadBombDonate,MadBombGitHub,BlackViper,SecureDigitsPlus".Split(',') | % { "MenuInfo$_" } ;
+            "Search,Select,Grid,Empty"          -Split ',' | % { "ServiceDialog$_" } ;
+            "OS,Profile,Build,Chassis"          -Split ',' | % {       "Current$_" } ;
+            "Active,Inactive,Skipped"           -Split ',' | % {       "Display$_" } ;
+            "Simulate,Xbox,Change,StopDisabled" -Split ',' | % {          "Misc$_" } ;
+            "DiagErrors,Log,Console,DiagReport" -Split ',' | % {         "Devel$_" } ;
+            "Build,Edition,Laptop"              -Split ',' | % {        "Bypass$_" } ;
+            "Service,Script"                    -Split ',' | % { "$_`Browse"  , "$_`File"   } | % { "Logging$_" } ;
+            "Registry,Template"                 -Split ',' | % { "$_`Browse"  , "$_`File"   } | % { "Backup$_"  } ;
+            "Service,Script"                    -Split ',' | % { "$_`Profile" , "$_`Label"  } ; "Start,Cancel" -Split ',' )
         }
 
-        If ( $Custom )
+        If ( $Config )
         {
-            $Custom = Read-Host "Enter full path to custom service configuration"
-            
-            If ( ! ( Test-Path $Custom ) )
-            {
-                Write-Theme -Action "Exception [!]" "Path not a valid file."
-            }
+            [ PSCustomObject ]@{ 
 
-            If ( $Custom.Split('.')[-1] -ne ".csv" )
-            {
-                Write-Theme -Action "Exception [!]" "File not in a valid .csv format"
+                'AJRouter'                                      = '2,2,2,2,2,2,1,1,2,2'
+                'ALG'                                           = '2,2,2,2,1,1,1,1,1,1'
+                'AppHostSvc'                                    = '3,0,3,0,3,0,3,0,3,0'
+                'AppIDSvc'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'Appinfo'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'AppMgmt'                                       = '0,0,2,2,2,2,1,1,2,2'
+                'AppReadiness'                                  = '2,0,2,0,2,0,2,0,2,0'
+                'AppVClient'                                    = '0,0,1,0,1,0,1,0,1,0'
+                'aspnet_state'                                  = '2,0,2,0,2,0,2,0,2,0'
+                'AssignedAccessManagerSvc'                      = '0,0,2,0,2,0,2,0,2,0'
+                'AudioEndpointBuilder'                          = '3,0,3,0,3,0,3,0,3,0'
+                'AudioSrv'                                      = '3,0,3,0,3,0,3,0,3,0'
+                'AxInstSV'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'BcastDVRUserService_?????'                     = '2,0,2,0,2,0,2,0,2,0'
+                'BDESVC'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'BFE'                                           = '3,0,3,0,3,0,3,0,3,0'
+                'BITS'                                          = '4,0,4,0,4,0,4,0,4,0'
+                'BluetoothUserService_?????'                    = '2,0,2,0,2,0,2,0,2,0'
+                'Browser'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'BTAGService'                                   = '2,2,2,2,2,2,1,1,2,2'
+                'BthAvctpSvc'                                   = '2,2,2,2,2,2,1,1,2,2'
+                'BthHFSrv'                                      = '2,2,2,2,2,2,1,1,2,2'
+                'bthserv'                                       = '2,2,2,2,2,2,1,1,2,2'
+                'c2wts'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'camsvc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'CaptureService_?????'                          = '0,0,2,2,2,2,1,1,2,2'
+                'CDPSvc'                                        = '4,0,4,0,4,0,4,0,4,0'
+                'CDPUserSvc_?????'                              = '3,0,3,0,3,0,3,0,3,0'
+                'CertPropSvc'                                   = '2,2,2,2,2,2,1,1,2,2'
+                'COMSysApp'                                     = '2,0,2,0,2,0,2,0,2,0'
+                'CryptSvc'                                      = '3,0,3,0,3,0,3,0,3,0'
+                'CscService'                                    = '0,0,2,2,1,1,1,1,1,1'
+                'defragsvc'                                     = '2,0,2,0,2,0,2,0,2,0'
+                'DeviceAssociationService'                      = '2,0,2,0,2,0,2,0,2,0'
+                'DeviceInstall'                                 = '2,0,2,0,2,0,2,0,2,0'
+                'DevicePickerUserSvc_?????'                     = '2,0,2,0,2,0,2,0,2,0'
+                'DevQueryBroker'                                = '2,0,2,0,2,0,2,0,2,0'
+                'Dhcp'                                          = '3,0,3,0,3,0,3,0,3,0'
+                'diagnosticshub.standardcollector.service'      = '2,0,2,0,2,0,2,0,2,0'
+                'diagsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'DiagTrack'                                     = '3,0,3,0,3,0,3,0,3,0'
+                'DmEnrollmentSvc'                               = '2,0,2,0,2,0,2,0,2,0'
+                'dmwappushsvc'                                  = '2,2,2,2,1,1,1,1,1,1'
+                'Dnscache'                                      = '3,0,3,0,3,0,3,0,3,0'
+                'DoSvc'                                         = '4,0,4,0,4,0,4,0,4,0'
+                'dot3svc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'DPS'                                           = '3,0,3,0,3,0,3,0,3,0'
+                'DsmSVC'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'DsRoleSvc'                                     = '2,0,2,0,2,0,2,0,2,0'
+                'DsSvc'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'DusmSvc'                                       = '3,0,3,0,3,0,3,0,3,0'
+                'EapHost'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'EFS'                                           = '2,0,2,0,2,0,2,0,2,0'
+                'embeddedmode'                                  = '2,0,2,0,2,0,2,0,2,0'
+                'EventLog'                                      = '3,0,3,0,3,0,3,0,3,0'
+                'EventSystem'                                   = '3,0,3,0,3,0,3,0,3,0'
+                'Fax'                                           = '2,2,2,2,1,1,1,1,1,1'
+                'fdPHost'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'FDResPub'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'fhsvc'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'FontCache'                                     = '3,0,3,0,3,0,3,0,3,0'
+                'FontCache3.0.0.0'                              = '2,0,2,0,2,0,2,0,2,0'
+                'FrameServer'                                   = '2,2,2,2,1,1,1,1,1,1'
+                'ftpsvc'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'GraphicsPerfSvc'                               = '2,0,2,0,2,0,2,0,2,0'
+                'hidserv'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'hns'                                           = '0,0,2,0,2,0,2,0,2,0'
+                'HomeGroupListener'                             = '2,0,2,0,2,0,2,0,2,0'
+                'HomeGroupProvider'                             = '2,0,2,0,2,0,2,0,2,0'
+                'HvHost'                                        = '2,2,2,2,1,1,1,1,1,1'
+                'icssvc'                                        = '2,2,2,2,1,1,1,1,1,1'
+                'IKEEXT'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'InstallService'                                = '2,0,2,0,2,0,2,0,2,0'
+                'iphlpsvc'                                      = '3,3,3,3,3,3,1,1,3,3'
+                'IpxlatCfgSvc'                                  = '2,2,2,2,2,2,1,1,2,2'
+                'irmon'                                         = '2,2,2,2,1,1,1,1,1,1'
+                'KeyIso'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'KtmRm'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'LanmanServer'                                  = '3,0,3,0,3,0,3,0,3,0'
+                'LanmanWorkstation'                             = '3,0,3,0,3,0,3,0,3,0'
+                'lfsvc'                                         = '2,2,2,2,1,1,1,1,1,1'
+                'LicenseManager'                                = '2,0,2,0,2,0,2,0,2,0'
+                'lltdsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'lmhosts'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'LPDSVC'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'LxssManager'                                   = '2,0,2,0,2,0,2,0,2,0'
+                'MapsBroker'                                    = '4,4,4,4,1,1,1,1,1,1'
+                'MessagingService_?????'                        = '2,0,2,0,2,0,2,0,2,0'
+                'MSDTC'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'MSiSCSI'                                       = '2,2,2,2,1,1,1,1,1,1'
+                'MsKeyboardFilter'                              = '0,0,0,0,0,0,0,0,0,0'
+                'MSMQ'                                          = '3,0,3,0,3,0,3,0,3,0'
+                'MSMQTriggers'                                  = '3,0,3,0,3,0,3,0,3,0'
+                'NaturalAuthentication'                         = '2,2,2,2,2,2,1,1,2,2'
+                'NcaSVC'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'NcbService'                                    = '2,0,2,0,2,0,2,0,2,0'
+                'NcdAutoSetup'                                  = '2,2,2,2,2,2,1,1,2,2'
+                'Netlogon'                                      = '2,2,2,2,2,2,1,1,2,2'
+                'Netman'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'NetMsmqActivator'                              = '3,0,3,0,3,0,3,0,3,0'
+                'NetPipeActivator'                              = '3,0,3,0,3,0,3,0,3,0'
+                'netprofm'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'NetSetupSvc'                                   = '2,0,2,0,2,0,2,0,2,0'
+                'NetTcpActivator'                               = '3,0,3,0,3,0,3,0,3,0'
+                'NetTcpPortSharing'                             = '2,2,2,2,1,1,1,1,1,1'
+                'NlaSvc'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'nsi'                                           = '3,0,3,0,3,0,3,0,3,0'
+                'OneSyncSvc_?????'                              = '4,0,4,0,4,0,4,0,4,0'
+                'p2pimsvc'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'p2psvc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'PcaSvc'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'PeerDistSvc'                                   = '0,0,2,2,1,1,1,1,1,1'
+                'PerfHost'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'PhoneSvc'                                      = '2,2,2,2,1,1,1,1,1,1'
+                'pla'                                           = '2,0,2,0,2,0,2,0,2,0'
+                'PlugPlay'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'PNRPAutoReg'                                   = '2,0,2,0,2,0,2,0,2,0'
+                'PNRPsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'PolicyAgent'                                   = '2,0,2,0,2,0,2,0,2,0'
+                'Power'                                         = '3,0,3,0,3,0,3,0,3,0'
+                'PrintNotify'                                   = '2,0,2,0,2,0,2,0,2,0'
+                'PrintWorkflowUserSvc_?????'                    = '2,0,2,0,2,0,2,0,2,0'
+                'ProfSvc'                                       = '3,0,3,0,3,0,3,0,3,0'
+                'PushToInstall'                                 = '2,0,2,0,2,0,2,0,2,0'
+                'QWAVE'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'RasAuto'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'RasMan'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'RemoteAccess'                                  = '1,0,1,0,1,0,1,0,1,0'
+                'RemoteRegistry'                                = '1,0,1,0,1,0,1,0,1,0'
+                'RetailDemo'                                    = '2,2,2,2,1,1,1,1,1,1'
+                'RmSvc'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'RpcLocator'                                    = '2,2,2,2,1,1,1,1,1,1'
+                'SamSs'                                         = '3,0,3,0,3,0,3,0,3,0'
+                'SCardSvr'                                      = '1,0,1,0,1,0,1,0,1,0'
+                'ScDeviceEnum'                                  = '2,2,2,2,1,1,1,1,1,1'
+                'SCPolicySvc'                                   = '2,2,2,2,1,1,1,1,1,1'
+                'SDRSVC'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'seclogon'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'SEMgrSvc'                                      = '2,2,2,2,1,1,1,1,1,1'
+                'SENS'                                          = '3,0,3,0,3,0,3,0,3,0'
+                'Sense'                                         = '0,0,2,0,2,0,2,0,2,0'
+                'SensorDataService'                             = '2,2,2,2,1,1,1,1,2,2'
+                'SensorService'                                 = '2,2,2,2,1,1,1,1,2,2'
+                'SensrSvc'                                      = '2,2,2,2,1,1,1,1,2,2'
+                'SessionEnv'                                    = '2,2,2,2,2,2,1,1,2,2'
+                'SgrmBroker'                                    = '4,0,4,0,4,0,4,0,4,0'
+                'SharedAccess'                                  = '2,2,2,2,1,1,1,1,1,1'
+                'SharedRealitySvc'                              = '2,0,2,0,2,0,2,0,2,0'
+                'ShellHWDetection'                              = '3,0,3,0,3,0,3,0,3,0'
+                'shpamsvc'                                      = '1,0,1,0,1,0,1,0,1,0'
+                'smphost'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'SmsRouter'                                     = '2,2,2,2,1,1,1,1,1,1'
+                'SNMPTRAP'                                      = '2,2,2,2,1,1,1,1,1,1'
+                'spectrum'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'Spooler'                                       = '3,0,3,0,3,0,3,0,3,0'
+                'SSDPSRV'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'ssh-agent'                                     = '2,0,2,0,2,0,2,0,2,0'
+                'SstpSvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'StiSvc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'StorSvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'svsvc'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'swprv'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'SysMain'                                       = '3,0,3,0,3,0,3,0,3,0'
+                'TabletInputService'                            = '2,2,2,2,1,1,1,1,2,2'
+                'TapiSrv'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'TermService'                                   = '2,2,2,2,2,2,1,1,2,2'
+                'Themes'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'TieringEngineService'                          = '2,0,2,0,2,0,2,0,2,0'
+                'TimeBroker'                                    = '2,0,2,0,2,0,2,0,2,0'
+                'TokenBroker'                                   = '2,0,2,0,2,0,2,0,2,0'
+                'TrkWks'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'TrustedInstaller'                              = '2,0,2,0,2,0,2,0,2,0'
+                'tzautoupdate'                                  = '1,0,1,0,1,0,1,0,1,0'
+                'UevAgentService'                               = '0,0,1,0,1,0,1,0,1,0'
+                'UI0Detect'                                     = '2,0,2,0,2,0,2,0,2,0'
+                'UmRdpService'                                  = '2,2,2,2,2,2,1,1,2,2'
+                'upnphost'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'UserManager'                                   = '3,0,3,0,3,0,3,0,3,0'
+                'UsoSvc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'VaultSvc'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'vds'                                           = '2,0,2,0,2,0,2,0,2,0'
+                'vmcompute'                                     = '0,0,2,0,2,0,2,0,2,0'
+                'vmicguestinterface'                            = '2,2,2,2,1,1,1,1,1,1'
+                'vmicheartbeat'                                 = '2,2,2,2,1,1,1,1,1,1'
+                'vmickvpexchange'                               = '2,2,2,2,1,1,1,1,1,1'
+                'vmicrdv'                                       = '2,2,2,2,1,1,1,1,1,1'
+                'vmicshutdown'                                  = '2,2,2,2,1,1,1,1,1,1'
+                'vmictimesync'                                  = '2,2,2,2,1,1,1,1,1,1'
+                'vmicvmsession'                                 = '2,2,2,2,1,1,1,1,1,1'
+                'vmicvss'                                       = '2,2,2,2,1,1,1,1,1,1'
+                'vmms'                                          = '0,0,3,0,3,0,3,0,3,0'
+                'VSS'                                           = '2,0,2,0,2,0,2,0,2,0'
+                'W32Time'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'W3LOGSVC'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'W3SVC'                                         = '3,0,3,0,3,0,3,0,3,0'
+                'WaaSMedicSvc'                                  = '2,0,2,0,2,0,2,0,2,0'
+                'WalletService'                                 = '2,0,2,0,2,0,2,0,2,0'
+                'WarpJITSvc'                                    = '2,0,2,0,2,0,2,0,2,0'
+                'WAS'                                           = '2,0,2,0,2,0,2,0,2,0'
+                'wbengine'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'WbioSrvc'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'Wcmsvc'                                        = '3,0,3,0,3,0,3,0,3,0'
+                'wcncsvc'                                       = '2,2,2,2,2,2,1,1,2,2'
+                'WdiServiceHost'                                = '2,0,2,0,2,0,2,0,2,0'
+                'WdiSystemHost'                                 = '2,0,2,0,2,0,2,0,2,0'
+                'WebClient'                                     = '2,2,2,2,2,2,1,1,2,2'
+                'Wecsvc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'WEPHOSTSVC'                                    = '2,0,2,0,2,0,2,0,2,0'
+                'wercplsupport'                                 = '2,0,2,0,2,0,2,0,2,0'
+                'WerSvc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'WFDSConSvc'                                    = '2,2,2,2,1,1,1,1,2,2'
+                'WiaRpc'                                        = '2,0,2,0,2,0,2,0,2,0'
+                'WinHttpAutoProxySvc'                           = '2,0,2,0,2,0,2,0,2,0'
+                'Winmgmt'                                       = '3,0,3,0,3,0,3,0,3,0'
+                'WinRM'                                         = '2,2,2,2,1,1,1,1,1,1'
+                'wisvc'                                         = '2,2,2,2,1,1,1,1,1,1'
+                'WlanSvc'                                       = '3,3,3,3,2,2,2,2,3,3'
+                'wlidsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'wlpasvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'wmiApSrv'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'WMPNetworkSvc'                                 = '2,2,2,2,1,1,1,1,1,1'
+                'WMSVC'                                         = '2,0,2,0,2,0,2,0,2,0'
+                'workfolderssvc'                                = '2,2,2,2,1,1,1,1,1,1'
+                'WpcMonSvc'                                     = '2,2,2,2,1,1,1,1,1,1'
+                'WPDBusEnum'                                    = '2,0,2,0,2,0,2,0,2,0'
+                'WpnService'                                    = '3,0,3,0,3,0,3,0,3,0'
+                'WpnUserService_?????'                          = '3,0,3,0,3,0,3,0,3,0'
+                'wscsvc'                                        = '4,0,4,0,4,0,4,0,4,0'
+                'WSearch'                                       = '4,0,4,0,4,0,4,0,4,0'
+                'wuauserv'                                      = '2,0,2,0,2,0,2,0,2,0'
+                'wudfsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
+                'WwanSvc'                                       = '2,2,2,2,1,1,1,1,1,1'
+                'xbgm'                                          = '2,0,2,0,2,0,2,0,2,0'
+                'XblAuthManager'                                = '2,2,2,2,1,1,1,1,1,1'
+                'XblGameSave'                                   = '2,2,2,2,1,1,1,1,1,1'
+                'XboxGipSvc'                                    = '2,0,2,0,2,0,2,0,2,0'
+                'XboxNetApiSvc'                                 = '2,2,2,2,1,1,1,1,1,1'
             }
         }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-ServiceProfile #_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
-        $Config                          = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-
-        Write-Theme -Action "Collecting [+]" "[ Service Configuration ]: Current Profile"
-
-        $Skipped                         = Resolve-ScriptVars  | % { $_.Service.Skip }
-        $Current                         = Get-CurrentServices | Sort Name
-
-        Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
-
-        $List                            = Import-ServiceConfiguration
-
-        $Collect                         = [ PSCustomObject ]@{ }
-
-        $Type                            = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
-
-        $Type                            | % { $Collect | Add-Member -MemberType NoteProperty -Name $_ -Value @( 0..( $List.Count - 1 ) ) }
-
-        Write-Theme -Action "Processing [+]" "[ Service Configuration ]: Overlay"
-
-        ForEach ( $L in 0..( $List.Count - 1 ) )
-        {
-            $Index                       = "{0:d3}" -f $L
-            $Name                        = $List[$L].Service.Replace( '?????' , $Config )
-            $Slot                        = 0..9
-            $Push                        = 0..9
-            $C                           = 0
-            
-            If ( $Name -in $List.Service )
-            {
-                $X                       = $List | ? { $_.Service -eq $Name }
-
-                $Type                    | % {
-
-                    $Slot[$C]            = $X.$_
-                    $C ++
-                }
-            }
-
-            If ( $Name -in $Current.Name )
-            {
-                $X                       = $Current | ? { $_.Name -eq $Name }
-
-                0..9 | % { 
-
-                    $Push[$_]            = [ PSCustomObject ]@{
-
-                        Index            = $Index
-                        Scoped           = "+"
-                        Profile          = $Slot[$_]
-                        Name             = $Name
-                        Status           = $X.Status
-                        StartType        = $X.StartType
-                        DelayedAutoStart = $X.DelayedAutoStart
-                        DisplayName      = $X.DisplayName
-                        PathName         = $X.PathName
-                        Description      = $X.Description
-                    }
-                }
-            }
-
-            If ( $Name -notin $Current.Name )
-            {
-                0..9 | % { 
-                    
-                    $Push[$_]            = [ PSCustomObject ]@{
-
-                        Index                = $Index
-                        Scoped               = "-"
-                        Profile              = "-"
-                        Name                 = $Name
-                        Status               = "-"
-                        StartType            = "-"
-                        DelayedAutoStart     = "-"
-                        DisplayName          = "-"
-                        PathName             = "-"
-                        Description          = "-"
-                    }
-                }
-            }
-
-            $C = 0
-
-            $Type | % { 
-
-                $Collect.$_[$L] = $Push[$C]
-
-                $Push[$C] | % { 
-                
-                    If ( $_.Scoped -eq "+" )
-                    {
-                        If ( ( $_.Profile -eq $_.StartType ) -or ( $_.Profile -match "(DS)" -and $_.DelayedAutoStart -eq 1 ) )
-                        {
-                            $_.Scoped = "@"
-                        }
-                    }
-                }
-
-                $C ++
-            }
-        }
-
-        $Collect                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -831,6 +669,326 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Return-ViperBombGUI #______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( Mandatory , ParameterSetName =  'Main' ) ][ Switch ] $Main  ,
+            [ Parameter ( Mandatory , ParameterSetName = 'Alert' ) ][ Switch ] $Alert )
+
+    If ( $Main )
+    {
+        $XAML  = Get-XAML -Service
+        $Named = Resolve-Script -Names
+        $GUI   = Convert-XAMLToWindow -Xaml $XAML -NE $Named -Passthru
+    }
+
+    If ( $Alert )
+    {
+        $XAML = @"
+        <Window xmlns        = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x          = "http://schemas.microsoft.com/winfx/2006/xaml"
+            Title            = "Notice" 
+            Height           = "225" 
+            Width            = "300" 
+            BorderBrush      = "Black" 
+            Background       = "White" 
+            WindowStyle      = "ToolWindow">
+            <Grid Background     = "#FFE5E5E5">
+                <GroupBox Header = "Caution" Margin="5">
+                    <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height = "3*" />
+                    <RowDefinition Height = "25" />
+                    <RowDefinition Height = "50" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row = "0" Margin = "5" Name = "Tbox" TextWrapping = "Wrap"/>
+                <CheckBox  Grid.Row = "1" Margin = "5" Name = "Cbox" Content = "CheckBox" HorizontalAlignment = "Left" />
+                        <Grid Grid.Row = "2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width = "*"/>
+                                <ColumnDefinition Width = "*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column = "0" Margin ="10" Name = "Yes" Content = "Yes"  />
+                            <Button Grid.Column = "1" Margin ="10" Name = "No"  Content = "No"  />
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Window>
+"@
+
+        $Named = "Tbox" , "Cbox" , "Yes" , "No"
+
+        $GUI   = Convert-XAMLToWindow -Xaml $Xaml -NE $Named -Passthru
+
+    }
+
+    [ PSCustomObject ]@{ 
+
+        XAML  = $Xaml
+        Named = $Named
+        GUI   = $GUI
+    }                                                                               #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Import-ServiceConfiguration #______________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param ( 
+        
+            [ Parameter ( ParameterSetName = "Default" ) ] [ Switch ] $Default ,
+            [ Parameter ( ParameterSetName =    "Load" ) ] [ Switch ] $Load    ,
+            [ Parameter ( ParameterSetname =  "Custom" ) ] [ String ] $Custom  )
+
+        $C      = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+        $X      = @( '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)' )
+
+        If ( $Default )
+        {
+            $Config          = Resolve-Script -Config
+
+            $Services        = $Config | GM | ? { $_.MemberType -eq "NoteProperty" } | % { $_.Name }
+
+            $Return          = @( )
+
+            0..( $Services.Count - 1 ) | % { 
+                
+                $S           = $Config.$( $Services[$_] ).Split(',')
+            
+                $Return     += [ PSCustomObject ]@{
+                    
+                    Service  = $Services[$_].Replace( "?????" , $C )
+                    "10H:D+" = $X[$S[0]]
+                    "10H:D-" = $X[$S[1]]
+                    "10P:D+" = $X[$S[2]]
+                    "10P:D-" = $X[$S[3]]
+                    "DT:S+"  = $X[$S[4]]
+                    "DT:S-"  = $X[$S[5]]
+                    "DT:T+"  = $X[$S[6]]
+                    "DT:T-"  = $X[$S[7]]
+                    "LT:S+"  = $X[$S[8]]
+                    "LT:S-"  = $X[$S[9]]
+                }
+            }
+
+            $Return
+        }
+
+        If ( $Load )
+        {
+            $Scale = @{  
+            
+                Base = Resolve-Script -Path    | % { "$( $_.Parent        )\Services" }
+                File = Resolve-Script -Control | % { "$( $_.ServiceConfig ).csv"      }
+        
+            } | % { IPCSV ( "{0}\{1}" -f $_.Base , $_.File ) } | % { 
+            
+                IPCSV $_ | % {
+                
+                    [ PSCustomObject ]@{ 
+                    
+                        Service  = $_.Service
+                        "10H:D+" = $X[$_."10H:D+"]
+                        "10H:D-" = $X[$_."10H:D-"]
+                        "10P:D+" = $X[$_."10P:D+"]
+                        "10P:D-" = $X[$_."10P:D-"]
+                        "DT:S+"  = $X[$_."DT:S+"]
+                        "DT:S-"  = $X[$_."DT:S-"]
+                        "DT:T+"  = $X[$_."DT:T+"]
+                        "DT:T-"  = $X[$_."DT:T-"]
+                        "LT:S+"  = $X[$_."LT:S+"]
+                        "LT:S-"  = $X[$_."LT:S-"]
+                    }
+                }
+            }
+        }
+
+        If ( $Custom )
+        {
+            $Custom = Read-Host "Enter full path to custom service configuration"
+            
+            If ( ! ( Test-Path $Custom ) )
+            {
+                Write-Theme -Action "Exception [!]" "Path not a valid file."
+            }
+
+            If ( $Custom.Split('.')[-1] -ne ".csv" )
+            {
+                Write-Theme -Action "Exception [!]" "File not in a valid .csv format"
+            }
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function New-ServiceTemplate #______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
+
+            [ ValidateNotNullOrEmpty () ]
+            [ Parameter ( ParameterSetname = "Object" ) ] [ String [] ] $Names )
+
+        
+        $Return = [ PSCustomObject ]@{ }
+
+        $Names | % { $Return | Add-Member -MemberType NoteProperty -Name $_ -Value "-" }
+
+        $Return
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____ 
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-ServiceProfile #_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+
+        Write-Theme -Action "Collecting [+]" "[ Service Configuration ]: Current Profile"
+
+        Resolve-Script -Services             | % {
+
+            $Filter                          = [ PSCustomObject ]@{ 
+                
+                Skipped                      = $_.Skip 
+                Xbox                         = $_.Xbox
+                DataGrid                     = $_.DataGrid
+            }
+        }
+
+        $Current                             = Get-CurrentServices | Sort Name
+
+        Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
+
+        $List                                = Import-ServiceConfiguration -Default
+        $Index                               = 0..( $List.Count - 1 )
+
+        Write-Theme -Action "Processing [+]" "[ Service Configuration ]: Overlay"
+
+        # Create Template & Output Containers
+
+        $Service                             = [ PSCustomObject ]@{
+        
+            Profile                          = [ PSCustomObject ]@{ }
+            Master                           = @( )
+            Active                           = @( )
+            Inactive                         = @( )
+            Skipped                          = @( )
+            Xbox                             = @( )
+        }
+
+        $Type                                = Resolve-Script -Types
+
+        $Type                                | % {
+        
+            $Splat                           = @{
+
+                MemberType                   = "NoteProperty"
+                Name                         = $_
+                Value                        = ForEach ( $i in $Index )
+                {
+                    [ PSCustomObject ]@{
+
+                        Index                = $I
+                        Scoped               = "-"
+                        Profile              = $List[$I].$_
+                        Name                 = $List[$I].Service
+                        
+                    }
+                }
+            }
+
+            $Service.Profile                 | Add-Member @Splat
+        }
+
+        ForEach ( $I in $Index )
+        {
+            $New                             = New-ServiceTemplate -Names $Filter.DataGrid
+
+            $New.Index                       = "{0:d3}" -f $I
+            $New.Name                        = $List[$I].Service
+            
+            If ( $New.Name -in $Current.Name )
+            {
+                $X                           = $Current | ? { $_.Name -eq $New.Name }
+
+                $New.Scoped                  = "+"
+                $New.Status                  = $X.Status
+                $New.StartType               = $X.StartType
+                $New.DelayedAutoStart        = $X.DelayedAutoStart
+                $New.DisplayName             = $X.DisplayName
+                $New.PathName                = $X.PathName
+                $New.Description             = $X.Description
+            }
+
+            $New.Status                      | % {
+
+                If ( $_ -eq "Running" )
+                {
+                    $Service.Active         += $New.Name
+                }
+
+                If ( $_ -eq "Stopped" )
+                {
+                    $Service.Inactive       += $New.Name
+                }
+
+                If ( ( $_ -eq "-" ) -or ( $New.Name -in $Filter.Skipped ) )
+                {
+                    $Service.Skipped        += $New.Name
+                }
+
+                If ( $New.Name -in $Filter.Xbox )
+                { 
+                    $Service.Xbox           += $New.Name
+                }
+
+                If ( $New.Name -in $List.Service )
+                {
+                    If ( $New.Scoped -eq "+" )
+                    {
+                        ForEach ( $T in $Type )
+                        {
+                            $Service.Profile.$T[$I] | % { 
+
+                                $_.Scoped = "+"
+
+                                If ( ( $_.Profile -eq $New.StartType ) -or ( $_.Profile -like "*DS*" -and $New.DelayedAutoStart -ne $Null ) )
+                                {
+                                    $_.Scoped = "@"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $Service.Master += $New
+        }
+
+        $Service | % { 
+
+            $Return                          = [ PSCustomObject ]@{
+
+                "10H:D+"                         = $_.Profile."10H:D+"
+                "10H:D-"                         = $_.Profile."10H:D-"
+                "10P:D+"                         = $_.Profile."10P:D+"
+                "10P:D-"                         = $_.Profile."10P:D-"
+                "DT:S+"                          = $_.Profile."DT:S+"
+                "DT:S-"                          = $_.Profile."DT:S-"
+                "DT:T+"                          = $_.Profile."DT:T+"
+                "DT:T-"                          = $_.Profile."DT:T-"
+                "LT:S+"                          = $_.Profile."LT:S+"
+                "LT:S-"                          = $_.Profile."LT:S-"
+                Master                           = @( $_.Master )
+                Active                           = @( $_.Active )
+                Inactive                         = @( $_.Inactive )
+                Skipped                          = @( $_.Skipped )
+                XBox                             = @( $_.Xbox )
+            }
+        }
+
+        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Show-Console #_____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
@@ -846,53 +1004,6 @@
     [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , 5 )
     
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Filter-Services #__________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ Parameter ( Position = 0 , Mandatory , ValueFromPipeline ) ] [ PSCustomObject ] $Config   ,
-            [ ValidateSet ('10H:D+','10H:D-','10P:D+','10P:D-','DT:S+','DT:S-','DT:T+','DT:T-','LT:S+','LT:S-')]
-            [ Parameter ( Position = 1 , Mandatory , ValueFromPipeline ) ] [         String ] $Type     ,
-            [ Parameter ( Position = 2 , Mandatory , ValueFromPipeline ) ] [ PSCustomObject ] $Model  )
-
-        $ServiceState = $Config.$Type
-
-        $Return       = [ PSCustomObject ]@{
-        
-            Profile   = $Type
-            Active    = @( )
-            Inactive  = @( )
-            Skipped   = @( )
-            Xbox      = @( )
-        }
-        
-        $Return | % { 
-
-            If ( $Control.DisplayActive -eq 1 ) 
-            { 
-                $_.Active    = $ServiceState | ? { $_.Status -eq "Running"    }
-            }
-
-            If ( $Control.DisplayInactive -eq 1 )
-            { 
-                $_.Inactive  = $ServiceState | ? { $_.Status -eq "Running"    }
-            }
-
-            If ( $Control.DisplaySkipped -eq 1 )
-            {
-                $_.Skipped   = $ServiceState | ? { $_.Status -eq "-"          }
-            }
-
-            If ( $Control.MiscXbox -eq 1 )
-            {
-                $_.Xbox      = @( $ServiceState | ? { $_.Name -in ( Resolve-Script -Services | % { $_.Xbox } ) } ) 
-            }
-        }
-
-        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -967,8 +1078,8 @@
         #  $Console                                = Show-Console -Mode 5
         
         $Config                                    = Get-ServiceProfile
-        $Object                                    = $Config | GM | ? MemberType -eq NoteProperty | % { $_.Name }
-        $Filter                                    = Resolve-Script -Services
+
+        $Types                                     = Resolve-Script -Types
 
         Return-ViperBombGUI -Main                  | % {
         
@@ -982,9 +1093,11 @@
         # -------- #
 
         $Arch                                      = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
-        $GUI.CurrentOS.Text                        = Resolve-Windows -MSInfo  | % { $_.Caption , "($Arch)" -join ' ' }
-        $GUI.CurrentBuild.Text                     = Resolve-Windows -Edition | % { "v{0}.{1}" -f $_.Build , $_.Version }
-        $GUI.CurrentChassis.Text                   = Resolve-Windows -Type    | % { $_.Chassis }
+
+        $GUI.CurrentOS.Text                        = Resolve-Windows -MSInfo     | % { $_.Caption , "($Arch)" -join ' ' }
+        $GUI.CurrentBuild.Text                     = Resolve-Windows -Edition    | % { "v{0}.{1}" -f $_.Build , $_.Version }
+        $GUI.CurrentChassis.Text                   = Resolve-Windows -Type       | % { $_.Chassis }
+
         $GUI.ServiceDialogEmpty.Text               = "Select a profile from the configuration menu to begin"
         $GUI.ServiceDialogSearch.IsEnabled         = $False
 
@@ -992,156 +1105,69 @@
         # Datagrid ScriptBlock #
         # -------------------- #
 
-        $DisableBox = {
+        $DisableBox                                = {
 
             $GUI.ServiceDialogSearch.IsEnabled     = $True
             $GUI.ServiceDialogEmpty.Visibility     = "Collapsed"
             $GUI.ServiceDialogEmpty.Text           = ""
+
+        }
+
+        $SelectProfile                             = {
+
+            Param( $Type , $Text )
+
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) 
+            { 
+                & $DisableBox 
+            }
+
+            $Selection = $Config.$Type
+            $List      = $Config.Master
+            $Service   = @( )
+            
+            0..( $Config.Master.Count - 1 ) | % { 
+
+                $Service += [ PSCustomObject ]@{ 
+
+                    Index            = $List[$_].Index
+                    Scoped           = $Selection[$_].Scoped
+                    Profile          = $Selection[$_].Profile
+                    Name             = $Selection[$_].Name
+                    Status           = $List[$_].Status
+                    StartType        = $List[$_].StartType
+                    DelayedAutoStart = $List[$_].DelayedAutoStart
+                    DisplayName      = $List[$_].DisplayName
+                    PathName         = $List[$_].PathName
+                    Description      = $List[$_].Description
+                }
+            }
+
+            $GUI.ServiceDialogGrid                 | % { 
+                
+                $_.ItemsSource                     = $Null
+                $_.ItemsSource                     = $Service
+            }
         }
 
         # ---------- #
         # Menu Items #
         # ---------- #
 
-        $GUI.MenuConfigHomeDefaultMax.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'10H:D+' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Win10 Home | Default Max"
+        $GUI.MenuConfigHomeDefaultMax    | % { $_.Add_Click({ ICM $SelectProfile -Args "10H:D+" , "Win10 Home | Default Max" }) }
+        $GUI.MenuConfigHomeDefaultMin    | % { $_.Add_Click({ ICM $SelectProfile -Args "10H:D-" , "Win10 Home | Default Min" }) }
+        $GUI.MenuConfigProDefaultMax     | % { $_.Add_Click({ ICM $SelectProfile -Args "10P:D+" , "Win10 Pro | Default Max"  }) }
+        $GUI.MenuConfigProDefaultMin     | % { $_.Add_Click({ ICM $SelectProfile -Args "10H:D-" , "Win10 Pro | Default Min"  }) }
+        $GUI.MenuConfigDesktopSafeMax    | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:S+" , "Desktop | Safe Max"       }) }
+        $GUI.MenuConfigDesktopSafeMin    | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:S-" , "Desktop | Safe Min"       }) }
+        $GUI.MenuConfigDesktopTweakedMax | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:T+" , "Desktop | Tweaked Max"    }) }
+        $GUI.MenuConfigDesktopTweakedMin | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:T-" , "Desktop | Tweaked Min"    }) }
+        $GUI.MenuConfigLaptopSafeMax     | % { $_.Add_Click({ ICM $SelectProfile -Args  "LT:S+" , "Laptop | Safe Max"        }) }
+        $GUI.MenuConfigLaptopSafeMin     | % { $_.Add_Click({ ICM $SelectProfile -Args  "LT:S-" , "Desktop | Safe Min"       }) }
 
-            $GUI.ServiceDialogGrid                 | % { 
-                
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-            }
-        })
-
-        $GUI.MenuConfigHomeDefaultMin.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'10H:D-' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Win10 Home | Default Min"
-
-            $GUI.ServiceDialogGrid                 | % { 
-                
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-            }
-        })
-
-        $GUI.MenuConfigProDefaultMax.Add_Click(
-        { 
-            $ServiceProfile                        = @( $Services.'10P:D+' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Win10 Pro | Default Max"
-
-            $GUI.ServiceDialogGrid                 | % {
-                
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-            }
-        })
-
-        $GUI.MenuConfigProDefaultMin.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'10P:D-' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Win10 Pro | Default Min"
-
-            $GUI.ServiceDialogGrid                 | % { 
-                
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-                
-                
-            }
-        })
-        
-        $GUI.MenuConfigDesktopSafeMax.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'DT:S+' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Desktop | Safe Max"
-
-            $GUI.ServiceDialogGrid                 | % {
-                
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-                
-                
-            }
-        })
-
-        $GUI.MenuConfigDesktopSafeMin.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'DT:S-' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Desktop | Safe Min"
-
-            $GUI.ServiceDialogGrid                 | % {
-            
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-            }
-        })
-
-        $GUI.MenuConfigDesktopTweakedMax.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'DT:T+' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Desktop | Tweaked Max"
-
-            $GUI.ServiceDialogGrid                 | % {
-            
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-            }
-        })
-
-        $GUI.MenuConfigDesktopTweakedMin.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'DT:T-' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Desktop | Tweaked Min"
-
-            $GUI.ServiceDialogGrid                 | % {
-
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-                
-            }
-        })
-
-        $GUI.MenuConfigLaptopSafeMax.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'LT:S+' )
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) { & $DisableBox }
-            $GUI.CurrentProfile.Text               = "Laptop | Safe Max"
-
-            $GUI.ServiceDialogGrid                 | % {
-            
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-                
-            }
-        })
-
-        $GUI.MenuConfigLaptopSafeMin.Add_Click(
-        {
-            $ServiceProfile                        = @( $Services.'LT:S-' )
-            & $DisableBox
-            $GUI.CurrentProfile.Text               = "Laptop | Safe Min"
-            
-            $GUI.ServiceDialogGrid                 | % {
-        
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $ServiceProfile
-            }
-        })
-
-        $GUI.MenuInfoFeedback                      | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
-        $GUI.MenuInfoFAQ                           | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About } }) }
-        $GUI.MenuInfoAbout                         | % { 
+        $GUI.MenuInfoFeedback            | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
+        $GUI.MenuInfoFAQ                 | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About } }) }
+        $GUI.MenuInfoAbout               | % { 
         
             $_.Add_Click(
             { 
@@ -1153,7 +1179,7 @@
                               "    Custom: If in proper format`n"                         ,
                               "    Backup: Created via this utility"             -join '' } | % { Show-Message -Title $_.Title -Message $_.Message }
             
-            }) 
+            })
         }
 
         $GUI.MenuInfoCopyright                      | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
@@ -1450,10 +1476,6 @@
         #$GUI.BypassEdition
         #$GUI.BypassLaptop
 
-        #$GUI.BypassBuild
-        #$GUI.BypassEdition
-        #$GUI.BypassLaptop
-
         #$GUI.MiscSimulate   [ What If ]
         # Produce a list of services and corresponding changes
         
@@ -1466,7 +1488,6 @@
         #$GUI.DevelDiagErrors
 
         #$GUI.DevelLog
-
         #$GUI.DevelConsole
         #$GUI.DevelDiagReport
         
