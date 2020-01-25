@@ -1081,6 +1081,8 @@
 
         $Types                                     = Resolve-Script -Types
 
+        $Output                                    = @( )
+
         Return-ViperBombGUI -Main                  | % {
         
             $Xaml                                  = $_.Xaml
@@ -1122,52 +1124,156 @@
                 & $DisableBox 
             }
 
-            $Selection = $Config.$Type
-            $List      = $Config.Master
-            $Service   = @( )
+            If ( $Output.Count -ne 0 )
+            {
+                $Output = @( )
+            }
+
+            $Selection                             = $Config.$Type
+            $List                                  = $Config.Master
+            $Service                               = @( )
             
             0..( $Config.Master.Count - 1 ) | % { 
 
-                $Service += [ PSCustomObject ]@{ 
+                $Service                          += [ PSCustomObject ]@{ 
 
-                    Index            = $List[$_].Index
-                    Scoped           = $Selection[$_].Scoped
-                    Profile          = $Selection[$_].Profile
-                    Name             = $Selection[$_].Name
-                    Status           = $List[$_].Status
-                    StartType        = $List[$_].StartType
-                    DelayedAutoStart = $List[$_].DelayedAutoStart
-                    DisplayName      = $List[$_].DisplayName
-                    PathName         = $List[$_].PathName
-                    Description      = $List[$_].Description
+                    Index                          = $List[$_].Index
+                    Scoped                         = $Selection[$_].Scoped
+                    Profile                        = $Selection[$_].Profile
+                    Name                           = $Selection[$_].Name
+                    Status                         = $List[$_].Status
+                    StartType                      = $List[$_].StartType
+                    DelayedAutoStart               = $List[$_].DelayedAutoStart
+                    DisplayName                    = $List[$_].DisplayName
+                    PathName                       = $List[$_].PathName
+                    Description                    = $List[$_].Description
                 }
             }
 
-            $GUI.ServiceDialogGrid                 | % { 
-                
-                $_.ItemsSource                     = $Null
-                $_.ItemsSource                     = $Service
+            $GUI.ServiceDialogGrid.ItemsSource     = $Null
+
+            If ( $Control.DisplayActive -eq 0 )
+            {
+                $Output                           += $Config.Active
             }
+
+            If ( $Control.DisplayInactive -eq 1 )
+            {
+                $Output                           += $Config.Inactive   
+            }
+
+            If ( $Control.DisplaySkipped -eq 1 )
+            {
+                $Output                           += $Config.Skipped
+            }
+
+            If ( $Control.MiscXbox -eq 1 )
+            {
+                $Output                           += $Config.Xbox
+            }
+            
+            $GUI.ServiceDialogGrid.ItemsSource     = $Service
+            $GUI.CurrentProfile.Text               = $Text
+
         }
 
         # ---------- #
         # Menu Items #
         # ---------- #
 
-        $GUI.MenuConfigHomeDefaultMax    | % { $_.Add_Click({ ICM $SelectProfile -Args "10H:D+" , "Win10 Home | Default Max" }) }
-        $GUI.MenuConfigHomeDefaultMin    | % { $_.Add_Click({ ICM $SelectProfile -Args "10H:D-" , "Win10 Home | Default Min" }) }
-        $GUI.MenuConfigProDefaultMax     | % { $_.Add_Click({ ICM $SelectProfile -Args "10P:D+" , "Win10 Pro | Default Max"  }) }
-        $GUI.MenuConfigProDefaultMin     | % { $_.Add_Click({ ICM $SelectProfile -Args "10H:D-" , "Win10 Pro | Default Min"  }) }
-        $GUI.MenuConfigDesktopSafeMax    | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:S+" , "Desktop | Safe Max"       }) }
-        $GUI.MenuConfigDesktopSafeMin    | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:S-" , "Desktop | Safe Min"       }) }
-        $GUI.MenuConfigDesktopTweakedMax | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:T+" , "Desktop | Tweaked Max"    }) }
-        $GUI.MenuConfigDesktopTweakedMin | % { $_.Add_Click({ ICM $SelectProfile -Args  "DT:T-" , "Desktop | Tweaked Min"    }) }
-        $GUI.MenuConfigLaptopSafeMax     | % { $_.Add_Click({ ICM $SelectProfile -Args  "LT:S+" , "Laptop | Safe Max"        }) }
-        $GUI.MenuConfigLaptopSafeMin     | % { $_.Add_Click({ ICM $SelectProfile -Args  "LT:S-" , "Desktop | Safe Min"       }) }
+        $GUI.MenuConfigHomeDefaultMax              | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[0]
+                ICM $SelectProfile -Args $Type , "Win10 Home | Default Max"
+            })
+        }
+
+        $GUI.MenuConfigHomeDefaultMin              | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[1]
+                ICM $SelectProfile -Args $Type , "Win10 Home | Default Min"
+            })
+        }
+
+        $GUI.MenuConfigProDefaultMax               | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[2]
+                ICM $SelectProfile -Args $Type ,  "Win10 Pro | Default Max"
+            })
+        }
+
+        $GUI.MenuConfigProDefaultMin               | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[3]
+                ICM $SelectProfile -Args $Type ,  "Win10 Pro | Default Min"
+            })
+        }
+
+        $GUI.MenuConfigDesktopSafeMax              | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[4]
+                ICM $SelectProfile -Args $Type ,    "Desktop | Safe Max"
+            })
+        }
+
+        $GUI.MenuConfigDesktopSafeMin              | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[5]
+                ICM $SelectProfile -Args $Type ,    "Desktop | Safe Min"    
+            })
+        }
+
+        $GUI.MenuConfigDesktopTweakedMax           | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[6]
+                ICM $SelectProfile -Args $Type ,    "Desktop | Tweaked Max"
+            })
+        }
+
+        $GUI.MenuConfigDesktopTweakedMin           | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[7]
+                ICM $SelectProfile -Args $Type ,    "Desktop | Tweaked Min"
+            })
+        }
+
+        $GUI.MenuConfigLaptopSafeMax               | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[8]
+                ICM $SelectProfile -Args $Type ,     "Laptop | Safe Max"
+            })
+        }
+
+        $GUI.MenuConfigLaptopSafeMin               | % {
+
+            $_.Add_Click(
+            {
+                $Type                              = $Types[9]
+                ICM $SelectProfile -Args $Type ,     "Laptop | Safe Min"
+            })
+        }
 
         $GUI.MenuInfoFeedback            | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
         $GUI.MenuInfoFAQ                 | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About } }) }
-        $GUI.MenuInfoAbout               | % { 
+        $GUI.MenuInfoAbout               | % {
         
             $_.Add_Click(
             { 
@@ -1177,8 +1283,11 @@
                               "`n"                                                        ,
                               "    Default: Black Viper (Sparks v1.0)`n"                  ,
                               "    Custom: If in proper format`n"                         ,
-                              "    Backup: Created via this utility"             -join '' } | % { Show-Message -Title $_.Title -Message $_.Message }
-            
+                              "    Backup: Created via this utility"             -join '' 
+                } | % { 
+                
+                    Show-Message -Title $_.Title -Message $_.Message 
+                }
             })
         }
 
@@ -1187,6 +1296,19 @@
         $GUI.MenuInfoMadBombGitHub                  | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Base    } } }
         $GUI.MenuInfoBlackViper                     | % { $_.Add_Click{ Resolve-Script -Sparks  | % { Start $_.WebSite } } }
         $GUI.MenuInfoSecureDigitsPlus               | % { $_.Add_Click{ Resolve-Script -Company | % { Start $_.Site    } } }
+
+        # ---------------- #
+        # Preference Items #
+        # ---------------- #
+        
+        If ( $GUI.DisplayActive.IsChecked   -eq $False ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 1 }) } }
+        If ( $GUI.DisplayActive.IsChecked   -eq $True  ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 0 }) } }
+        If ( $GUI.DisplayInactive.IsChecked -eq $False ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 1 }) } }
+        If ( $GUI.DisplayInactive.IsChecked -eq $True  ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 0 }) } }
+        If ( $GUI.DisplaySkipped.IsChecked  -eq $False ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 1 }) } }    
+        If ( $GUI.DisplaySkipped.IsChecked  -eq $True  ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 0 }) } }
+        If ( $GUI.MiscXbox.IsChecked        -eq $False ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 1 }) } }
+        If ( $GUI.MiscXbox.IsChecked        -eq $True  ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 0 }) } }
 
         # ----------------- #
         # Datagrid Handling #
@@ -1205,37 +1327,29 @@
 
             $Array                                  = @( )
 
-            $Array += $ServiceProfile | ? { $_.$Filter -match $GUI.ServiceDialogSearch.Text }
+            $Array                                 += $Service | ? { $_.$Filter -match $GUI.ServiceDialogSearch.Text }
 
             If ( ( $Array -eq $Null ) -or ( $Array.Count -eq 0 ) )
             {
-                $GUI.ServiceDialogGrid.Visibility   = "Collapsed"
-                        
+                $GUI.ServiceDialogGrid.Visibility   = "Collapsed"    
                 $GUI.ServiceDialogEmpty.Visibility  = "Visible"
-    
                 $GUI.ServiceDialogEmpty.Text        = "No results found"
             }
 
             If ( ( $Array -ne $Null ) -or ( $Array.Count -ge 1 ) )
             {
                 $GUI.ServiceDialogGrid.Visibility   = "Visible"
-
                 $GUI.ServiceDialogGrid.ItemsSource  = $Array
-
                 $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
-
                 $GUI.ServiceDialogEmpty.Text        = ""
             }
 
             If ( ( $Filter -ne $Null ) -and ( $GUI.ServiceDialogSearch.Text -eq "" ) )
             {
                 $Filter                             = $Null
-
                 $GUI.ServiceDialogSelect.IsEnabled  = $True
-
                 $GUI.ServiceDialogGrid.ItemsSource  = $Null
-
-                $GUI.ServiceDialogGrid.ItemsSource  = $ServiceProfile
+                $GUI.ServiceDialogGrid.ItemsSource  = $Service
             }
         })
 
@@ -1398,70 +1512,6 @@
 
             $Dialog.Dispose()
         })
-
-        If ( $GUI.DisplayActive.IsChecked -eq $False )
-        {
-            $GUI.DisplayActive.Add_Click(
-            { 
-                $Control.DisplayActive = 0 
-            })
-        }
-            
-        If ( $GUI.DisplayActive.IsChecked -eq $True  )
-        {
-            $GUI.DisplayActive.Add_Click(
-            { 
-                $Control.DisplayActive = 1 
-            })
-        }
-
-        If ( $GUI.DisplayInactive.IsChecked -eq $False )
-        {
-            $GUI.DisplayInactive.Add_Click(
-            { 
-                $Control.DisplayInactive = 0 
-            })
-        }
-            
-        If ( $GUI.DisplayInactive.IsChecked -eq $True  )
-        {
-            $GUI.DisplayInactive.Add_Click(
-            { 
-                $Control.DisplayInactive = 1 
-            })
-        }
-
-        If ( $GUI.DisplaySkipped.IsChecked -eq $False )
-        {
-            $GUI.DisplaySkipped.Add_Click(
-            { 
-                $Control.DisplaySkipped = 0 
-            })
-        }
-            
-        If ( $GUI.DisplaySkipped.IsChecked -eq $True  )
-        {
-            $GUI.DisplaySkipped.Add_Click(
-            { 
-                $Control.DisplaySkipped = 1 
-            })
-        }
-
-        If ( $GUI.MiscXbox.IsChecked -eq $False )
-        {
-            $GUI.MiscXbox.Add_Click(
-            { 
-                $Control.MiscXbox = 0 
-            })
-        }
-            
-        If ( $GUI.MiscXbox.IsChecked -eq $True  )
-        {
-            $GUI.MiscXbox.Add_Click(
-            { 
-                $Control.MiscXbox = 1 
-            })
-        }
 
         #$GUI.MiscSimulate
         #$GUI.MiscChange
