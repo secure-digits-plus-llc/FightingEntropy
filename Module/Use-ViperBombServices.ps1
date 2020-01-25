@@ -101,7 +101,7 @@
                 [ PSCustomObject ]@{
     
                     Version        = "ViperBomb v7.0.0"
-                    Date           = "2020-01-23"
+                    Date           = "2020-01-25"
                     Script         = $_.ScriptConfig
                     Service        = $_.ServiceConfig
                     Release        = "Development"
