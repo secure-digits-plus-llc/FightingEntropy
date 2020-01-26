@@ -1051,6 +1051,9 @@
         }
 
         $Control                                   = Resolve-Script -Control
+        $MSInfo                                    = Resolve-Windows -MSInfo
+        $System                                    = Resolve-Windows -System
+
 
         If ( $Control.TermsOfService -eq 0 )
         {
@@ -1097,7 +1100,7 @@
         $Arch                                      = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
 
         $GUI.CurrentOS.Text                        = Resolve-Windows -MSInfo     | % { $_.Caption , "($Arch)" -join ' ' }
-        $GUI.CurrentBuild.Text                     = Resolve-Windows -Edition    | % { "v{0}.{1}" -f $_.Build , $_.Version }
+        $GUI.CurrentBuild.Text                     = "$( $PSVersionTable.BuildVersion )"
         $GUI.CurrentChassis.Text                   = Resolve-Windows -Type       | % { $_.Chassis }
 
         $GUI.ServiceDialogEmpty.Text               = "Select a profile from the configuration menu to begin"
@@ -1115,13 +1118,16 @@
 
         }
 
-        $SelectProfile                             = {
-
-            Param( $Type , $Text )
+        $Select                                    = {
 
             If ( ! $GUI.ServiceDialogSearch.IsEnabled ) 
             { 
                 & $DisableBox 
+            }
+
+            If ( $GUI.ServiceDialogSearch.Text -ne "" )
+            {
+                $Reinject = $GUI.ServiceDialogSearch.Text
             }
 
             If ( $Output.Count -ne 0 )
@@ -1150,8 +1156,6 @@
                 }
             }
 
-            $GUI.ServiceDialogGrid.ItemsSource     = $Null
-
             If ( $Control.DisplayActive -eq 0 )
             {
                 $Output                           += $Config.Active
@@ -1171,9 +1175,23 @@
             {
                 $Output                           += $Config.Xbox
             }
-            
+
+            If ( $Output.Count -ne 0 )
+            {
+                $Output  = $Output | Sort
+
+                $Service = $Service | ? { $_.Name -in $Output }
+            }
+
+            $GUI.ServiceDialogGrid.ItemsSource     = $Null
             $GUI.ServiceDialogGrid.ItemsSource     = $Service
             $GUI.CurrentProfile.Text               = $Text
+
+            If ( $Reinject -ne $Null )
+            {
+                $GUI.ServiceDialogSearch.Text      = $Reinject
+                $Reinject                          = $Null
+            }
 
         }
 
@@ -1186,7 +1204,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[0]
-                ICM $SelectProfile -Args $Type , "Win10 Home | Default Max"
+                $Text                              = "Win10 Home | Default Max"
+                & $Select
             })
         }
 
@@ -1195,7 +1214,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[1]
-                ICM $SelectProfile -Args $Type , "Win10 Home | Default Min"
+                $Text                              = "Win10 Home | Default Min"
+                & $Select
             })
         }
 
@@ -1204,7 +1224,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[2]
-                ICM $SelectProfile -Args $Type ,  "Win10 Pro | Default Max"
+                $Text                              = "Win10 Pro | Default Max"
+                & $Select
             })
         }
 
@@ -1213,7 +1234,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[3]
-                ICM $SelectProfile -Args $Type ,  "Win10 Pro | Default Min"
+                $Text                              = "Win10 Pro | Default Min"
+                & $Select
             })
         }
 
@@ -1222,7 +1244,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[4]
-                ICM $SelectProfile -Args $Type ,    "Desktop | Safe Max"
+                $Text                              = "Desktop | Safe Max"
+                & $Select
             })
         }
 
@@ -1231,7 +1254,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[5]
-                ICM $SelectProfile -Args $Type ,    "Desktop | Safe Min"    
+                $Text                              = "Desktop | Safe Min"
+                & $Select
             })
         }
 
@@ -1240,7 +1264,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[6]
-                ICM $SelectProfile -Args $Type ,    "Desktop | Tweaked Max"
+                $Text                              = "Desktop | Tweaked Max"
+                & $Select
             })
         }
 
@@ -1249,7 +1274,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[7]
-                ICM $SelectProfile -Args $Type ,    "Desktop | Tweaked Min"
+                $Text                              = "Desktop | Tweaked Min"
+                & $Select
             })
         }
 
@@ -1258,7 +1284,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[8]
-                ICM $SelectProfile -Args $Type ,     "Laptop | Safe Max"
+                $Text                              = "Laptop | Safe Max"
+                & $Select
             })
         }
 
@@ -1267,7 +1294,8 @@
             $_.Add_Click(
             {
                 $Type                              = $Types[9]
-                ICM $SelectProfile -Args $Type ,     "Laptop | Safe Min"
+                $Text                              = "Laptop | Safe Min"
+                & $Select
             })
         }
 
@@ -1301,14 +1329,14 @@
         # Preference Items #
         # ---------------- #
         
-        If ( $GUI.DisplayActive.IsChecked   -eq $False ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 1 }) } }
-        If ( $GUI.DisplayActive.IsChecked   -eq $True  ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 0 }) } }
-        If ( $GUI.DisplayInactive.IsChecked -eq $False ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 1 }) } }
-        If ( $GUI.DisplayInactive.IsChecked -eq $True  ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 0 }) } }
-        If ( $GUI.DisplaySkipped.IsChecked  -eq $False ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 1 }) } }    
-        If ( $GUI.DisplaySkipped.IsChecked  -eq $True  ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 0 }) } }
-        If ( $GUI.MiscXbox.IsChecked        -eq $False ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 1 }) } }
-        If ( $GUI.MiscXbox.IsChecked        -eq $True  ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 0 }) } }
+        If ( $GUI.DisplayActive.IsChecked   -eq $False ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 1 ; & $Select }) } }
+        If ( $GUI.DisplayActive.IsChecked   -eq $True  ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 0 ; & $Select }) } }
+        If ( $GUI.DisplayInactive.IsChecked -eq $False ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 1 ; & $Select }) } }
+        If ( $GUI.DisplayInactive.IsChecked -eq $True  ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 0 ; & $Select }) } }
+        If ( $GUI.DisplaySkipped.IsChecked  -eq $False ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 1 ; & $Select }) } }    
+        If ( $GUI.DisplaySkipped.IsChecked  -eq $True  ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 0 ; & $Select }) } }
+        If ( $GUI.MiscXbox.IsChecked        -eq $False ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 1 ; & $Select }) } }
+        If ( $GUI.MiscXbox.IsChecked        -eq $True  ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 0 ; & $Select }) } }
 
         # ----------------- #
         # Datagrid Handling #
