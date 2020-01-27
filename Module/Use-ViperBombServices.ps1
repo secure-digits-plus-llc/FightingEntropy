@@ -59,6 +59,7 @@
             [ Parameter ( ParameterSetName =       "Path" ) ] [ Switch ] $Path      ,
             [ Parameter ( ParameterSetName =    "Control" ) ] [ Switch ] $Control   ,
             [ Parameter ( ParameterSetName =  "Copyright" ) ] [ Switch ] $Copyright ,
+            [ Parameter ( ParameterSetName =    "Message" ) ] [ Switch ] $Message   ,
             [ Parameter ( ParameterSetName =       "Help" ) ] [ Switch ] $Help      ,
             [ Parameter ( ParameterSetName =   "Services" ) ] [ Switch ] $Services  ,
             [ Parameter ( ParameterSetName =      "Names" ) ] [ Switch ] $Names     ,
@@ -70,10 +71,10 @@
             PassedArgs           = If ( ! $Args ) { "N/A" } Else { $Args }
             TermsOfService       = 0
             DisplayActive        = 1
-            DisplayInactive      = 0
-            DisplaySkipped       = 0
+            DisplayInactive      = 1
+            DisplaySkipped       = 1
             MiscSimulate         = 0
-            MiscXbox             = 0
+            MiscXbox             = 1
             MiscChange           = 0
             MiscStopDisabled     = 0
             DevelDiagErrors      = 0
@@ -89,6 +90,7 @@
             BackupTemplateFile   = "Backup.csv"
             ServiceConfig        = "Black Viper (Sparks v1.0)"
             ScriptConfig         = "DevOPS (MC/SDP v1.0)"
+            Profile              = $Null
 
         }
 
@@ -140,7 +142,7 @@
         {
             [ PSCustomObject ]@{
 
-                Website = "http://www.blackviper.com"
+                Site       = "http://www.blackviper.com"
             }
         }
 
@@ -193,6 +195,16 @@
             "In other words, these terms of service must be accepted in order to use," ,
             "and in no circumstance may the author(s) be subjected to any liability  " ,
             "or damage resultant to its use.                                         " 
+        }
+
+        If ( $Message )
+        {
+            "This utility provides an interface to load and customize " ,
+                          "service configuration profiles, such as:`n"                ,
+                          "`n"                                                        ,
+                          "    Default: Black Viper (Sparks v1.0)`n"                  ,
+                          "    Custom: If in proper format`n"                         ,
+                          "    Backup: Created via this utility"               -join ''    
         }
 
         If ( $Help )
@@ -268,19 +280,22 @@
 
                 DataGrid = 'Index' , 'Scoped' , 'Profile' , 'Name' , 'Status' , 'StartType' , 'DelayedAutoStart' , 'DisplayName' , 'PathName' , 'Description'
 
-                Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , "PrintWorkflowUserSvc" , "UnistoreSvc" , 
-                              "UserDataSvc" , "WpnUserService" | % { $_ , $QMark -join '_' } ; 
+                Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , 
+                              "PrintWorkflowUserSvc" , "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { $_ , $QMark -join '_' } ; 
                               
-                              'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 
-                              'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 
-                              'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 'StateRepository' , 'SystemEventsBroker' ,
-	                          'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' ) | Sort
+                              'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 
+                              'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 
+                              'StateRepository' , 'SystemEventsBroker' , 'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' ) | Sort
             }
         }
 
         If ( $Types )
         {
-            @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
+            [ PSCustomObject ]@{
+
+                Types  = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
+                Titles = @( "Home" , "Pro" | % { "Win10 $_ | Default" } ; "Safe" , "Tweaked" | % { "Desktop | $_" } ; "Laptop | Safe" ) | % { "$_ Max" , "$_ Min" }
+            }
         }
         
         If ( $Names )
@@ -741,8 +756,8 @@
             [ Parameter ( ParameterSetName =    "Load" ) ] [ Switch ] $Load    ,
             [ Parameter ( ParameterSetname =  "Custom" ) ] [ String ] $Custom  )
 
-        $C      = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-        $X      = @( '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)' )
+        $C                   = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+        $X                   = @( '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)' )
 
         If ( $Default )
         {
@@ -777,10 +792,10 @@
 
         If ( $Load )
         {
-            $Scale = @{  
+            $Scale           = @{  
             
-                Base = Resolve-Script -Path    | % { "$( $_.Parent        )\Services" }
-                File = Resolve-Script -Control | % { "$( $_.ServiceConfig ).csv"      }
+                Base         = Resolve-Script -Path    | % { "$( $_.Parent        )\Services" }
+                File         = Resolve-Script -Control | % { "$( $_.ServiceConfig ).csv"      }
         
             } | % { IPCSV ( "{0}\{1}" -f $_.Base , $_.File ) } | % { 
             
@@ -874,9 +889,9 @@
             Xbox                             = @( )
         }
 
-        $Type                                = Resolve-Script -Types
+        $Types                               = Resolve-Script -Types | % { $_.Types }
 
-        $Type                                | % {
+        $Types                               | % {
         
             $Splat                           = @{
 
@@ -944,7 +959,7 @@
                 {
                     If ( $New.Scoped -eq "+" )
                     {
-                        ForEach ( $T in $Type )
+                        ForEach ( $T in $Types )
                         {
                             $Service.Profile.$T[$I] | % { 
 
@@ -978,10 +993,10 @@
                 "LT:S+"                          = $_.Profile."LT:S+"
                 "LT:S-"                          = $_.Profile."LT:S-"
                 Master                           = @( $_.Master )
-                Active                           = @( $_.Active )
-                Inactive                         = @( $_.Inactive )
-                Skipped                          = @( $_.Skipped )
-                XBox                             = @( $_.Xbox )
+                DisplayActive                    = @( $_.Active )
+                DisplayInactive                  = @( $_.Inactive )
+                DisplaySkipped                   = @( $_.Skipped )
+                MiscXbox                         = @( $_.Xbox )
             }
         }
 
@@ -1051,10 +1066,7 @@
         }
 
         $Control                                   = Resolve-Script -Control
-        $MSInfo                                    = Resolve-Windows -MSInfo
-        $System                                    = Resolve-Windows -System
-
-
+ 
         If ( $Control.TermsOfService -eq 0 )
         {
             Write-Theme -Array ( Resolve-Script -Copyright ) -Title "Terms of Service / Copyright" -Prompt "Press Enter to Continue" | % { 
@@ -1062,7 +1074,34 @@
                 If ( $_ -eq $True )
                 {
                     Write-Theme -Action "Accepted [+]" "Terms of Service" 11 11 15
-                    $Control.TermsOfService = 1
+                    
+                    $Control.TermsOfService        = 1
+
+                    $MSInfo                        = Resolve-Windows -MSInfo
+                    $System                        = Resolve-Windows -System
+                    $Path                          = Resolve-Script -Path | % { $_.Parent , "Services" -join '\' }
+                    $MadBomb                       = Resolve-Script -MadBomb
+                    $Company                       = Resolve-Script -Company
+                    $Sparks                        = Resolve-Script -Sparks
+        
+                    $Chassis                       = Resolve-Windows -Type | % { $_.Chassis }
+
+                    $Config                        = Get-ServiceProfile
+        
+                    $Service                       = @( )
+
+                    Resolve-Script -Types          | % {
+                
+                        $Types                     = $_.Types 
+                        $Titles                    = $_.Titles
+                    }
+
+                    Return-ViperBombGUI -Main      | % {
+        
+                        $Xaml                      = $_.Xaml
+                        $GUI                       = $_.GUI
+                        $Named                     = $_.Named
+                    }
                 }
 
                 Else 
@@ -1074,347 +1113,188 @@
             }
         }
 
-        # --------------------------------- #
-        # Load Service Profiles and the GUI #
-        # --------------------------------- #
+        $GUI.DisplayActive.IsChecked                = $True
+        $GUI.DisplayInactive.IsChecked              = $True
+        $GUI.DisplaySkipped.IsChecked               = $True
+        $GUI.CurrentOS.Text                         = "{0} ({1})" -f $MSInfo.Caption , $env:PROCESSOR_ARCHITECTURE.Replace( 'AMD' , 'x' )
+        $GUI.CurrentBuild.Text                      = $PSVersionTable.BuildVersion
+        $GUI.CurrentChassis.Text                    = $Chassis
+        $GUI.ServiceDialogEmpty.Text                = "Select a profile from the configuration menu to begin"
+        $GUI.ServiceDialogSearch.IsEnabled          = $False
 
-        #  $Console                                = Show-Console -Mode 5
-        
-        $Config                                    = Get-ServiceProfile
-
-        $Types                                     = Resolve-Script -Types
-
-        $Output                                    = @( )
-
-        Return-ViperBombGUI -Main                  | % {
-        
-            $Xaml                                  = $_.Xaml
-            $GUI                                   = $_.GUI
-            $Named                                 = $_.Named
-        }
-
-        # -------- #
-        # Defaults #
-        # -------- #
-
-        $Arch                                      = $env:PROCESSOR_ARCHITECTURE | % { $_.Replace( 'AMD' , 'x' ) }
-
-        $GUI.CurrentOS.Text                        = Resolve-Windows -MSInfo     | % { $_.Caption , "($Arch)" -join ' ' }
-        $GUI.CurrentBuild.Text                     = "$( $PSVersionTable.BuildVersion )"
-        $GUI.CurrentChassis.Text                   = Resolve-Windows -Type       | % { $_.Chassis }
-
-        $GUI.ServiceDialogEmpty.Text               = "Select a profile from the configuration menu to begin"
-        $GUI.ServiceDialogSearch.IsEnabled         = $False
-
-        # -------------------- #
-        # Datagrid ScriptBlock #
-        # -------------------- #
-
-        $DisableBox                                = {
-
-            $GUI.ServiceDialogSearch.IsEnabled     = $True
-            $GUI.ServiceDialogEmpty.Visibility     = "Collapsed"
-            $GUI.ServiceDialogEmpty.Text           = ""
-
-        }
-
-        $Select                                    = {
-
-            If ( ! $GUI.ServiceDialogSearch.IsEnabled ) 
-            { 
-                & $DisableBox 
-            }
-
-            If ( $GUI.ServiceDialogSearch.Text -ne "" )
-            {
-                $Reinject = $GUI.ServiceDialogSearch.Text
-            }
-
-            If ( $Output.Count -ne 0 )
-            {
-                $Output = @( )
-            }
-
-            $Selection                             = $Config.$Type
-            $List                                  = $Config.Master
-            $Service                               = @( )
-            
-            0..( $Config.Master.Count - 1 ) | % { 
-
-                $Service                          += [ PSCustomObject ]@{ 
-
-                    Index                          = $List[$_].Index
-                    Scoped                         = $Selection[$_].Scoped
-                    Profile                        = $Selection[$_].Profile
-                    Name                           = $Selection[$_].Name
-                    Status                         = $List[$_].Status
-                    StartType                      = $List[$_].StartType
-                    DelayedAutoStart               = $List[$_].DelayedAutoStart
-                    DisplayName                    = $List[$_].DisplayName
-                    PathName                       = $List[$_].PathName
-                    Description                    = $List[$_].Description
-                }
-            }
-
-            If ( $Control.DisplayActive -eq 0 )
-            {
-                $Output                           += $Config.Active
-            }
-
-            If ( $Control.DisplayInactive -eq 1 )
-            {
-                $Output                           += $Config.Inactive   
-            }
-
-            If ( $Control.DisplaySkipped -eq 1 )
-            {
-                $Output                           += $Config.Skipped
-            }
-
-            If ( $Control.MiscXbox -eq 1 )
-            {
-                $Output                           += $Config.Xbox
-            }
-
-            If ( $Output.Count -ne 0 )
-            {
-                $Output  = $Output | Sort
-
-                $Service = $Service | ? { $_.Name -in $Output }
-            }
-
-            $GUI.ServiceDialogGrid.ItemsSource     = $Null
-            $GUI.ServiceDialogGrid.ItemsSource     = $Service
-            $GUI.CurrentProfile.Text               = $Text
-
-            If ( $Reinject -ne $Null )
-            {
-                $GUI.ServiceDialogSearch.Text      = $Reinject
-                $Reinject                          = $Null
-            }
-
-        }
-
-        # ---------- #
-        # Menu Items #
-        # ---------- #
-
-        $GUI.MenuConfigHomeDefaultMax              | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[0]
-                $Text                              = "Win10 Home | Default Max"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigHomeDefaultMin              | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[1]
-                $Text                              = "Win10 Home | Default Min"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigProDefaultMax               | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[2]
-                $Text                              = "Win10 Pro | Default Max"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigProDefaultMin               | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[3]
-                $Text                              = "Win10 Pro | Default Min"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigDesktopSafeMax              | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[4]
-                $Text                              = "Desktop | Safe Max"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigDesktopSafeMin              | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[5]
-                $Text                              = "Desktop | Safe Min"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigDesktopTweakedMax           | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[6]
-                $Text                              = "Desktop | Tweaked Max"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigDesktopTweakedMin           | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[7]
-                $Text                              = "Desktop | Tweaked Min"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigLaptopSafeMax               | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[8]
-                $Text                              = "Laptop | Safe Max"
-                & $Select
-            })
-        }
-
-        $GUI.MenuConfigLaptopSafeMin               | % {
-
-            $_.Add_Click(
-            {
-                $Type                              = $Types[9]
-                $Text                              = "Laptop | Safe Min"
-                & $Select
-            })
-        }
-
-        $GUI.MenuInfoFeedback            | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.Base  } }) }
-        $GUI.MenuInfoFAQ                 | % { $_.Add_Click({ Resolve-Script -Company | % { Start $_.About } }) }
-        $GUI.MenuInfoAbout               | % {
-        
-            $_.Add_Click(
-            { 
-                @{  Title   = "About - ViperBomb Service Configuration Utility"
-                    Message = "This utility provides an interface to load and customize " ,
-                              "service configuration profiles, such as:`n"                ,
-                              "`n"                                                        ,
-                              "    Default: Black Viper (Sparks v1.0)`n"                  ,
-                              "    Custom: If in proper format`n"                         ,
-                              "    Backup: Created via this utility"             -join '' 
-                } | % { 
-                
-                    Show-Message -Title $_.Title -Message $_.Message 
-                }
-            })
-        }
-
-        $GUI.MenuInfoCopyright                      | % { $_.Add_Click{ Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) } }
-        $GUI.MenuInfoMadBombDonate                  | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Donate  } } }
-        $GUI.MenuInfoMadBombGitHub                  | % { $_.Add_Click{ Resolve-Script -MadBomb | % { Start $_.Base    } } }
-        $GUI.MenuInfoBlackViper                     | % { $_.Add_Click{ Resolve-Script -Sparks  | % { Start $_.WebSite } } }
-        $GUI.MenuInfoSecureDigitsPlus               | % { $_.Add_Click{ Resolve-Script -Company | % { Start $_.Site    } } }
-
-        # ---------------- #
-        # Preference Items #
-        # ---------------- #
-        
-        If ( $GUI.DisplayActive.IsChecked   -eq $False ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 1 ; & $Select }) } }
-        If ( $GUI.DisplayActive.IsChecked   -eq $True  ) { $GUI.DisplayActive    | % { $_.Add_Click({ $Control.DisplayActive   = 0 ; & $Select }) } }
-        If ( $GUI.DisplayInactive.IsChecked -eq $False ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 1 ; & $Select }) } }
-        If ( $GUI.DisplayInactive.IsChecked -eq $True  ) { $GUI.DisplayInactive  | % { $_.Add_Click({ $Control.DisplayInactive = 0 ; & $Select }) } }
-        If ( $GUI.DisplaySkipped.IsChecked  -eq $False ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 1 ; & $Select }) } }    
-        If ( $GUI.DisplaySkipped.IsChecked  -eq $True  ) { $GUI.DisplaySkipped   | % { $_.Add_Click({ $Control.DisplaySkipped  = 0 ; & $Select }) } }
-        If ( $GUI.MiscXbox.IsChecked        -eq $False ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 1 ; & $Select }) } }
-        If ( $GUI.MiscXbox.IsChecked        -eq $True  ) { $GUI.MiscXbox         | % { $_.Add_Click({ $Control.MiscXbox        = 0 ; & $Select }) } }
-
-        # ----------------- #
-        # Datagrid Handling #
-        # ----------------- #
-
-        $GUI.ServiceDialogSearch.Add_TextChanged(
+        Function Refresh-DataGrid
         {
-            If ( $GUI.ServiceDialogSearch.Text -ne "" )
-            {
-                $GUI.ServiceDialogSelect.IsEnabled  = $False
+            [ CmdLetBinding () ] Param (
 
-                $Filter                             = $GUI.ServiceDialogSelect.SelectedItem.Content
+                [ Parameter ( Mandatory ) ] [ Windows.Window ] $GUI     ,
+                [ Parameter ( Mandatory ) ] [ PSCustomObject ] $Control ,
+                [ Parameter ( Mandatory ) ] [ PSCustomObject ] $Config  )
+
+            If ( ! $GUI.ServiceDialogSearch.IsEnabled )
+            { 
+                $GUI.ServiceDialogSearch.IsEnabled  = $True
+                $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
+                $GUI.ServiceDialogEmpty.Text        = "" 
+            }
+
+            Resolve-Script -Types                   | % {
+
+                $Type                               = ( $_.Types  )[ $Control.Profile ]
+                $GUI.CurrentProfile.Text            = ( $_.Titles )[ $Control.Profile ]
+            }
+
+            $Service                                = @( )
+            
+            0..( $Config.Master.Count - 1 )         | % {
+
+                $Service                           += [ PSCustomObject ]@{ 
+
+                    Index                           = $Config.Master[$_].Index
+                    Scoped                          = $Config.$Type[$_].Scoped
+                    Profile                         = $Config.$Type[$_].Profile
+                    Name                            = $Config.$Type[$_].Name
+                    Status                          = $Config.Master[$_].Status
+                    StartType                       = $Config.Master[$_].StartType
+                    DelayedAutoStart                = $Config.Master[$_].DelayedAutoStart
+                    DisplayName                     = $Config.Master[$_].DisplayName
+                    PathName                        = $Config.Master[$_].PathName
+                    Description                     = $Config.Master[$_].Description
+                }
             }
 
             $GUI.ServiceDialogGrid.ItemsSource      = $Null
 
-            $Array                                  = @( )
+            $Output                                 = @( )
 
-            $Array                                 += $Service | ? { $_.$Filter -match $GUI.ServiceDialogSearch.Text }
+            If ( $Control.DisplayActive   -eq 1 ) { $Output += @( $Config.DisplayActive   ) }
+            If ( $Control.DisplayInactive -eq 1 ) { $Output += @( $Config.DisplayInactive ) }
+            If ( $Control.DisplaySkipped  -eq 1 ) { $Output += @( $Config.DisplaySkipped  ) }
+            If ( $Control.MiscXbox        -eq 1 ) { $Output += @( $Config.MiscXbox        ) }
 
-            If ( ( $Array -eq $Null ) -or ( $Array.Count -eq 0 ) )
+            If ( $Output.Count -gt 0 )
             {
-                $GUI.ServiceDialogGrid.Visibility   = "Collapsed"    
-                $GUI.ServiceDialogEmpty.Visibility  = "Visible"
-                $GUI.ServiceDialogEmpty.Text        = "No results found"
+                $Output                             = $Output  | ? { $_ -ne $Null } | Sort
+                $Service                            = $Service | ? { $_.Name -in $Output }
             }
 
-            If ( ( $Array -ne $Null ) -or ( $Array.Count -ge 1 ) )
-            {
-                $GUI.ServiceDialogGrid.Visibility   = "Visible"
-                $GUI.ServiceDialogGrid.ItemsSource  = $Array
-                $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
-                $GUI.ServiceDialogEmpty.Text        = ""
+            $GUI.ServiceDialogGrid.ItemsSource      = $Service
+
+            [ PSCustomObject ]@{ Service            = $Service }
+        }
+
+        $Select = { 
+        
+            If ( $Control.Profile -in 0..9 ) 
+            { 
+                Refresh-DataGrid -GUI $GUI -Control $Control -Config $Config | % { $Service = $_.Service } 
             }
 
-            If ( ( $Filter -ne $Null ) -and ( $GUI.ServiceDialogSearch.Text -eq "" ) )
+            Else
             {
-                $Filter                             = $Null
+                Show-Message -Title "Error" -Message "Select a profile"
+            }
+        }
+
+        $GUI.MenuInfoFeedback.Add_Click({             Start $Company.Base   })
+        $GUI.MenuInfoFAQ.Add_Click({                  Start $Company.About  })
+        $GUI.MenuInfoAbout.Add_Click({                Show-Message -Title "About - ViperBomb Service Configuration Utility" -Message ( Resolve-Script -Message ) })
+        $GUI.MenuInfoCopyright.Add_Click({            Show-Message -Title "Copyright" -Message ( ( Resolve-Script -Copyright ) -join "`n" ) })
+        $GUI.MenuInfoMadBombDonate.Add_Click({        Start $MadBomb.Donate  })
+        $GUI.MenuInfoMadBombGitHub.Add_Click({        Start $MadBomb.Base    })
+        $GUI.MenuInfoBlackViper.Add_Click({           Start $Sparks.Website  })
+        $GUI.MenuInfoSecureDigitsPlus.Add_Click({     Start $Company.Site    })
+
+        $GUI.MenuConfigHomeDefaultMax.Add_Click({     $Control.Profile         = 0 ; & $Select })
+        $GUI.MenuConfigHomeDefaultMin.Add_Click({     $Control.Profile         = 1 ; & $Select })
+        $GUI.MenuConfigProDefaultMax.Add_Click({      $Control.Profile         = 2 ; & $Select })
+        $GUI.MenuConfigProDefaultMin.Add_Click({      $Control.Profile         = 3 ; & $Select })
+        $GUI.MenuConfigDesktopSafeMax.Add_Click({     $Control.Profile         = 4 ; & $Select })
+        $GUI.MenuConfigDesktopSafeMin.Add_Click({     $Control.Profile         = 5 ; & $Select })
+        $GUI.MenuConfigDesktopTweakedMax.Add_Click({  $Control.Profile         = 6 ; & $Select })
+        $GUI.MenuConfigDesktopTweakedMin.Add_Click({  $Control.Profile         = 7 ; & $Select })
+        $GUI.MenuConfigLaptopSafeMax.Add_Click({      $Control.Profile         = 8 ; & $Select })
+        $GUI.MenuConfigLaptopSafeMin.Add_Click({      $Control.Profile         = 9 ; & $Select })
+        $GUI.DisplayActive.Add_Checked({              $Control.DisplayActive   = 1 ; & $Select })
+        $GUI.DisplayActive.Add_Unchecked({            $Control.DisplayActive   = 0 ; & $Select })
+        $GUI.DisplayInactive.Add_Checked({            $Control.DisplayInactive = 1 ; & $Select })
+        $GUI.DisplayInactive.Add_Unchecked({          $Control.DisplayInactive = 0 ; & $Select })
+        $GUI.DisplaySkipped.Add_Checked({             $Control.DisplaySkipped  = 1 ; & $Select })
+        $GUI.DisplaySkipped.Add_Unchecked({           $Control.DisplaySkipped  = 0 ; & $Select })
+        $GUI.MiscXbox.Add_Checked({                   $Control.MiscXbox        = 1 ; & $Select })
+        $GUI.MiscXbox.Add_Unchecked({                 $Control.MiscXbox        = 0 ; & $Select })
+
+        $GUI.ServiceDialogSearch.Add_TextChanged(
+        {
+            If ( ( $GUI.ServiceDialogSearch.Text -ne "" ) -and ( $GUI.ServiceDialogSelect.IsEnabled -eq $True ) )
+            {
+                $GUI.ServiceDialogSelect.IsEnabled      = $False
+                $Filter                                 = $GUI.ServiceDialogSelect.SelectedItem.Content
+                $Immute                                 = $GUI.ServiceDialogGrid.ItemsSource.Clone()
+            }
+
+            If ( $GUI.ServiceDialogSearch.Text -ne "" )
+            {
+                $GUI.ServiceDialogGrid.ItemsSource      = $Null
+                $Text                                   = $GUI.ServiceDialogSearch.Text
+
+                $Return                                 = $Immute.Clone() | ? { $_.$Filter -match $Text }
+
+                $Out                                    = @{  
+                
+                    $True  = "Visible"   , $Return , "Collapsed" , "" 
+                    $False = "Collapsed" , $Null   , "Visible"   , "No results found" 
+                    
+                }[ $Return.Count -gt 0 ]
+
+            }
+
+            If ( ( $GUI.ServiceDialogSearch.Text -eq "" ) -and ( $GUI.ServiceDialogSelect.IsEnabled -ne $True ) )
+            {
                 $GUI.ServiceDialogSelect.IsEnabled  = $True
-                $GUI.ServiceDialogGrid.ItemsSource  = $Null
-                $GUI.ServiceDialogGrid.ItemsSource  = $Service
+                $Out                                = "Visible" , $Immute.Clone() , "Collapsed" , ""
             }
+
+            $GUI.ServiceDialogGrid.Visibility       = $Out[0]
+            $GUI.ServiceDialogGrid.ItemsSource      = $Out[1]
+            $GUI.ServiceDialogEmpty.Visibility      = $Out[2]
+            $GUI.ServiceDialogEmpty.Text            = $Out[3]
         })
+
 
         # ----------- #
         # Preferences #
         # ----------- #
 
-        # Save Custom Logging Service File
-
-        $GUI.LoggingServiceBrowse.Add_Click(
+        Function Open-FileDialog
         {
-            $GUI.LoggingServiceFile                 | % {
+            [ CmdLetBinding() ] Param ( [ ValidateNotNullOrEmpty () ] [ Parameter ( Mandatory ) ] [ PSCustomObject ] $Item )
+
+            $Item.Item                              | % {
                     
                 $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingServiceFile } ) -join '_'
+                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , $Item.Object -join '_'
             }
 
             $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
                     
             $Dialog                                 | % {
 
-                $_.Title                            = "Designate Service Logging Output"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'log (*.log) | *.log'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Service.log"
+                $_.Title                            = $Item.Caption
+                $_.InitialDirectory                 = $Path
+                $_.Filter                           = $Item.FileType
+                $_.Filename                         = ( Get-Date -UFormat "%Y%m%d-%H_%M" ) , $Item.FileName -join '_'
             }
 
-            $X = $Dialog.ShowDialog()
+            $X                                      = $Dialog.ShowDialog()
 
             If ( $X -eq "OK" )
             {
-                $GUI.LoggingServiceFile.Text        = $Dialog.Filename
+                $Item.Item.Text                     = $Dialog.Filename
             }
 
             Else
             {
-                $GUI.LoggingServiceFile             | % {
+                $Item.Item                          | % {
                           
                     $_.IsEnabled                    = $False
                     $_.Text                         = "<Activate to designate a different file name/path>"
@@ -1422,124 +1302,27 @@
             }
 
             $Dialog.Dispose()
-        })
+            
+        }
 
-        # Save Custom Logging Script File
+        $ItemDialog                                 = 0..3
+        
+        0..3 | % { 
 
-        $GUI.LoggingScriptBrowse.Add_Click(
-        {
-            $GUI.LoggingScriptFile                  | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.LoggingScriptFile } ) -join '_'
-            }
+            $ItemDialog[$_] = [ PSCustomObject ]@{ 
+            
+                Item     = @( $GUI     | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } )[$_]
+                Object   = @( $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } )[$_]
+                Caption  = @( "Service Logging" , "Script Logging" , "Registry Backup" , "Template Backup" | % { "Designate $_ File" } )[$_]
+                FileType = @( "log" , "log" , "reg" , "csv" | % { "$_ (*.$_) | *.$_" } )[$_]
+                FileName = @( "Service.log" , "Script.log" , "Backup.reg" , "Template.csv" )[$_]
+            } 
+        }
 
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Script Logging Output"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'log (*.log) | *.log'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Script.log"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.LoggingScriptFile.Text         = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.LoggingScriptFile              | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
-
-        # Save Custom Backup Registry File ( *.reg )
-
-        $GUI.BackupRegistryBrowse.Add_Click(
-        {
-            $GUI.BackupRegistryFile                 | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupRegistryFile } ) -join '_'
-            }
-
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Registry Backup File"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'reg (*.reg) | *.reg'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Backup.reg"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.BackupRegistryFile.Text        = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.BackupRegistryFile             | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
-
-        # Save Custom Backup Template File ( *.reg )
-
-        $GUI.BackupTemplateBrowse.Add_Click(
-        {
-            $GUI.BackupTemplateFile                 | % {
-                    
-                $_.IsEnabled                        = $True
-                $_.Text                             = ( Get-Date -UFormat "%Y%m%d_%H%M" ) , ( Resolve-Script -Control | % { $_.BackupTemplateFile } ) -join '_'
-            }
-
-            $Dialog                                 = New-Object System.Windows.Forms.SaveFileDialog
-                    
-            $Dialog                                 | % {
-
-                $_.Title                            = "Designate Template Backup File"
-                $_.InitialDirectory                 = Resolve-Script -Path | % { "$( $_.Parent )\Services" }
-                $_.Filter                           = 'csv (*.csv) | *.csv'
-                $_.Filename                         = "$( Get-Date -UFormat "%Y%m%d-%H_%M" )_Template.csv"
-            }
-
-            $X = $Dialog.ShowDialog()
-
-            If ( $X -eq "OK" )
-            {
-                $GUI.BackupTemplateFile.Text        = $Dialog.Filename
-            }
-
-            Else
-            {
-                $GUI.BackupTemplateFile             | % {
-                          
-                    $_.IsEnabled                    = $False
-                    $_.Text                         = "<Activate to designate a different file name/path>"
-                }
-            }
-
-            $Dialog.Dispose()
-        })
+        $GUI.LoggingServiceBrowse.Add_Click({ Open-FileDialog -Item $ItemDialog[0] })
+        $GUI.LoggingScriptBrowse.Add_Click({  Open-FileDialog -Item $ItemDialog[1] })
+        $GUI.BackupRegistryBrowse.Add_Click({ Open-FileDialog -Item $ItemDialog[2] })
+        $GUI.BackupTemplateBrowse.Add_Click({ Open-FileDialog -Item $ItemDialog[3] })
 
         #$GUI.MiscSimulate
         #$GUI.MiscChange
@@ -1571,21 +1354,11 @@
         
         # ------------------------ #
 
-        $GUI.ServiceLabel.Text                      = $GUI.ServiceProfile.SelectedItem.Content
+        $GUI.ServiceLabel.Text = $GUI.ServiceProfile.SelectedItem.Content
+        $GUI.ServiceProfile.Add_SelectionChanged( { $GUI.ServiceLabel.Text = $GUI.ServiceProfile.SelectedItem.Content })
 
-        $GUI.ServiceProfile.Add_SelectionChanged(
-        {
-            $GUI.ServiceLabel.Text                  = $GUI.ServiceProfile.SelectedItem.Content
-        })
-
-        # ------------------------ #
-
-        $GUI.ScriptLabel.Text                       = $GUI.ScriptProfile.SelectedItem.Content
-
-        $GUI.ScriptProfile.Add_SelectionChanged(
-        {
-            $GUI.ScriptLabel.Text                   = $GUI.ScriptProfile.SelectedItem.Content
-        })
+        $GUI.ScriptLabel.Text  = $GUI.ScriptProfile.SelectedItem.Content
+        $GUI.ScriptProfile.Add_SelectionChanged(  { $GUI.ScriptLabel.Text  = $GUI.ScriptProfile.SelectedItem.Content })
 
         # ------------------------ #
 
@@ -1594,7 +1367,7 @@
 
         #$GUI.Start
 
-        $GUI.Cancel.Add_Click({ $GUI.DialogResult   = $False })
+        $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
 
         $GUI | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } | % { 
         
