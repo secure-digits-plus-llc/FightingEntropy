@@ -1,4 +1,4 @@
-<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+﻿<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -3382,17 +3382,7 @@
             PreferredLifeTime            = [ TimeSpan ]::MaxValue 
         }
 
-        New-NetIpAddress @IPAddress
-    
-        $Splat                           = @{    
-        
-            InterfaceIndex               = $Adapter
-            ServerAddresses              = "1.1.1.1" , "1.0.0.1" 
-        }
-
-        Set-DNSClientServerAddress @Splat
-    
-        0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
+        New-NetIpAddress @IPAddress            $Splat                           = @{                        InterfaceIndex               = $Adapter            ServerAddresses              = "1.1.1.1" , "1.0.0.1"         }        Set-DNSClientServerAddress @Splat            0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
 
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -3541,7 +3531,7 @@
                 $X      = @( 3 , 9 , 9 , 9 , 6 , 4 , 5 , 6 , 6 , 5 , 5 , 6 , 7 , 7 , 6 , 6 , 7 , 7 , 6 ) | % { $SP[$_] }
 
                 $Y      = @( "<$GB" , " $HD = 'Company Information / Certificate Generation'" , "  $W = '330'" , " $H = '160'" , "  $( $VAL[0] ) >" , 
-                             "<$G>" , "<$GRD>" ; "2" , "" | % { "<$RD $H = '$_*' />" } ; "</$GRD>" , "<$G $GR = '0' >" , "<$GCD>" ; 
+                             "<$G>" , "<$GRD>" ; 2 , "" | % { "<$RD $H = '$_*' />" } ; "</$GRD>" , "<$G $GR = '0' >" , "<$GCD>" ; 
                              "" , "2.5" | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" )
 
                 $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
@@ -3859,9 +3849,9 @@
         If ( $DCFound ) # Domain Controller Found                                    [
         {#___________________________________________________________________________/
 
-             # ____   _________________________
-             #//¯¯\\__[________ Header _______]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+             #  ____   _________________________
+             # //¯¯\\__[________ Header _______]
+             # ¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
                 $X      = @( 2 ; @( 13 ) * 4 ; 10 , 13 , 13 , 9 ) | % { $SP[$_] }
 
                 $Y      = "<Window" , "  xmlns = '$Schema/presentation'" , "xmlns:x = '$Schema'" , "  $W = '350'" ,
@@ -3869,9 +3859,9 @@
                           "  WindowStartupLocation = 'CenterScreen' >"
 
                 $XML[0] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[_______ Framing _______]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+             #  ____   _________________________
+             # //¯¯\\__[_______ Framing _______]
+             # ¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
                 $X      = @( 4 , 5 , 6 , 6 , 5 , 5 , 6 , 7 , 7 , 6 , 6 , 7 , 7 , 7 , 6 ) | % { $SP[$_] }
 
                 $Y      = @( "<$G>" , "<$GRD>" ; "3" , "" | % { "<$RD $H = '$_*' />" } ; "</$GRD>" , "<$G $GR = '0' >" ,
@@ -3879,9 +3869,9 @@
                           0..2 | % { "<$RD $H = '*' />" } ; "</$GRD>" )
 
                 $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[      User Input       ]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+             #  ____   _________________________
+             # //¯¯\\__[      User Input       ]
+             # ¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
                 $X      = 0..2 | % { 6 , 7 , 6 } | % { $SP[$_] }
 
                 $Y      = ( 0 , "Controller" , "DC" ) , ( 1 , "DNS" , "Domain" ) , ( 2 , "NetBIOS" , "NetBIOS" ) | % {
@@ -4265,29 +4255,57 @@
             $X = @(6..9;9,8,8,9;@(10)*3;9;9..11;11,10,10,11;@(12,13,13,13,12)*2;12,12,11,10;10..12;@(13)*3;@(@(12)*4;11..9;9..11;11,10;10..12;12..10;10..12;
             @(13)*4;12)*2;@(12)*4;11..8;8..10;10;@(9;9..12;12,12,11,11,12,12;@(11)*7;10)*2;9..6) | % { $SP[$_] }
 
-            $Y = @( "<TabItem $HD = 'Preferences'>" , "<$G>" , "<$GRD>" ; 1.25 , "" | % { "<$RD $H = '$_*'/>" } ; "</$GRD>" , "<$G $GR = '0'>" , "<$GCD>" ; 
-            0..2 | % { "<$CD $W = '*'/>" } ; "</$GCD>" , "<$G $GC = '2'>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*'/>" } ; 
-            "</$GRD>" , "<$GB $GR = '0' $HD = 'Bypass / Checks [ Risky Options ]' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '*'/>" } ; 
-            "</$GRD>" , "<$CB   $GR = '0' $( $VAL[1] ) $H = '24' $Q = 'BypassEdition'>" ; @( "Override Edition Check' IsSelected = 'True" ; 
-            "Home" , "Pro" | % { "Windows 10 $_" } ) | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" ; ( 1 , "Build" , "Skip Build/Version Check" ) ,
-            ( 2 , "Laptop" , "Enable Laptop Tweaks" ) | % { "<$CHK   $GR = '$( $_[0] )' $MA = '5' $Q = 'Bypass$( $_[1] )' $CO = '$( $_[2] )'/>" } ; 
-            "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Display' $MA = '5' >" , "<$G>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; ( 0 , "Active" ) , 
-            ( 1 , "Inactive" ) , ( 2 , "Skipped" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Display$( $_[1] )' $CO = 'Show $( $_[1] ) Services' />" } ; 
-            "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '0'>" , "<$GRD>" ; "" , 2 | % { "<$RD $H = '*'/>" } ; "</$GRD>" ; 
-            "<$GB $GR = '0' $HD = 'Service Configuration' $MA = '5'>" , "<$CB  $GR = '1' $Q = 'ServiceProfile' $H ='24'>" ; 
-            "Black Viper (Sparks v1.0)' IsSelected = 'True" , "DevOPS (MD/SDP v1.0)' IsEnabled = 'False" | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , 
-            "<$GB $GR = '1' $HD = 'Miscellaneous' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..3 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; 
+            $Y = @( "<TabItem $HD = 'Preferences'>" , "<$G>" , "<$GRD>" ; 
+
+            1.25 , "" | % { "<$RD $H = '$_*'/>" } ; "</$GRD>" , "<$G $GR = '0'>" , "<$GCD>" ; 
+            0..2      | % { "<$CD $W = '*'/>"   } ; "</$GCD>" , "<$G $GC = '2'>" , "<$GRD>" ; 
+            0..1      | % { "<$RD $H = '*'/>"   } ; "</$GRD>" , "<$GB $GR = '0' $HD = 'Bypass / Checks [ Risky Options ]' $MA = '5'>" , "<$G>" , "<$GRD>" ; 
+            0..2      | % { "<$RD $H = '*'/>"   } ; "</$GRD>" , "<$CB   $GR = '0' $($VAL[1]) $H = '24' $Q = 'BypassEdition'>" ; 
+
+            @( "Override Edition Check' IsSelected = 'True" ; "Home" , "Pro" | % { "Windows 10 $_" } ) | % { "<$CBI $CO = '$_'/>" } ; "</$CB>" ; 
+
+            ( 1 , "Build" , "Skip Build/Version Check" ) , ( 2 , "Laptop" , "Enable Laptop Tweaks" ) | % { 
+
+                "<$CHK   $GR = '$($_[0])' $MA = '5' $Q = 'Bypass$($_[1])' $CO = '$($_[2])'/>" } ; 
+    
+            "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Display' $MA = '5' >" , "<$G>" , "<$GRD>" ; 
+
+            0..2      | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; 
+
+            ( 0 , "Active" ) , ( 1 , "Inactive" ) , ( 2 , "Skipped" ) | % { 
+            
+                "<$CHK  $GR = '$($_[0])' $MA = '5' $Q = 'Display$($_[1])' $CO = 'Show $($_[1]) Services' />" } ; 
+
+            "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '0'>" , "<$GRD>" ;
+
+            1.5 , 2   | % { "<$RD $H = '*'/>" } ; "</$GRD>" ; 
+            "<$GB $GR = '0' $HD = 'Service Configuration' $MA = '5'>" , 
+            "<$CB  $GR = '1' $Q = 'ServiceProfile' $H ='24'>" ; 
+            "Black Viper (Sparks v1.0)' IsSelected = 'True" , "DevOPS (MC/SDP v1.0)' IsEnabled = 'False" | % { "<$CBI $CO = '$_'/>" } ; 
+            "</$CB>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Miscellaneous' $MA = '5'>" , "<$G>" , "<$GRD>" ; 
+            0..3      | % { "<$RD $H = '30'/>" } ; "</$GRD>" ;
+
             ( 0 , "Simulate" , "Simulate Changes [ Dry Run ]" ) , ( 1 , "Xbox" , "Skip All Xbox Services" ) , ( 2 , "Change" , "Allow Change of Service State" ) , 
             ( 3 , "StopDisabled" , "Stop Disabled Services" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Misc$( $_[1] )'     $CO = '$( $_[2] )'   />" } ; 
-            "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '1'>" , "<$GRD>" ; "" , 2 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , "<$GB $GR = '0' $HD = 'User Interface' $MA = '5'>" , 
-            "<$CB  $GR = '1' $Q = 'ScriptProfile' $H = '24' >" ; "DevOPS (MC/SDP v1.0)' IsSelected =  'True" , "MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False" | % { 
-            "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Development' $MA = '5'>" , "<$G>" , "<$GRD>" ; 0..3 | % { "<$RD $H = '30'/>" } ; 
-            "</$GRD>" ; ( 0 , "DiagErrors" , "Diagnostic Output [ On Error ]" ) , ( 1 , "Log" , "Enable Development Logging" ) , ( 2 , "Console" , "Enable Console" ) , 
+
+            "</$G>" , "</$GB>" , "</$G>" , "<$G $GC = '1'>" , "<$GRD>" ; 
+            
+            1.5 , 2   | % { "<$RD $H = '*'/>" } ; 
+            
+            "</$GRD>" , "<$GB $GR = '0' $HD = 'User Interface' $MA = '5'>" , 
+            
+            "<$CB  $GR = '1' $Q = 'ScriptProfile' $H = '24' >" ;
+            "DevOPS (MC/SDP v1.0)' IsSelected =  'True" , "MadBomb (MadBomb122 v1.0)' IsEnabled  = 'False" | % { 
+            "<$CBI $CO = '$_'/>" } ; "</$CB>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Development' $MA = '5'>" , "<$G>" , "<$GRD>" ; 
+            
+            0..3 | % { "<$RD $H = '30'/>" } ; "</$GRD>" ; 
+            
+            ( 0 , "DiagErrors" , "Diagnostic Output [ On Error ]" ) , ( 1 , "Log" , "Enable Development Logging" ) , ( 2 , "Console" , "Enable Console" ) , 
             ( 3 , "DiagReport" , "Enable Diagnostic" ) | % { "<$CHK  $GR = '$( $_[0] )' $MA = '5' $Q = 'Devel$( $_[1] )'  $CO = '$( $_[2] )' />" } ; "</$G>" , "</$GB>" , 
             "</$G>" , "</$G>" , "<$G $GR = '1'>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*'/>" } ; "</$GRD>" , 
             "<$GB $GR = '0' $HD = 'Logging: Create logs for all changes made via this utility' $MA = '5'>" , "<$G>" , "<$GCD>" ; 
             
-            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 1.5 , 2.0 | % { "<$RD $H = '$_*' />" } ; "</$GRD>" ; 
+            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
             
             ( 0 , "Service" ) , ( 1 , "Script" ) | % { 
 
@@ -4297,7 +4315,7 @@
                 
             "</$G>" , "</$GB>" , "<$GB $GR = '1' $HD = 'Backup: Save your current Service Configuration' $MA = '5'>" , "<$G>" , "<$GCD>" ; 
 
-            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 1.5 , 2.0 | % { "<$RD $H = '$_*' />" } ; "</$GRD>" ; 
+            75 , "*" , "6*" | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
             
             ( 0 , "Registry" ) , ( 1 , "Template" ) | % {
 
@@ -4325,7 +4343,7 @@
              #//¯¯\\__[__ Diagnostics Panel __]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-             $X = @( 6..8;9..4 ) | % { $SP[$_] }
+             $X = @( 6..8 ; 9..4 ) | % { $SP[$_] }
 
              $Y = @( "<TabItem Header = 'Diagnostics'>" , "<$G $BG = '#FFE5E5E5'>" , "<ScrollViewer VerticalScrollBarVisibility = 'Visible'>" , 
              "<TextBlock Name = 'DiagnosticOutput' TextTrimming = 'CharacterEllipsis' Background = 'White' FontFamily = 'Lucida Console'/>" , "</ScrollViewer>" , 
@@ -4648,7 +4666,7 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Install-DSCRoot # Provisioned installation of Hybrid-DSC __________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        
+
         $GUI = Get-XAML -DSCRoot | % { Convert-XAMLToWindow -XAML $_ -NE ( Find-XAMLNamedElements -Xaml $_ ) -PassThru }
 
         $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
@@ -4660,7 +4678,7 @@
                 "Installation Location" | % { 
                 
                     Show-Message -Title "$_ Missing" -Message "You must enter a $_" 
-                } 
+                }
             }   
             
             Else

@@ -1,4 +1,4 @@
-# ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+﻿# ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 #//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 #\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 #//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -848,8 +848,7 @@
 
         $Names | % { $Return | Add-Member -MemberType NoteProperty -Name $_ -Value "-" }
 
-        $Return
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____ 
+        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____ 
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -1006,17 +1005,9 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Show-Console #_____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
+        Param ( [ Bool ] $Switch )
 
-            [ ValidateSet ( 0 , 5 )   ]
-            [ Parameter ( Mandatory ) ] [ Int ] $Mode )
-
-    Add-Type -Name Window -Namespace Console -MemberDefinition @"
-        [DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();
-        [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
-"@
-
-    [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , 5 )
+            [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , $( If ( $Switch ) { 5 } Else { 0 } ) )
     
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -1024,10 +1015,6 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Load-MadBombRevisedGUI #___________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        
-        # ------------------------------------------------------ #
-        # Collect environment variables and script prerequisites #
-        # ------------------------------------------------------ #
 
         # OS Version
 
@@ -1038,6 +1025,19 @@
                 Write-Theme -Action "Exception [!]" "Only Windows 10 Client is currently supported" 12 4 15
                 Read-Host "Press Enter to Exit"
                 Break
+            }
+
+            Else
+            {
+                $Splat               = @{ 
+                
+                    Name             = "Window"
+                    Namespace        = "Console"
+                    MemberDefinition = '[DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();' , 
+                                       '[DllImport("user32.dll")]   public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);' -join "`n"
+                }
+
+                Add-Type @Splat
             }
         }
 
@@ -1113,14 +1113,20 @@
             }
         }
 
+        # Defaults
+
         $GUI.DisplayActive.IsChecked                = $True
         $GUI.DisplayInactive.IsChecked              = $True
         $GUI.DisplaySkipped.IsChecked               = $True
+
         $GUI.CurrentOS.Text                         = "{0} ({1})" -f $MSInfo.Caption , $env:PROCESSOR_ARCHITECTURE.Replace( 'AMD' , 'x' )
         $GUI.CurrentBuild.Text                      = $PSVersionTable.BuildVersion
         $GUI.CurrentChassis.Text                    = $Chassis
+
         $GUI.ServiceDialogEmpty.Text                = "Select a profile from the configuration menu to begin"
         $GUI.ServiceDialogSearch.IsEnabled          = $False
+        $GUI.ServiceLabel.Text                      = $GUI.ServiceProfile.SelectedItem.Content
+        $GUI.ScriptLabel.Text                       = $GUI.ScriptProfile.SelectedItem.Content
 
         Function Refresh-DataGrid
         {
@@ -1182,16 +1188,11 @@
             [ PSCustomObject ]@{ Service            = $Service }
         }
 
-        $Select = { 
+        $Select = {
         
             If ( $Control.Profile -in 0..9 ) 
             { 
                 Refresh-DataGrid -GUI $GUI -Control $Control -Config $Config | % { $Service = $_.Service } 
-            }
-
-            Else
-            {
-                Show-Message -Title "Error" -Message "Select a profile"
             }
         }
 
@@ -1214,14 +1215,15 @@
         $GUI.MenuConfigDesktopTweakedMin.Add_Click({  $Control.Profile         = 7 ; & $Select })
         $GUI.MenuConfigLaptopSafeMax.Add_Click({      $Control.Profile         = 8 ; & $Select })
         $GUI.MenuConfigLaptopSafeMin.Add_Click({      $Control.Profile         = 9 ; & $Select })
-        $GUI.DisplayActive.Add_Checked({              $Control.DisplayActive   = 1 ; & $Select })
+
         $GUI.DisplayActive.Add_Unchecked({            $Control.DisplayActive   = 0 ; & $Select })
-        $GUI.DisplayInactive.Add_Checked({            $Control.DisplayInactive = 1 ; & $Select })
+        $GUI.DisplayActive.Add_Checked({              $Control.DisplayActive   = 1 ; & $Select })
         $GUI.DisplayInactive.Add_Unchecked({          $Control.DisplayInactive = 0 ; & $Select })
-        $GUI.DisplaySkipped.Add_Checked({             $Control.DisplaySkipped  = 1 ; & $Select })
+        $GUI.DisplayInactive.Add_Checked({            $Control.DisplayInactive = 1 ; & $Select })
         $GUI.DisplaySkipped.Add_Unchecked({           $Control.DisplaySkipped  = 0 ; & $Select })
-        $GUI.MiscXbox.Add_Checked({                   $Control.MiscXbox        = 1 ; & $Select })
+        $GUI.DisplaySkipped.Add_Checked({             $Control.DisplaySkipped  = 1 ; & $Select })
         $GUI.MiscXbox.Add_Unchecked({                 $Control.MiscXbox        = 0 ; & $Select })
+        $GUI.MiscXbox.Add_Checked({                   $Control.MiscXbox        = 1 ; & $Select })
 
         $GUI.ServiceDialogSearch.Add_TextChanged(
         {
@@ -1260,14 +1262,30 @@
             $GUI.ServiceDialogEmpty.Text            = $Out[3]
         })
 
-
         # ----------- #
         # Preferences #
         # ----------- #
 
         Function Open-FileDialog
         {
-            [ CmdLetBinding() ] Param ( [ ValidateNotNullOrEmpty () ] [ Parameter ( Mandatory ) ] [ PSCustomObject ] $Item )
+            [ CmdLetBinding() ] Param ( 
+
+                [ Validateset( 0 , 1 , 2 , 3 ) ]
+                [ Parameter (      Mandatory ) ] [            Int ] $ItemDialog , 
+                [ Parameter (      Mandatory ) ] [ Windows.Window ] $GUI        ,
+                [ Parameter (      Mandatory ) ] [ PSCustomObject ] $Control    )
+
+            $ItemDialog      | % { 
+
+                $Item        = [ PSCustomObject ]@{ 
+            
+                    Item     = ( $GUI.LoggingServiceFile , $GUI.LoggingScriptFile , $GUI.BackupRegistryFile , $GUI.BackupTemplateFile )[$_]
+                    Object   = ( $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } )[$_]
+                    Caption  = @( "Service Logging" , "Script Logging" , "Registry Backup" , "Template Backup" | % { "Designate $_ File" } )[$_]
+                    FileType = @( "log" , "log" , "reg" , "csv" | % { "$_ (*.$_) | *.$_" } )[$_]
+                    FileName = @( "Service.log" , "Script.log" , "Backup.reg" , "Template.csv" )[$_]
+                }
+            }
 
             $Item.Item                              | % {
                     
@@ -1305,24 +1323,10 @@
             
         }
 
-        $ItemDialog                                 = 0..3
-        
-        0..3 | % { 
-
-            $ItemDialog[$_] = [ PSCustomObject ]@{ 
-            
-                Item     = @( $GUI     | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } )[$_]
-                Object   = @( $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile , $_.BackupRegistryFile , $_.BackupTemplateFile } )[$_]
-                Caption  = @( "Service Logging" , "Script Logging" , "Registry Backup" , "Template Backup" | % { "Designate $_ File" } )[$_]
-                FileType = @( "log" , "log" , "reg" , "csv" | % { "$_ (*.$_) | *.$_" } )[$_]
-                FileName = @( "Service.log" , "Script.log" , "Backup.reg" , "Template.csv" )[$_]
-            } 
-        }
-
-        $GUI.LoggingServiceBrowse.Add_Click({ Open-FileDialog -Item $ItemDialog[0] })
-        $GUI.LoggingScriptBrowse.Add_Click({  Open-FileDialog -Item $ItemDialog[1] })
-        $GUI.BackupRegistryBrowse.Add_Click({ Open-FileDialog -Item $ItemDialog[2] })
-        $GUI.BackupTemplateBrowse.Add_Click({ Open-FileDialog -Item $ItemDialog[3] })
+        $GUI.LoggingServiceBrowse.Add_Click({ Open-FileDialog -Item 0 -GUI $GUI -Control $Control })
+        $GUI.LoggingScriptBrowse.Add_Click({  Open-FileDialog -Item 1 -GUI $GUI -Control $Control })
+        $GUI.BackupRegistryBrowse.Add_Click({ Open-FileDialog -Item 2 -GUI $GUI -Control $Control })
+        $GUI.BackupTemplateBrowse.Add_Click({ Open-FileDialog -Item 3 -GUI $GUI -Control $Control })
 
         #$GUI.MiscSimulate
         #$GUI.MiscChange
@@ -1354,10 +1358,8 @@
         
         # ------------------------ #
 
-        $GUI.ServiceLabel.Text = $GUI.ServiceProfile.SelectedItem.Content
+        
         $GUI.ServiceProfile.Add_SelectionChanged( { $GUI.ServiceLabel.Text = $GUI.ServiceProfile.SelectedItem.Content })
-
-        $GUI.ScriptLabel.Text  = $GUI.ScriptProfile.SelectedItem.Content
         $GUI.ScriptProfile.Add_SelectionChanged(  { $GUI.ScriptLabel.Text  = $GUI.ScriptProfile.SelectedItem.Content })
 
         # ------------------------ #
