@@ -5231,7 +5231,7 @@
         {   
             If ( Test-Path $Code.Directory )
             {
-                Write-Theme -Action "Exception [!]" "Directory must not exist, breaking"
+                Write-Theme -Action "Exception [!]" "Directory must not exist, breaking" 12 4 15
                 
                 Read-Host "Press Enter to Return"
                 
@@ -5244,7 +5244,7 @@
 
                 If ( $? -eq $True )
                 {
-                    Write-Theme -Action "Successful [+]" "Directory Created"
+                    Write-Theme -Action "Successful [+]" "Directory Created" 11 11 15
                 }
 
                 Else
@@ -5257,16 +5257,16 @@
             
             # Create the Samba Share
 
-            $NSMBS = @{ Name        = $Code.Samba 
+            $Splat = @{ Name        = $Code.Samba 
                         Path        = $Code.Directory 
                         FullAccess  = "Administrators" 
                         Description = $Code.Description }
     
-            NSMBS @NSMBS
+            NSMBS @Splat
 
             If ( $? -eq $True )
             {
-                Write-Theme -Action "Successful [+]" "Samba Share Created"
+                Write-Theme -Action "Successful [+]" "Samba Share Created" 11 11 15
             }
 
             Else
@@ -5278,29 +5278,29 @@
 
             # Create the PSDrive/MDTPersistent Drive
             
-            $NDR = @{   Name        = $Code.DSDrive.Replace( ':' , '' )
+            $Splat = @{ Name        = $Code.DSDrive.Replace( ':' , '' )
                         PSProvider  = "MDTProvider"
                         Root        = $Code.Directory
                         Description = $Code.Description
                         NetworkPath = "\\$ENV:ComputerName\$( $Code.Samba )"
                         Verbose     = $True }
 
-            NDR @NDR | Add-MDTPersistentDrive -VB
+            NDR @Splat | Add-MDTPersistentDrive -VB
 
             # Scaffold Hybrid-DSC Deployment Share Root Settings, Copy Designated/Default Background & Logo
             
             $Code | % { 
 
-                $DSC = "$( $_.Directory )\$( $_.Company )"
+                $DSC = $_.Directory , $_.Company -join '\'
 
                 NI $DSC -ItemType Directory 
 
                 ( 0 , "Resources" ) , ( 1 , "Tools" ) , ( 2 , "Images" ) , ( 3 , "Profiles" ) , ( 4 , "Certificates" ) , ( 5 , "Applications" ) | % { 
 
-                    NI "$DSC\($( $_[0] ))$( $_[1] )" -ItemType Directory
+                    NI ( "$DSC\({0}){1}" -f $_[0] , $_[1] ) -ItemType Directory
                 }
 
-                $RES = ( gci $DSC *0* ).FullName
+                $RES = ( GCI $DSC *0* ).FullName
 
                 $_.Background , $_.Logo | % { CP $_ $RES }
 
@@ -5431,7 +5431,7 @@
                 RKSMBA -Name $_ -AccountName "CREATOR OWNER" -Force 
             }
 
-            $Control = @{ Path        = GCI ( Resolve-HybridDSC -Root | % { $_.Tree } ) "*Control*" -Recurse | % { $_.FullName }
+            $Control = @{ Path        = Resolve-HybridDSC -Root | % { GCI $_.Tree "*Control*" -Recurse } | % { $_.FullName }
                           Destination = $Share | % { gci $_.Directory "*(2)Images*" -Recurse } | % { $_.FullName }
                           Recurse     = $True 
                           Force       = $True }
