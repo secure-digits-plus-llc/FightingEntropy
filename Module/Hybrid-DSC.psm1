@@ -5616,23 +5616,26 @@
 
             Write-Theme -Action "Stopped [+]" "Default Web Site"
 
-            "MRxDAV" , "WebClient" | % { Get-Service -Name $_ } | % { 
-        
-                If ( $_.Status -ne "Running" ) 
-                {
-                    $Splat = @{ StartupType = "Automatic"
-                                Status      =   "Running"
-                                Name        =    $_.Name }
+            ForEach ( $i in "MRxDAV" , "WebClient" , "WAS" , "W3SVC" )
+            {
+                Get-Service -Name $I | % { 
                 
-                    Set-Service @Splat
+                    If ( $_.Status -ne "Running" ) 
+                    { 
 
-                    Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Activated"
+                        $Splat = @{ StartupType = "Automatic"
+                                    Status      =   "Running"
+                                    Name        =    $_.Name }
                 
-                }
+                        Set-Service @Splat
+
+                        Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Activated"
+                    }
             
-                Else 
-                {
-                    Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Already Active"
+                    Else 
+                    {
+                        Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Already Active"
+                    }
                 }
             }
 
