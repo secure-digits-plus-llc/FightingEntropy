@@ -4023,13 +4023,13 @@
 
                         ( 2 , "Drive Label" , "Drive" ) , ( 3 , "Directory Path" , "Directory" ) , ( 4 , "Samba Share" , "Samba" ) | % { 
                         
-                            "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$( @{ $True = $CB ; $False = $TB }[ $_[0] -eq 2 ] ) $Q = '$( $_[2] )' />" , "</$GB>" 
+                            "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$( @{ $True = $CB ; $False = "$TB $( $VAL[1] )" }[ $_[0] -eq 2 ] ) $Q = '$( $_[2] )' />" , "</$GB>" 
                             
                         } ; "<$G $GR = '5'>" , "<$GCD>" ; "" , 2 | % { "<$CD $W = '$_*' />" } ; "</$GCD>"
 
                         ( 0 , "PS Drive" , "DSDrive" ) , ( 1 , "Description" , "Description" ) | % { 
                         
-                            "<$GB $GC = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$TB $Q = '$( $_[2] )' />" , "</$GB>" } ;"</$G>" , "</$G>" , "</$GB>" )
+                            "<$GB $GC = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$TB $( $VAL[1] ) $Q = '$( $_[2] )' />" , "</$GB>" } ;"</$G>" , "</$G>" , "</$GB>" )
 
                 $XML[3] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
 
@@ -4052,7 +4052,7 @@
 
                         ( 2 , "Name" , "Name" ) , ( 3 , "App Pool" , "AppPool" ) , ( 4 , "Virtual Host" , "Proxy" ) | % { 
                     
-                                "<$GB $GR = '$( $_[0] )' Header = '$( $_[1] )'>" , "<$TB $Q = 'IIS_$( $_[2] )' />" , "</$GB>"
+                                "<$GB $GR = '$( $_[0] )' Header = '$( $_[1] )'>" , "<$TB $( $VAL[1] ) $Q = 'IIS_$( $_[2] )' />" , "</$GB>"
                     
                         } ; "</$G>" , "</$GB>" , "</$G>" , "</TabItem>" )
 
@@ -4069,21 +4069,21 @@
             "</$GRD>" , "<$GB $GR = '0'" , "  $MA = '10'" , "  Padding = '5' " , "  Foreground = 'Black'" ,
             "  $BG = 'White'>" , "<$G>" , "<$GRD>" ; "50,*,*,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; 
             "</$GRD>" , "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Image Branding Settings' />" ; 
-            "<$GB $GR = '1' $HD = 'Company $Q'>" , "<$TB $Q = 'Company' />" , "</$GB>" , 
-            "<$GB $GR = '2' Header = 'Support Website' >" , "<$TB $Q = 'WWW' />" , "</$GB>" ; 
+            "<$GB $GR = '1' $HD = 'Company $Q'>" , "<$TB $( $VAL[1] ) $Q = 'Company' />" , "</$GB>" , 
+            "<$GB $GR = '2' Header = 'Support Website' >" , "<$TB $( $VAL[1] ) $Q = 'WWW' />" , "</$GB>" ; 
 
             "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
 
             ( 0 , "Phone" , "Phone" ) , ( 1 , "Hours" , "Hours" ) | % { 
             
-                "<$GB $GC = '$( $_[0] )' $HD = 'Support $( $_[1] )'>" , "<$TB $Q = '$( $_[1] )' />" , "</$GB>" 
+                "<$GB $GC = '$( $_[0] )' $HD = 'Support $( $_[1] )'>" , "<$TB $( $VAL[1] ) $Q = '$( $_[1] )' />" , "</$GB>" 
                 
             } ; "</$G>" , "<$G $GR = '4' $GR`Span = '2' >" , "<$GCD>" ; "*" , 100 | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ;
             0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
 
             ( "Logo [ 120x120 ]" , 0 , "Logo" ) , ( "Background" , 1 , "Background" ) | % { 
             
-                "<$GB $HD = '$( $_[0] )' $GR = '$( $_[1] )' $GC = '0'>" , "<$TB $GC = '1' $Q = '$( $_[2] )' />" , "</$GB>" , 
+                "<$GB $HD = '$( $_[0] )' $GR = '$( $_[1] )' $GC = '0'>" , "<$TB $( $VAL[1] ) $GC = '1' $Q = '$( $_[2] )' />" , "</$GB>" , 
                 "<$BU $MA = '5,15,5,5' $H = '20' $GR = '$( $_[1] )' $GC = '1' $CO = '$( $_[2] )' $Q = '$( $_[2] )Browse' />" 
 
             } ; "</$G>" , "</$G>" , "</$GB>" )
@@ -4103,11 +4103,11 @@
                     
                     ( 1 , "Branch Name" , "Branch" ) , ( 2 , "NetBIOS Domain" , "NetBIOS" ) | % { 
 
-                        "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )' >" , "<$TB $Q = '$( $_[2] )' />" , "</$GB>" 
+                        "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )' >" , "<$TB $( $VAL[1] ) $Q = '$( $_[2] )' />" , "</$GB>" 
                         
                     } ; "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
                     
-                    ( 0 , "Account" , $TB , "User" ) , ( 1 , "Password" , $PWB , "Pass' PasswordChar = '*" ) | % { 
+                    ( 0 , "Account" , "$TB $( $VAL[1] )" , "User" ) , ( 1 , "Password" , $PWB , "Pass' PasswordChar = '*" ) | % { 
 
                         "<$GB $GC = '$( $_[0] )' $HD = 'Administrator $( $_[1] )'>" , "<$( $_[2] ) $Q = 'LMCred_$( $_[3] )' />" , "</$GB>" 
                     
@@ -4940,7 +4940,7 @@
 
         Import-MDTModule
         
-        $CS   = gcim Win32_ComputerSystem
+        $CS    = GCIM Win32_ComputerSystem
 
         $Code = [ PSCustomObject ]@{ 
         
@@ -5144,6 +5144,8 @@
             $GUI.NetBIOS.Text = $_.NetBIOS
             $GUI.Branch.Text  = $_.Branch 
         }
+
+        GCIM Win32_LogicalDisk | ? { $_.DriveType -eq 3 } | % { $GUI.Drive.AddChild( $_.DeviceID ) }
 
         $GUI.Legacy      | % { $_.IsChecked = $True }
         $GUI.IIS_Install | % { $_.IsChecked = $True }
