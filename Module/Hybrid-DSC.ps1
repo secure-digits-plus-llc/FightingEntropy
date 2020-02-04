@@ -1,4 +1,4 @@
-﻿<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -1896,7 +1896,7 @@
 
             If ( $Report -ne $Null )
             {
-                $PDC                              = $Report | ? { $_.Service -eq "Domain Master Browser" }
+                $PDC                              = $Report.NetBIOS | ? { $_.ID -eq "<1C>" }
 
                 If ( $PDC.Count -gt 1 )
                 {
@@ -1912,7 +1912,7 @@
 
                 If ( $PDC -eq $Null )
                 {
-                    $BDC                          = $Report | ? { $_.Service -eq "Domain Controller" }
+                    $BDC                          = $Report.NetBIOS | ? { $_.Service -eq "Domain Controller" }
 
                     If ( $BDC.Count -gt 1 )
                     {
@@ -2816,7 +2816,7 @@
                                           "RAS Client" , "Interchange(MSMail Connector)" , "Store" , "Directory" , "Server" , "Client" , "Control" , 
                                           "SMS Administrators Remote Control Tool" , "Chat" , "Transfer" , "on Windows NT" , "mccaffee anti-virus" , 
                                           "on Windows NT" , "MTA" , "IMC" , "Network Monitor Agent" , "Network Monitor Application" , "Messenger" , 
-                                          "Name" , "Master Browser" , "Controllers" , "Master Browser" , "Browser Service Elections" , "Server" , 
+                                          "Name" , "Master Browser" , "Controller" , "Master Browser" , "Browser Service Elections" , "Server" , 
                                           "" , "" , "DCA IrmaLan Gateway Server" , "MS NetBIOS Browse"
 
         $Filter                         = 0,0,7,0,0,0,0,0,1,1,1,3,3,4,0,4,4,6,7,6,1,1,7,7,0,5,5,5,7,7,2,2,2,7,0
@@ -3382,7 +3382,17 @@
             PreferredLifeTime            = [ TimeSpan ]::MaxValue 
         }
 
-        New-NetIpAddress @IPAddress            $Splat                           = @{                        InterfaceIndex               = $Adapter            ServerAddresses              = "1.1.1.1" , "1.0.0.1"         }        Set-DNSClientServerAddress @Splat            0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
+        New-NetIpAddress @IPAddress
+    
+        $Splat                           = @{    
+        
+            InterfaceIndex               = $Adapter
+            ServerAddresses              = "1.1.1.1" , "1.0.0.1" 
+        }
+
+        Set-DNSClientServerAddress @Splat
+    
+        0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
 
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -3927,7 +3937,7 @@
              #_    ____________________________
              #\\__//¯¯[_______ Framing _______]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 4 , 4 , 5 , 4 , 4 , 6 , 5 , 4 , 4 , 4 , 3 , 2 ) | % { $SP[$_] }
+                $X      = @( 4 , 4 , 5 , 4 , 4 , 6 , 5 , 4 , 4 , 4 , 3 , 3 , 2 ) | % { $SP[$_] }
 
                 $Y      = @( "<Image $GR = '0' $GC`Span = '4' $( $HAL[1] ) $W = '640' $H = '250' Source = '$( $GFX.Banner )' />" ,
                        "<$TBL $GR = '1' $GC = '1' $GC`Span = '2' $( $HAL[1] ) Padding = '5' Foreground = '#00FF00' FontWeight = 'Bold' $( $VAL[1] )>" , 
@@ -3952,7 +3962,7 @@
              # ____   _________________________
              #//¯¯\\__[_______ Header ________]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 2 ; @( 13 ) * 10 ; 12 , 10 , 9 ) | % { $SP[$_] }
+                $X      = @( 2 ; @( 13 ) * 7 ; 12 , 10 , 9 ) | % { $SP[$_] }
 
                 $Y      = @( "<Window" , "  xmlns = '$Schema/presentation'" , "xmlns:x = '$Schema'" , "  Title = '$Author | Hybrid @ $Title'" , 
                              "  $W = '640'" , " $H = '960'" , "Topmost = 'True' " , "   Icon = '$( $GFX.Icon )'" , " ResizeMode = 'NoResize'" , "$( $HAL[1] )" ,  
@@ -3962,153 +3972,164 @@
              # ____   _________________________
              #//¯¯\\__[__ Window Resources ___]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 3..5 ; 5..8 ; 9..3 ) | % { $SP[$_] } 
+                 $X = @( 1..3;@(3)*4;3..6;8,8,8,7,11,11;6..2;2,3,3,3,2,1 ) | % { $SP[$_] }
 
-                $Y      = @( "<Window.Resources>" , "<Style TargetType = 'Label' x:Key = 'RoundedBox' >" , "<$SE $PR = 'TextBlock.TextAlignment' Value = 'Center' />" , 
-                             "<$SE $PR = 'Template' >" , "<$SE.Value>" , "<ControlTemplate TargetType = 'Label' >" , 
-                             "<Border CornerRadius = '12' $BG = 'Blue' BorderBrush = 'Black' BorderThickness = '3' >" , 
-                             "<ContentPresenter x:Name = 'contentPresenter' ContentTemplate = '{ TemplateBinding ContentTemplate }' $MA = '5' />" ,
-                             "</Border>" , "</ControlTemplate>" , "</$SE.Value>" , "</$SE>" , "</Style>" , "</Window.Resources>" )
-                
-                $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[_____ Background ______]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 3 , 4 , 5 , 5 , 5 , 4 , 4 , 5 , 4 , 4 , 5 ) | % { $SP[$_] } 
-            
-                $Y      = @( "<$G>" , "<$GRD>" ; 250 , '*' , 50 | % { "<$RD $H = '$_' />" } ; "</$GRD>" , "<$G.$BG>" , 
-                             "<ImageBrush Stretch = 'UniformToFill' ImageSource = '$( $GFX.Background )' />" , "</$G.$BG>" , 
-                             "<Image $GR = '0' Source = '$( $GFX.Banner )'/>" , 
-                             "<TabControl $GR = '1' $BG = '{x:Null}' BorderBrush = '{x:Null}' Foreground = '{x:Null}' $( $HAL[1] )>" )
-
-                $XML[2] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[_______ Staging _______]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 5..7 ; 6 , 6 , 7 ; @( 8 ) * 6 ; 7 , 7 , 8 , 7 , 7 , 8 , 9 , 9 , 8 , 8 ; @( 9 ) * 5 ; 8 ; @( 8 , 9 , 9 , 10 , 9 , 8 , 8 ) * 5 ; 
-                             7 , 7 , 8 , 9 , 9 , 8 ; @( 8 , 9 , 10 , 9 , 8 ) * 2 ; 7 ; 7 , 8 , 7 ) | % { $SP[$_] }
-
-                $Y      = @( "<TabItem $HD = 'Stage Deployment Server' BorderBrush = '{x:Null}' $W = '280' >" , "<TabItem.Effect>" , "<DropShadowEffect/>" , 
-                             "</TabItem.Effect>" , "<$G>" , "<$GRD>" ; 5 , 3 | % { 50 , "$_*" , "*" } | % { "<RowDefinition Height = '$_' />" } ; "</$GRD>" , 
-                             "<$LA Style = '{ StaticResource RoundedBox }' $GR = '0' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#FFFFFF' FontSize = '14' >" , 
-                             "MDT Base Share Settings" , "</$LA>" , "<$G $GR = '1' >" , "<$GCD>" ; 2 , 3 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GRD>" ; 
-                             0..4 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
-
-                            ( 0 , "Drive Label" ,   "Drive" ) , ( 1 ,    "Directory Path" ,   "Directory" ) , ( 2 , "Samba Share" , "Samba" ) , 
-                            ( 3 ,    "PS Drive" , "DSDrive" ) , ( 4 , "Drive Description" , "Description" ) | % {
-                                
-                                "<$TBL $GR = '$( $_[0] )' $GC = '0' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#00FF00' >" , "$( $_[1] )" , "<$TBL.Effect>" , 
-                                "<DropShadowEffect   ShadowDepth = '1'  Color = '#336633' />" , "</$TBL.Effect>" , "</$TBL>" , 
-                                "<$TB $GR = '$( $_[0] )' $GC = '1' $H = '24' $MA = '20,0,20,0' $Q = '$( $_[2] )' />" } ; 
-
-                            "</$G>" , "<$G $GR = '2' >" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ;
-
-                            ( 0 , "Legacy MDT" , "Legacy" ) , ( 1 , "PSD-Remaster" , "Remaster" ) | % { 
-                    
-                                "<$RB $GC = '$( $_[0] )' $MA =  '5' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#00FF00' $CO = '$( $_[1] )' $Q = '$( $_[2] )' >" , 
-                                "<$RB.Effect>" , "<DropShadowEffect ShadowDepth = '1' Color = '#336633' />" , "</$RB.Effect>" , "</$RB>" } ;
-                            
-                            "</$G>" , "<$LA Style = '{ StaticResource RoundedBox }' $GR = '3' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#FFFFFF' FontSize = '14' >" , 
-                            "BITS / IIS Configuration" , "</$LA>" )
-
-                $XML[3] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[__ BITS / IIS Setup ___]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 7 , 8 , 9 , 9 , 8 , 8 , 9 , 9 , 9 , 8 ; @( 8 , 9 , 9 , 10 , 9 , 8 , 8 ) * 3 ; 7 , 7 , 8 , 9  , 9 , 8 ; @( 8 , 9 , 10 , 9 , 8 ) * 2 ; 
-                             7 , 6 , 5 ) | % { $SP[$_] }
-
-                $Y      = @( "<$G $GR = '4' >" , "<$GCD>" ; 2 , 3 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GRD>" ; 0..2 | % { "<$RD $H = '*' />" } ; "</$GRD>" ;
-
-                            ( 0 , "BITS / IIS Name" , "IIS_Name" ) , ( 1 , "IIS App Pool" , "IIS_AppPool" ) , ( 2 , "Virtual Host / Proxy" , "IIS_Proxy" ) | % {
-                           
-                                "<$TBL $GR = '$( $_[0] )' $GC = '0' $MA =  '5' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#00FF00' >" , "$( $_[1] )" , "<$TBL.Effect>" , 
-                                "<DropShadowEffect ShadowDepth = '1' Color = '#336633' />" , "</$TBL.Effect>" , "</$TBL>" , 
-                                "<$TB $GR = '$( $_[0] )' $GC = '1' $H = '24' $MA = '20,0,20,0' $Q = '$( $_[2] )' />" } ;
-                            
-                            "</$G>" , "<$G $GR = '5' >" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ;
-
-                            ( 0 , "IIS_Install" , "Install / Configure IIS" ) , ( 1 , "IIS_Skip" , "Skip IIS Setup" ) | % { 
-
-                                "<$RB $GC = '$( $_[0] )' $MA = '5' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#00FF00' $Q = '$( $_[1] )' Content = '$( $_[2] )' >" , 
-                                "<$RB.Effect>" , "<DropShadowEffect   ShadowDepth = '1'  Color = '#336633' />" , "</$RB.Effect>" , "</$RB>" } ;
-
-                            "</$G>" , "</$G>" , "</TabItem>" )
-
-                $XML[4] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[____ Company Info _____]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 5 , 6 , 7 , 6 , 6 , 7 ; @( 8 ) * 6 ; 7 , 7 , 8 , 7 , 7 , 8 , 9 , 9 , 8 , 8 ; @( 9 ) * 4 ; 8 ; @( 8 , 9 , 9 , 10 , 9 , 8 , 8 ) * 4 ; 
-                             7 , 7 , 8 , 7 ) | % { $SP[$_] }
-                
-                $Y      = @( "<TabItem $HD = 'Image Info' $( $HAL[1] ) $W = '280' BorderBrush = '{x:Null}' >" , "<TabItem.Effect>" , "<DropShadowEffect/>" , 
-                             "</TabItem.Effect>" , "<$G>" , "<$GRD>" ; 4 , 2 , 4 | % { 50 , "$_*" } | % { "<$RD $H = '$_' />" } ; "</$GRD>" ; 
-                             "<$LA Style = '{ StaticResource RoundedBox }' $GR = '0' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#FFFFFF' FontSize = '14' >" , 
-                             "Company Information" , "</$LA>" , "<$G $GR = '1' >" , "<$GCD>" ; 2 , 3 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GRD>" ; 
-                             0..3 | % { "<$RD $H = '*' />" } ; "</$GRD>" ;
-                            
-                            ( 0 , "Company Name" , "Company" ) , ( 1 , "Support Website" , "WWW" ) , ( 2 , "Support Phone" , "Phone" ) , 
-                            ( 3 , "Support Hours" , "Hours" ) | % {
-
-                                "<$TBL $GR = '$( $_[0] )' $GC = '0' $MA = '5' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#00FF00' >" , "$( $_[1] )" , "<$TBL.Effect>" , 
-                                "<DropShadowEffect ShadowDepth = '1' Color = '#336633' />" , "</$TBL.Effect>" , "</$TBL>" ; 
-                                "<$TB $GR = '$( $_[0] )' $GC = '1' $H = '24' $MA = '20,0,20,0' $Q = '$( $_[2] )' $TW = 'WrapWithOverflow' />" }
+                 $Y = @( "<Window.Resources>" , "<Style TargetType    = 'Label' x:Key = 'HeadLabel' >" ; 
     
-                            "</$G>" , "<$LA Style = '{ StaticResource RoundedBox }' $GR = '2' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#FFFFFF' FontSize = '14' >" , 
-                            "Custom Graphics" , "</$LA>" )
+                      ( "$TBL.TextAlignment" , "Center" ) , ( "FontWeight" , "Heavy" ) , ( "FontSize" , 18 ) , ( $MA , 5 ) , 
+                      ( "Foreground" , "White" ) | % { "<$SE $PR = '$( $_[0] )' Value = '$( $_[1] )' />" } ;
 
-                $XML[5] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[___ Custom Graphics ___]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 7 , 8 , 9 , 9 , 8 , 8 , 9 , 9 , 8 ; @( 8 , 9 , 9 , 10 , 9 , 8 , 8 ) * 2 ; 7 , 7 , 8 , 7 ) | % { $SP[$_] }
+                        "<$SE $PR = 'Template' >" , "<$SE.Value>" , "<ControlTemplate TargetType = 'Label' >" , "<$BO CornerRadius = '2,2,2,2' " ,
+                        "$BG = '#FF0080FF' ", "$BO`Brush = 'Black'"  , "$BO`Thickness = '3'>" , "<ContentPresenter x:Name = 'contentPresenter'" , 
+                        "  ContentTemplate = '{ TemplateBinding ContentTemplate }'" , "  $MA = '5' /> " , "</$BO>" , "</ControlTemplate>" , 
+                        "</$SE.Value>" , "</$SE>" , "</Style>" , "<Style TargetType = 'RadioButton' x:Key = 'RadButton' >" ;
 
-                $Y      = @( "<$G $GR = '3' >" , "<$GCD>" ; 2 , 3 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ;
-
-                            ( 0 , "Logo [120x120] BMP" , "Logo" ) , ( 1 , "Background" , "Background" ) | % {
-                                
-                                "<$TBL $GR = '$( $_[0] )' $GC = '0' $MA = '5' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#00FF00' >" , "$( $_[1] )" , "<$TBL.Effect>" , 
-                                "<DropShadowEffect ShadowDepth = '1' Color = '#336633' />" , "</$TBL.Effect>" , "</$TBL>" , 
-                                "<$TB $GR = '$( $_[0] )' $GC = '1' $H = '24' $MA = '20,0,20,0' $Q = '$( $_[2] )' $TW = 'WrapWithOverflow' />" } ; 
-                            
-                            "</$G>" , "<$LA Style = '{ StaticResource RoundedBox }' $GR = '4' $( $VAL[1] ) $( $HAL[1] ) Foreground = '#FFFFFF' FontSize = '14' >" , 
-                            "Network &amp; Target Credentials" , "</$LA>" )
-
-                $XML[6] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
-             # ____   _________________________
-             #//¯¯\\__[_ Network Credentials _]
-             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 7 , 8 , 9 , 9 , 8 , 8 ; @( 9 ) * 4 ; 8 ; @( 8,9,9,10,9,8,8 ) * 4 ; 7..4 ) | % { $SP[$_] }
-
-                $Y      = @( "<$G $GR = '5' >" , "<$GCD>" ; 2 , 3 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" ; "<$GRD>" ; 0..3 | % { "<$RD $H = '*' />" } ; "</$GRD>" ;
-
-                            ( 0 , "Branch Name" , "Branch" ) , ( 1 , "NetBIOS Domain" , "NetBIOS" ) , ( 2 , "Administrator Account" , "LMCred_User" ) , 
-                            ( 3 , "Administrator Password" , "LMCred_Pass" ) | % { 
-
-                                If ( $_ -eq 3 ) { $TBX = $PWB ; $QX = "$PWC = '*'" } Else { $TBX = $TB ; $QX = "" }
-
-                                "<$TBL $GR = '$( $_[0] )' $GC = '0' Margin =  '5' VerticalAlignment = 'Center' HorizontalAlignment = 'Center' Foreground = '#00FF00' >" , 
-                                "$( $_[1] )" , "<$TBL.Effect>" , "<DropShadowEffect ShadowDepth = '1' Color = '#336633' />" , "</$TBL.Effect>" , "</$TBL>" , 
-                                "<$TBX $GR = '$( $_[0] )' $GC = '1' $H = '24' $MA = '20,0,20,0' $Q = '$( $_[2] )' $QX />" } ; 
-                            
-                            "</$G>" , "</$G>" , "</TabItem>" , "</TabControl>" )
-
-                $XML[7] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+                      ( "HorizontalAlignment" , "Center" ) , ( "VerticalAlignment" , "Center" ) , ( "Foreground" , "Black" ) | % { 
+                        "<Setter Property = '$( $_[0] )' Value = '$( $_[1] )'/>" } ; "</Style>" , "</Window.Resources>" )
+        
+                $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
              # ____   _________________________
              #//¯¯\\__[_______ Framing _______]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $X      = @( 4 , 5 ; @( 6 ) * 4 ; 5 , 5 ; 5..2 ) | % { $SP[$_] }
 
-                $Y      = @( "<$G $GR = '2' >" , "<$GCD>" ; "" , 2 , 2 , "" | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
-                
-                            ( 1 , "Start" ) , ( 2 , "Cancel" ) | % { 
+                $X = @( 1,2,3,3,3,2,2,3,6,2,2,3,2,5,5,5,5,3,5,5,4,5,4 ) | % { $SP[$_] }
+
+                $Y = @( "<$G>" , "<$GRD>" ; 250, "*" , 40 | % { "<$RD $H = '$_' />" } ; "</$GRD>" , "<$G.$BG>" ; 
+                        "<ImageBrush Stretch = 'UniformToFill'" , "ImageSource = '$( $GFX.Background )' />" , "</$G.$BG>" , 
+                        "<Image $GR = '0'" , "   Source = '$( $GFX.Banner )'/>" , "<TabControl $GR = '1'" ; 
+            
+                        "{x:Null}" | % { "$BG = '$_'" , "$BO`Brush = '$_'" , "Foreground = '$_'" } ; "$( $HAL[1] )>" ;
+                        "<TabItem $HD = 'Stage Deployment Server'" , "$BO`Brush = '{x:Null}'" , "$W = '280' >" , 
+                        "<TabItem.Effect>" , "<DropShadowEffect/>" , "</TabItem.Effect>" )
+
+                $XML[2] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[_______ Staging _______]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+                $X = @( 4,5,6,6,5,5;@(8)*4;6,7;@(8)*6;7,7;@(10)*3;7,8,9,9,8,8,8,7;@(7,8,7)*3;7,8,9,9,8;@(8,9,8)*2;7,6,5 ) | % { $SP[$_] }
+
+                $Y = @( "<$G>" , "<$GRD>" ; 6 , 5 | % { "<$RD $H = '$_*' />" } ; "</$GRD>" , "<$GB $GR = '0'" , "$MA = '10'" , 
+                        "Padding = '5'" , "Foreground = 'Black'" , "$BG = 'White'>" , "<$G $GR = '0'>" , "<$GRD>" ;
+            
+                        "50,30,*,*,*,*".Split(',') | % { "<$RD $H = '$_'/>" } ; "</$GRD>" , 
+                        "<$LA $CO = 'Deployment Share Settings'" , "Style = '{ StaticResource HeadLabel }'" , "Foreground = 'White'" , 
+                        "$GR = '0'/>" , "<$G $GR = '1'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
+            
+                        ( 0 , "Legacy MDT" , "Legacy" ) , ( 1 , "PSD-Remaster" , "Remaster" ) | % { 
+            
+                        "<RadioButton $GC = '$( $_[0] )' $CO = '$( $_[1] )' $Q = '$( $_[2] )' Style = '{ StaticResource RadButton }' />" } ; "</$G>" ; 
+
+                        ( 2 , "Drive Label" , "Drive" ) , ( 3 , "Directory Path" , "Directory" ) , ( 4 , "Samba Share" , "Samba" ) | % { 
+                        
+                            "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$( @{ $True = $CB ; $False = $TB }[ $_[0] -eq 2 ] ) $Q = '$( $_[2] )' />" , "</$GB>" 
                             
-                                "<$BU $GC = '$( $_[0] )' $Q = '$( $_[1] )' $CO = '$( $_[1] )' $MA = '10' />" } ; 
-                                
-                            "</$G>" , "</$G>" , "</Window>" )
+                        } ; "<$G $GR = '5'>" , "<$GCD>" ; "" , 2 | % { "<$CD $W = '$_*' />" } ; "</$GCD>"
 
-                $XML[8] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+                        ( 0 , "PS Drive" , "DSDrive" ) , ( 1 , "Description" , "Description" ) | % { 
+                        
+                            "<$GB $GC = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$TB $Q = '$( $_[2] )' />" , "</$GB>" } ;"</$G>" , "</$G>" , "</$GB>" )
+
+                $XML[3] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[__ BITS / IIS Setup ___]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+                $X = @( 5 ; @( 7 ) * 4 ; 6..8 ; @( 8 ) * 4 ; 7,7,7,8,9,9,8,8,8,7;@(7,8,7)*3;6..3 ) | % { $SP[$_] }
+            
+                $Y = @( "<$GB $GR = '1' " , "  $MA = '10'" , "  Padding = '5' " , "  Foreground = 'Black'" , "  $BG = 'White'>" , 
+                        "<$G>" , "<$GRD>" ; "50,30,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; "</$GRD>" , 
+                        "<$LA $CO = 'BITS / IIS Settings' Style = '{ StaticResource HeadLabel }' Foreground = 'White' $GR = '0'/>" , 
+                        "<$G $GR = '1'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ;
+
+                        ( 0 , "Install" , "Install / Configure IIS" ) , ( 1 , "Skip" , "Skip IIS Setup" ) | % { 
+
+                            "<RadioButton $GC = '$( $_[0] )' $Q = 'IIS_$( $_[1] )' $CO = '$( $_[2] )' Style = '{ StaticResource RadButton }'/>"
+
+                        } ; "</$G>" ;
+
+                        ( 2 , "Name" , "Name" ) , ( 3 , "App Pool" , "AppPool" ) , ( 4 , "Virtual Host" , "Proxy" ) | % { 
+                    
+                                "<$GB $GR = '$( $_[0] )' Header = '$( $_[1] )'>" , "<$TB $Q = 'IIS_$( $_[2] )' />" , "</$GB>"
+                    
+                        } ; "</$G>" , "</$GB>" , "</$G>" , "</TabItem>" )
+
+                $XML[4] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[____ Company Info _____]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            $X = @(3..5;4;4..6;6,5,5;@(7)*4;6,7;@(8)*6;7,7;@(7,8,7)*2;7,8,9,9,8;@(8,9,8)*2;7,7;@(8,9,9,8)*2;@(8,9,8,8)*2;7..5 ) | % { $SP[$_] }
+
+            $Y = @( "<TabItem $HD = 'Image Info' $( $HAL[1] ) $W = '280' BorderBrush = '{x:Null}' >" , "<TabItem.Effect>" , 
+            "<DropShadowEffect/>" , "</TabItem.Effect>" , "<$G>" , "<$GRD>" ; 7 , 5 | % { "<$RD $H = '$_*'/>" } ; 
+            "</$GRD>" , "<$GB $GR = '0'" , "  $MA = '10'" , "  Padding = '5' " , "  Foreground = 'Black'" ,
+            "  $BG = 'White'>" , "<$G>" , "<$GRD>" ; "50,*,*,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; 
+            "</$GRD>" , "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Image Branding Settings' />" ; 
+            "<$GB $GR = '1' $HD = 'Company $Q'>" , "<$TB $Q = 'Company' />" , "</$GB>" , 
+            "<$GB $GR = '2' Header = 'Support Website' >" , "<$TB $Q = 'WWW' />" , "</$GB>" ; 
+
+            "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
+
+            ( 0 , "Phone" , "Phone" ) , ( 1 , "Hours" , "Hours" ) | % { 
+            
+                "<$GB $GC = '$( $_[0] )' $HD = 'Support $( $_[1] )'>" , "<$TB $Q = '$( $_[1] )'/>" , "</$GB>" 
+                
+            } ; "</$G>" , "<$G $GR = '4' $GR`Span = '2' >" , "<$GCD>" ; "*" , 100 | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ;
+            0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
+
+            ( "Logo [ 120x120 ]" , 0 , "Logo" ) , ( "Background" , 1 , "Background" ) | % { 
+            
+                "<$GB $HD = '$( $_[0] )' $GR = '$( $_[1] )' $GC = '0'>" , "<$TB $GC = '1' $Q = '$( $_[2] )' />" , "</$GB>" , 
+                "<$BU $MA = '5,15,5,5' $H = '20' $GR = '$( $_[1] )' $GC = '1' $CO = '$( $_[2] )' $Q = '$( $_[2] )Browse' />" 
+
+            } ; "</$G>" , "</$G>" , "</$GB>" )
+
+            $XML[5] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[_ Network Credentials _]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+        
+            $X = @(5;@(7)*4;6,7;@(8)*4;7,7;@(7,8,7)*2;7,8,9,9,8;@(8,9,8)*2;7..2) | % { $SP[$_] }
+            
+            $Y = @( "<$GB $GR = '1'" , "  $MA = '10'" , "  Padding = '5'" , "  Foreground = 'Black'" , "  $BG = 'White'>" , "<$G>" , "<$GRD>" ; 
+                    "50,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; "</$GRD>" ,
+                    
+                    "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Domain / Network Credentials' />" ;
+                    
+                    ( 1 , "Branch Name" , "Branch" ) , ( 2 , "NetBIOS Domain" , "NetBIOS" ) | % { 
+
+                        "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )' >" , "<$TB $Q = '$( $_[2] )'/>" , "</$GB>" 
+                        
+                    } ; "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
+                    
+                    ( 0 , "Account" , $TB , "User" ) , ( 1 , "Password" , $PWB , "Pass' PasswordChar = '*" ) | % { 
+
+                        "<$GB $GC = '$( $_[0] )' $HD = 'Administrator $( $_[1] )'>" , "<$( $_[2] ) $Q = 'LMCred_$( $_[3] )'/>" , "</$GB>" 
+                    
+                    } ; "</$G>" , "</$G>" , "</$GB>" , "</$G>" , "</TabItem>" , "</TabControl>" )
+
+            $XML[6] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
+
+             # ____   _________________________
+             #//¯¯\\__[_______ Framing _______]
+             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            $X = @( 2,3,4,4,3,3;3..0 )|% { $SP[$_] }
+        
+            $Y = @( "<$G $GR = '2' >" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
+
+            ( 0 , "Start" ) , ( 1 , "Cancel" ) | % { 
+            
+                "<$BU $GC = '$( $_[0] )' $Q = '$( $_[1] )' $CO = '$( $_[1] )' $W = '100' $H = '24' />" 
+            
+            } ; "</$G>" , "</$G>" , "</Window>" )
+
+            $XML[7] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
         }
 
         #/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\
@@ -4743,24 +4764,33 @@
 
             Write-Theme -Action "Installing [~]" "Hybrid-DSC Root Structure"
 
-            "Hybrid" , "Libraries" , "Scripts" , "Templates" , "Install" | % { 
+            "Hybrid" , "Libraries" , "Scripts" , "Templates" , "Install" | % {
             
-                "$( $Root.Base )\$_" | % { If ( ( Test-Path $_ ) -ne $True ) { NI $_ -ItemType Directory } Else { GI $_ } }
-            }
-
-            $ENV:PSModulePath.Split( ';' ) | ? { GCI $_ -Recurse "*Hybrid-DSC*" } | % { "$_\Hybrid-DSC" } | % { 
-
-                ForEach ( $I in "Graphics" , "Map" , "Control" )
-                {
-                    "$_\$I.zip" | % { Expand-Archive -Path $_ -DestinationPath "$( $Root.Base )\Hybrid" }
+                "$( $Root.Base )\$_" | % { 
+                
+                    If ( ( Test-Path $_ ) -ne $True ) 
+                    {
+                        NI $_ -ItemType Directory 
+                    }
+                    
+                    Else { GI $_ } 
                 }
             }
 
             $Registry     = Resolve-UninstallList
 
-            $Base         = "$( $Root.Base )\Tools" | % { If ( ( Test-Path $_ ) -ne $True ) { NI $_ -ItemType Directory } Else { GI $_ } } | % { $_.FullName }
+            $Base         = "$( $Root.Base )\Tools" | % { 
+            
+                If ( ( Test-Path $_ ) -ne $True ) 
+                { 
+                    NI $_ -ItemType Directory 
+                }
+                
+                Else { GI $_ }
+            
+            } | % { $_.FullName }
 
-            $MDTFile      = "MicrosoftDeploymentToolkit_x$( If ( $env:PROCESSOR_ARCHITECTURE -eq "x86" ) { 86 } Else { 64 } ).msi"
+            $MDTFile      = @{ x86 = 86 ; AMD64 = 64 }[ $env:PROCESSOR_ARCHITECTURE ] | % { "MicrosoftDeploymentToolkit_x$_.msi" }
 
             $Pull         = [ Ordered ]@{ }
 
@@ -4775,7 +4805,7 @@
                                                              "https://go.microsoft.com/fwlink/?linkid=2086042" ,
                                                     "/quiet /norestart /log $env:temp\win_adk.log /features +" ) ) # ~ 2m
 
-            # [ Windows PE ] - The Pain-in-the-ass Environment...
+            # [ Windows PE ] - The Pain-in-the-ass Environment... It is pretty cool, but also challenging.
 
             $Pull.Add( 1 , @(                                                                "Preinstallation" ,
                                                                                                 "10.1.17763.1" ,
@@ -4786,7 +4816,7 @@
                                                              "https://go.microsoft.com/fwlink/?linkid=2087112" ,
                                                     "/quiet /norestart /log $env:temp\win_adk.log /features +" ) ) # ~ 10m
 
-            # Microsoft Deployment Toolkit
+            # Microsoft Deployment Toolkit - One day, a bunch of wizards said "Lets make this awesome thing." And then they did.
 
             $Pull.Add( 2 , @(                                                                "Deployment Tool" ,
                                                                                                "6.3.8450.0000" ,
@@ -4826,18 +4856,18 @@
 
                     IPMO BitsTransfer
                 
-                    [ Net.ServicePointManager ]::SecurityProtocol = [ Net.SecurityProtocolType ]::Tls12
+                    [ Net.ServicePointManager ]::SecurityProtocol = 3072
 
-                    $BITS = @{  Source           = $X[6]
-                                Destination      = "$( $X[4] )\$( $X[5])"
-                                Description      = $X[3] }
+                    $Splat = @{  Source           = $X[6]
+                                 Destination      = "$( $X[4] )\$( $X[5])"
+                                 Description      = $X[3] }
 
-                    Start-BitsTransfer @BITS
+                    Start-BitsTransfer @Splat
 
-                    $SAPS = @{  FilePath         = $X[5]
-                                Args             = $X[7] 
-                                WorkingDirectory = $X[4]
-                                Passthru         = $True }
+                    $Splat = @{  FilePath         = $X[5]
+                                 Args             = $X[7] 
+                                 WorkingDirectory = $X[4]
+                                 Passthru         = $True }
 
                     Write-Theme -Action "Installing [+]" "$( $X[3] )"
                     
@@ -4845,7 +4875,7 @@
 
                     $Time = [ System.Diagnostics.Stopwatch ]::StartNew()
 
-                    SAPS @SAPS | % { 
+                    SAPS @Splat | % {
                     
                         For ( $j = 0 ; $j -le 100 ; $j = ( $j + 1 ) % 100 ) 
                         {
@@ -4878,13 +4908,13 @@
 
             IPMO BitsTransfer
              
-            [ Net.ServicePointManager ]::SecurityProtocol = [ Net.SecurityProtocolType ]::Tls12
+            [ Net.ServicePointManager ]::SecurityProtocol = 3072
                     
-            $BITS = @{ Source      = "https://github.com/FriendsOfMDT/PSD/archive/master.zip"
-                       Destination = "$( $Root.Base )\Tools\PSD_Master.zip" 
-                       Description = "PowerShell Deployment" }
+            $Splat = @{ Source      = "https://github.com/FriendsOfMDT/PSD/archive/master.zip"
+                        Destination = "$( $Root.Base )\Tools\PSD_Master.zip" 
+                        Description = "PowerShell Deployment" }
             
-            Start-BitsTransfer @BITS
+            Start-BitsTransfer @Splat
         }
 
         Else
@@ -4964,6 +4994,44 @@
             "IIS_Install"                | % { $GUI.$_.IsChecked = $False ; $Code.$_ =        "-" }
             "IIS_Skip"                   | % { $GUI.$_.IsChecked =  $True ; $Code.$_ = "Selected" }
             "Name" , "AppPool" , "Proxy" | % { "IIS_$_" } | % { $GUI.$_.IsEnabled = $False ; $GUI.$_.Text = "" ; $Code.$_ = "" }
+        })
+
+        $GUI.LogoBrowse.Add_Click(
+        {
+            $Dialog                                 = New-Object System.Windows.Forms.OpenFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Select Logo"
+                $_.InitialDirectory                 = $ENV:UserProfile
+                $_.Filter                           = "bmp (*.bmp) | *.bmp"
+            }
+
+            $X                                      = $Dialog.ShowDialog()
+
+            $GUI.Logo.Text = @{ $True = $Dialog.FileName ; $False = "<Not Designated>" }[ $X -eq "OK" ] 
+
+            $Dialog.Dispose()
+        
+        })
+
+        $GUI.BackgroundBrowse.Add_Click(
+        {
+            $Dialog                                 = New-Object System.Windows.Forms.OpenFileDialog
+                    
+            $Dialog                                 | % {
+
+                $_.Title                            = "Select Background"
+                $_.InitialDirectory                 = $ENV:UserProfile
+                $_.Filter                           = "bmp,gif,jpg,png,tif,dib,jfif,jpe,jpeg,wdp".Split( ',' ) | % { "$_ (*.$_) | *.$_" }
+            }
+
+            $X                                      = $Dialog.ShowDialog()
+
+            $GUI.Logo.Text = @{ $True = $Dialog.FileName ; $False = "<Not Designated>" }[ $X -eq "OK" ] 
+
+            $Dialog.Dispose()
+        
         })
 
         $GUI.Cancel.Add_Click({ $GUI.DialogResult = $False })
