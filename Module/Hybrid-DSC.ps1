@@ -7237,15 +7237,14 @@
         
             [ Parameter ( ValueFromPipeline ) ] [ String ] $ComputerName = $env:COMPUTERNAME )
  
-        GWMI Win32_LogicalDisk -ComputerName $ComputerName | % {
+        GWMI Win32_LogicalDisk | ? { $_.DriveType -eq 3 } | % { 
 
             $Size = ( $_.Size / 1GB )
             $Free = ( $_.FreeSpace / 1GB ) | % { $_ , ( ( $_ * 100 ) / $Size ) }
             $Used = ( ( $_.Size - $_.FreeSpace ) / 1GB ) | % { $_ , ( ( $_ * 100 ) / $Size ) }
 
             [ PSCustomObject ]@{ 
-    
-                ComputerName = $ComputerName
+
                 DriveLetter  = $_.DeviceID
                 DriveLabel   = $_.VolumeName | % { If ( !$_ ) { "N/A" } Else { $_ } }
                 Total        = "{0:n2}GB" -f $Size
