@@ -212,7 +212,7 @@
             }
         }
 
-        Return $Return
+        $Return
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }# ___                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -4659,7 +4659,7 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Add-ACL # Changes permissions of application pool/VHost ____________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-       [ CmdletBinding () ] Param ( [ String ] $Path , [ FileSystemAccessRule ] $ACL ) 
+       [ CmdletBinding () ] Param ( [ String ] $Path , [ System.Security.AccessControl.FileSystemAccessRule ] $ACL ) 
 
             Get-ACL -Path $Path | % { $_.AddAccessRule( $ACL )
             Set-ACL -Path $Path -ACLObject $_ }
@@ -4671,14 +4671,12 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdletBinding () ] Param ( [ String ] $SAM , 
 
-            [ FileSystemRights  ] $Rights              , 
-            [ AccessControlType ] $Access    = 'Allow' , 
-            [ InheritanceFlags  ] $Inherit   =  'None' , 
-            [ PropagationFlags  ] $Propagate =  'None' )
+            [ System.Security.AccessControl.FileSystemRights  ] $Rights              , 
+            [ System.Security.AccessControl.AccessControlType ] $Access    = 'Allow' , 
+            [ System.Security.AccessControl.InheritanceFlags  ] $Inherit   =  'None' , 
+            [ System.Security.AccessControl.PropagationFlags  ] $Propagate =  'None' )
 
-            IEX "Using Namespace System.Security.AccessControl"
-
-            Return [ FileSystemAccessRule ]::New( $SAM , $Rights , $Inherit , $Propagate , $Access ) 
+            [ System.Security.AccessControl.FileSystemAccessRule ]::New( $SAM , $Rights , $Inherit , $Propagate , $Access )
 
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -4686,13 +4684,10 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Resolve-UninstallList # Collects installed applications from the registry__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Return GP ( "" ,"\WOW6432Node" | % { 
+        GP ( "" ,"\WOW6432Node" | % { "HKLM:\SOFTWARE$_\Microsoft\Windows\CurrentVersion\Uninstall\*" } )[ 
         
-            "HKLM:\SOFTWARE$_\Microsoft\Windows\CurrentVersion\Uninstall\*" 
-        
-        })[@{ x86 = 0 ; AMD64 = 0..1 }[$Env:Processor_Architecture]]
-
-                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        @{  x86   = 0 ; 
+            AMD64 = 0..1 }[ $Env:Processor_Architecture ]]                          #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -4953,8 +4948,6 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Install-HybridDSC # Provisions/Installs a Legacy or PSD Deployment Share __//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param ( [ Parameter ( ) ][ Switch ] $Test )
-
         Import-MDTModule
         
         $CS    = GCIM Win32_ComputerSystem
@@ -5311,7 +5304,7 @@
 
             If ( $? -eq $True )
             {
-                Write-Theme -Action "Successful [+]" "PSDrive/MDTPersistent Drive Created"
+                Write-Theme -Action "Successful [+]" "PSDrive/MDTPersistent Drive Created" 11 11 15
             }
 
             Else
@@ -5347,7 +5340,9 @@
             }
 
             # Place Deployment Share Root Settings in the registry
-            $Names  = $Code  | GM | ? { $_.MemberType -eq "NoteProperty" } | % { $_.Name }
+            $PSDefaults = "ChildName" , "Drive" , "ParentPath" , "Path" , "Provider" | % { "PS$_" }
+
+            $Names  = $Code  | GM | ? { $_.MemberType -eq "NoteProperty" } | ? { $_.Name -notin $PSDefaults } |% { $_.Name }
             $Values = $Names | % { $Code.$_ } 
             
             0..( $Names.Count - 1 ) | % { SP -Path $Path -Name $Names[$_] -Value $Values[$_] -Force }
@@ -5431,7 +5426,7 @@
                 RKSMBA -Name $_ -AccountName "CREATOR OWNER" -Force 
             }
 
-            $Control = @{ Path        = Resolve-HybridDSC -Root | % { GCI $_.Tree "*Control*" -Recurse } | % { $_.FullName }
+            $Control = @{ Path        = Resolve-HybridDSC -Module | % { GCI $_ "*Control*" } | % { $_.FullName }
                           Destination = $Share | % { gci $_.Directory "*(2)Images*" -Recurse } | % { $_.FullName }
                           Recurse     = $True 
                           Force       = $True }
@@ -5443,377 +5438,27 @@
                 Write-Theme -Action "Complete [+]" "Legacy MDT Installed"
             }
             
-            If ( $Code.Remaster )
+            If ( $Code.Remaster -eq "Selected" )
             {
                 Write-Theme -Action "Complete [+]" "Hybrid-DSC/PSD Installed"
             }
                   
             If ( $Code.IIS_Install -eq "Selected" )
             {
-                # ____   _________________________
-                #//¯¯\\__[__ Table Definition ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    $Site         = [ PSCustomObject ]@{ 
+                Initialize-HybridIIS -Features | % { 
 
-                        Name      = $Code.IIS_Name
-                        Pool      = $Code.IIS_AppPool
-                        Host      = $Code.IIS_Proxy
+                    If ( $_.Reboot -eq $True )
+                    {
+                        $Path = Resolve-HybridDSC -Module | % { GCI $_ "Hybrid-DSC.ps1" } | % { $_.FullName }
 
-                        System    = $ENV:SystemDrive
-                        System32  = "$ENV:SystemRoot\System32"
-                        Server    = $ENV:ComputerName
+                        SC -Path "$Path\Reboot.ps1" -Value 
 
-                        AppHost   = "Machine/Webroot/AppHost"
-                        WebServer = "system.webServer"
-                        SecAuth   = "security/authentication"
-                        AutoStart = "ServerAutoStart"
-                        Static    = "StaticContent"
+                        New-ScheduledTaskTrigger -AtStartup
 
-                        Date      = ( Get-Date -UFormat "%m-%d-%Y" )
-                        Log       = "$Home\Desktop\ACL"
-
-                        Root      = ""
-                        Site      = ""
-                        URL       = ""
+                        New-ScheduledTaskAction -Execute PowerShell.exe -Argument "-ExecutionPolicy Bypass -Scope Process -Force -File $Path"
                     }
-
-                    $Site | % { 
-            
-                        $_.Root = "$( $_.System )\inetpub\$( $_.Name )"
-                        $_.Site = "IIS:\Sites\$( $_.Name )\$( $_.Host )"
-                        $_.URL  = "$( $_.Name ).$env:USERDNSDOMAIN"
-
-                    }
-
-                    $Site.Root | % { $_ , "$_\AppData" | ? { ! ( Test-Path $_ ) } | % { NI $_ -ItemType Directory } }
-                # ____   _________________________
-                #//¯¯\\__[__ Get Web Services ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    $Web          = @( "Web-Server" , "DSC-Service" , "FS-SMBBW" , "ManagementOData" , "WindowsPowerShellWebAccess" , "WebDAV-Redirector" ; 
-                    "BITS"        | % { "$_" , "$_-IIS-Ext" , "RSAT-$_-Server" } ;
-                    "Net"         | % { "$_-Framework-45-ASP$_" , "$_-WCF-HTTP-Activation45" } ;
-                    <# Web #>       @( "App-Dev" , "AppInit" , "Asp-Net45" , "Basic-Auth" , "Common-Http" , "Custom-Logging" , "DAV-Publishing" , "Default-Doc" ,
-                    "Digest-Auth" , "Dir-Browsing" , "Filtering" , "Health" ; "HTTP" | % {  "$_-Errors" , "$_-Logging" , "$_-Redirect" , "$_-Tracing" } ;
-                    "Includes" ; "ISAPI" | % { "$_-Ext" ; "$_-Filter" } ; "Log-Libraries" , "Metabase" , "Mgmt-Console" , "Net-Ext45" , "Performance" ,
-                    "Request-Monitor" , "Security" , "Stat-Compression" , "Static-Content" , "Url-Auth" , "WebServer" , "Windows-Auth" ) | % { "Web-$_" } ;
-            
-                    "WAS"         | % { "$_" , "$_-Process-Model" , "$_-Config-APIs" } )
-
-                    Write-Theme -Action "Checking [~]" "IIS / Windows Features"
-
-                    Get-WindowsFeature | ? { $_.Name -in $Web -and $_.InstallState -ne "Installed" } | % {
-
-                        Write-Theme -Action "Installing [~]" "Installing $( $_.Name )"
-    
-                        Install-WindowsFeature -Name $_.Name -IncludeAllSubFeature -IncludeManagementTools
-        
-                    }
-                # ____   _________________________
-                #//¯¯\\__[__ Set Web Services ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    IPMO WebAdministration
-        
-                    Write-Theme -Action "Loaded [~]" "WebAdministration Module"
-
-                    Get-Website | ? { $_.Name -eq "Default Web Site" } | Stop-Website | SP "IIS:\Sites\$( $_.Name )" ServerAutoStart False
-
-                    Write-Theme -Action "Stopped [+]" "Default Web Site"
-
-                    "MRxDAV" , "WebClient" | % { Get-Service -Name $_ } | % { 
-        
-                        If ( $_.Status -ne "Running" ) 
-                        {
-                            $Service = @{ StartupType = "Automatic"
-                                          Status      =   "Running"
-                                          Name        =    $_.Name }
-                
-                            Set-Service @Service
-
-                            Write-Theme -Action "Started [+]" "$( $_.Name ) Active"
-                        }
-            
-                        Else 
-                        {
-                            Write-Theme -Action "Running [+]" "$( $_.Name ) was already Active"
-                        }
-                    }
-                # ____   _________________________
-                #//¯¯\\__[__ Generate AppPool ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    If ( ( Get-IISAppPool -Name $Site.Pool ) -ne $Null )
-                    { 
-                        Write-Theme -Action "Removing [!]" "Prior Application Pool"
-            
-                        Remove-WebAppPool -Name $Site.Pool
-                    }
-
-                    New-WebAppPool -Name $Site.Pool -Force
-
-                    Write-Theme -Action "Configuring" "[~] Application Pool Settings"
-
-                    ( "Enable32BitAppOnWin64" , "True" ) , ( "ManagedRuntimeVersion" , "v4.0" ) , ( "ManagedPipelineMode" , "Integrated" ) | % { 
-            
-                        SP -Path "IIS:\AppPools\$( $Site.Pool )" -Name $_[0] -Value $_[1]
-                    }
-
-                    Restart-WebAppPool -Name $Site.Pool
-                # ____   _________________________
-                #//¯¯\\__[__ Generate Website ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    If ( ( Get-WebSite -Name $Site.Name ) -ne $Null )
-                    { 
-                        Write-Theme -Action "Removing [!]" "Prior Website"
-
-                        Remove-Website -Name $Site.Name
-                    }
-            
-                    $Splat = @{ Name             = $Site.Name
-                                ApplicationPool  = $Site.Pool
-                                PhysicalPath     = $Site.Root 
-                                Force            = $True }
-
-                    New-Website @Splat
-
-                    Write-Theme -Action "Generated [+]" "IIS Web Site $( $Site.Name )"
-
-                    Start-Website -Name $Site.Name
-
-                    Write-Theme -Action "Started [+]" "IIS Web Site $( $Site.Name )"
-                # ____   _________________________
-                #//¯¯\\__[___ Set Web Binding ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Binding [+]" "IIS Web Site $( $Site.Name )"
-
-                    $Splat = @{ Name             = $Site.Name
-                                HostHeader       = ""
-                                PropertyName     = "HostHeader"
-                                Value            = $Site.URL }
-
-                    Set-WebBinding @Splat
-
-                    Write-Theme -Action "Configured [+]" $Site.URL
-
-                    $Splat = @{ Site             = $Site.Name
-                                Name             = $Site.Host
-                                PhysicalPath     = $Code.Directory
-                                Force            = $True }
-
-                    New-WebVirtualDirectory @Splat
-                
-                    Write-Theme -Action "Complete [+]" "http://$( $Site.URL )"
-                # ____   _________________________
-                #//¯¯\\__[__ WebDAV Authoring ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Configuring [~]" "WebDAV Authoring"
-            
-                    $Splat = @{ PSPath           = $_.AppHost
-                                Location         = $_.Name
-                                Filter           = "$( $_.WebServer )/webdav/authoring"
-                                Name             = "Enabled"
-                                Value            = "True" }
-
-                    Set-WebConfigurationProperty @Splat
-
-                    Write-Theme -Action "Complete [~]" "WebDAV Authoring"
-                # ____   _________________________
-                #//¯¯\\__[____ WebDAV Rules _____]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
-            
-                    $Config = $Site | % { 
-            
-                        "Set Config '$( $_.Name )/$( $_.Host )'" , 
-                        "/Section:$( $_.WebServer )/webdav/authoringRules" , 
-                        "/+[Users='*',Path='*',Access='Read,Source']" , 
-                        "/Commit:AppHost" -join ' ' 
-                    }
-
-                    $Splat = @{ FilePath         = GCI "$( $Site.System32 )\inetsrv" "*appcmd.exe" | % { $_.FullName }
-                                ArgumentList     = $Config
-                                NoNewWindow      = $True
-                                PassThru         = $True }
-                    
-                    SAPS @Splat | Out-Null
-                
-                    Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
-                # ____   _________________________
-                #//¯¯\\__[____ Add Mime Type ____]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    $Splat = @{ PSPath = $Site.Site
-                                Filter = "$( $Site.WebServer )\$( $Site.Static )"
-                                Name   = "." }
-
-                    Get-WebConfigurationProperty @Splat | % { $_.Collection } | ? { !$_.fileExtension -eq ".*" } | % {
-
-                        $Splat.Add( "Value" , @{ fileExtension = '.*' ; mimeType = 'Text/Plain' } )
-
-                        Add-WebConfigurationProperty @Splat
-                
-                        Write-Theme -Action "Configured [+]" "[ fileExtension: '.*' ] / [ mimeType: 'Text/Plain' ]"
-                    }
-                # ____   _________________________
-                #//¯¯\\__[__ Directory Browse ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Enabling [+]" "Directory Browsing"
-
-                    $Splat     = @{ Filter = "/$( $Site.WebServer )/DirectoryBrowse"
-                                    Name   = "Enabled"
-                                    PSPath = $Site.Site
-                                    Value  = $True }
-
-                    Set-WebConfigurationProperty @Splat
-                # ____   _________________________
-                #//¯¯\\__[____ Security/Auth ____]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    $PSPath    = 0..8 | % { "MACHINE/WEBROOT/APPHOST" }
-                    $Location  = ( $Site | % { "$( $_.Name )\" ; "$( $_.Name )\$( $_.Host )" } )[1,1,0,1,0,1,0,1,0]
-                    $Filter    = @( "anonymous" , "windows" | % { "security/authentication/$_`Authentication" } ; "Rules" , "/properties" | % { "webdav/authoring$_" } ; 
-                                    "fileExtentions" , "verbs" | % { "security/requestFiltering/$_" } )[0,1,2,3,3,4,4,5,5] | % { "system.webServer/$_" }
-                    $Name      = (  "enabled" , "defaultMimeType" , "allowInfinitePropfindDepth" , "applyToWebDAV" )[0,0,1,2,2,3,3,3,3]
-                    $Value     = (  "False" , "True" , "Text/XML" )[0,1,2,1,1,0,0,0,0]
-
-                    ForEach ( $i in 0..8 )
-                    { 
-                        $Splat = @{ PSPath   = $PSPath[$i]
-                                    Location = $Location[$i]
-                                    Filter   = $Filter[$i]
-                                    Name     = $Name[$i]
-                                    Value    = $Value[$i] }
-                    
-                        $Names    = "Location" , "Filter" , "Name" , "Value"
-                        $Values   = $Names | % { $Splat.$_ }
-                        $Section  = "Setting WebConfiguration #$( $I + 1 )"
-
-                        $Subtable = New-SubTable -Items $Names -Values $Values
-
-                        $Panel    = @{ Title = "WebConfiguration"
-                                       Depth = 1
-                                       ID    = $Section  | % { "( $_ )" }
-                                       Table = $Subtable | % { $_ } }
-        
-                        $Table    =    New-Table @Panel
-
-                        Write-Theme -Table $Table
-
-                        Set-WebConfigurationProperty @Splat
-
-                    }
-                # ____   _________________________
-                #//¯¯\\__[___ Hidden Segments ___] # Disabled for now, recurring error "disk changes" ( This is a security issue )
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-                        # Write-Theme -Action "Restarting [~]" "IIS Service" 11 12 15
-                    
-                        # IISRESET /Stop
-
-                        # Write-Theme -Action "Configuring [~]" "Security Request Filtering for WebDAV" 11 12 15
-
-                        # $SP   = "system.webServer/security/requestFiltering" ; 
-                        # $HS   = "hiddenSegments"
-                        # $ATWD = "applytoWebDAV"
-                    
-                        # ( Get-IISConfigSection | ? { $_.SectionPath -like "*$SP*" } | Get-IISConfigElement -ChildElementName $HS ) | % { 
-                    
-                        #   Set-IISConfigAttributeValue -ConfigElement $_ -AttributeName "applytoWebDAV" -AttributeValue $False 
-                    
-                        # }
-
-                        # IISRESET /Start
-                # ____   _________________________
-                #//¯¯\\__[_____ File System _____]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Access Control [~]" "Configuring SAM / Access Control Permissions"
-
-                    'IIS_IUSRS', 'IUSR', "IIS APPPOOL\$( $Site.Pool )" | % { 
-
-                        $Splat = @{ SAM     = $_
-                                    Rights  = 'ReadAndExecute'
-                                    Inherit = 'ContainerInherit' , 'ObjectInherit' }
-
-                        New-ACLObject @Splat | % { Add-ACL -Path $Site.Root -ACL $_ }
-
-                    }
-
-                    'IIS_IUSRS', "IIS APPPOOL\$( $Site.Pool )"         | % {
-
-                        $Splat = @{ SAM     = $_
-                                    Rights  = 'Modify'
-                                    Inherit = 'ContainerInherit' , 'ObjectInherit' }
-
-                        New-AclObject @Splat | % { Add-Acl -Path "$( $Site.Root )\AppData" -ACL $_ }
-                    }
-                # ____   _________________________
-                #//¯¯\\__[__ Strictly TLS 1.2 ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Configuring [~]" "SCHANNEL [ SSL 2.0 - 3.0 ] & [ TLS 1.0 - 1.2 ]"
-
-                    $SSLTLS    = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
-
-                    $Types     = "Client" , "Server"
-
-                    $Protocols = @( 2..3 | % { "SSL $_.0" } ; 0..2 | % { "TLS 1.$_" } )
-
-                    $Protocols | % { If ( ! ( Test-Path "$SSLTLS\$_" ) ) { NI -Path $SSLTLS -Name "$_" } }
-
-                    $List      = GCI $SSLTLS | % { $_.PSPath } 
-                
-                    $List      | % { If ( $_.PSChildName -eq $Null ) { NI -Path $_ -Name "Server" ; NI -Path $_ -Name "Client" } }
-
-                    GCI $List  | % { 
-                
-                        $V = $( If ( $_ -like "*TLS 1.2*" ) { 1 } Else { 0 } )
-                    
-                        SP -Path $_.PSPath -Name "DisabledByDefault" -Value 0
-                        SP -Path $_.PSPath -Name           "Enabled" -Value $V
-                    }
-                # ____   _________________________
-                #//¯¯\\__[___ .Net FW TLS 1.2 ___]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Configuring [~]" ".Net Framework [ v2.0.50727 ] & [ v4.0.30319 ]"
-
-                    ForEach ( $i in "" , "\WOW6432NODE" | % { "HKLM:\SOFTWARE$_\Microsoft\.NETFramework" } ) 
-                    { 
-                        "v2.0.50727" , "v4.0.30319" | % { 
-
-                            If ( ( Test-Path $i ) -ne $True ) { NI -Path $i -Name "$_" }
-                        
-                            SP -Path $i -Name "SystemDefaultTlsVersions" -Type DWORD -Value 1
-                        }
-                    }
-                # ____   _________________________
-                #//¯¯\\__[_ Website / DNS Setup _]
-                #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                    Write-Theme -Action "Pausing [~]" "Website to modify DNS record"
-
-                    Stop-Website $Site.Name
-
-                    $Resolve = Resolve-HybridDSC -Domain
-
-                    $Splat = @{ ZoneName = $Resolve.Branch
-                                RRType   = "CNAME" }
-                    
-                    Get-DNSServerResourceRecord @Splat | ? { $_.HostName -eq $Site.Name } | % {
-
-                        $Splat.Add(  "Name" , $_.HostName )
-                        $Splat.Add( "Force" , $True )
-
-                        Remove-DNSServerResourceRecord @Splat
-                    }
-
-                    $Splat = @{ HostNameAlias = Resolve-DnsName 127.0.0.1 | % { $_.NameHost }
-                                Name          = $Site.Name
-                                ZoneName      = $Resolve.Branch }
-
-                    Add-DNSServerResourceRecordCName @Splat
-
-                    Write-Theme -Action "Resuming [+]" "Website $( $Site.Name )"
-                    Start-Website $Site.Name
-
-                    Write-Theme -Action "Complete [+]" "Your Web Server should now be available to the internet"
-                    Start "http://$( $Site.URL )"
-
-                    Write-Theme -Action "Recommendation" "[!] You may want to configure SSL Certificates manually"
-            } 
+                }
+            }
 
             If ( $Code.IIS_Skip -eq "Selected" )
             {
@@ -5824,6 +5469,458 @@
         Else
         {
             Write-Theme -Action "Exception [!]" "Either the user cancelled, or the dialog failed" 12 4 15
+        }
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Initialize-HybridDSC # Populates Tools and Items for subfolders ___________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯       
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( ParameterSetName = "Features" ) ] [ Switch ] $Features ,
+            [ Parameter ( ParameterSetName = "Install"  ) ] [ Switch ] $Install  )
+
+        If ( $Features )
+        {
+            # ____   _________________________
+            #//¯¯\\__[__ Get Web Services ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            $Reboot = [ PSCustomObject ]@{ Reboot = $False }
+
+            $Web    = @( "Web-Server" , "DSC-Service" , "FS-SMBBW" , "ManagementOData" , "WindowsPowerShellWebAccess" , "WebDAV-Redirector" ;
+            "BITS"  | % { "$_" , "$_-IIS-Ext" , "RSAT-$_-Server" } ; "Net" | % { "$_-Framework-45-ASP$_" , "$_-WCF-HTTP-Activation45" } ;
+            "WAS"   | % { "$_" , "$_-Process-Model" , "$_-Config-APIs" } ; @( ( "App-Dev,AppInit,Asp-Net45,Basic-Auth,Common-Http,Custom-Logging," +
+            "DAV-Publishing,Default-Doc,Digest-Auth,Dir-Browsing,Filtering,Health,Includes,Log-Libraries,Metabase,Mgmt-Console,Net-Ext45,Performance," + 
+            "Request-Monitor,Security,Stat-Compression,Static-Content,Url-Auth,WebServer,Windows-Auth" -join '' ).Split(',') + 
+            "Errors,Logging,Redirect,Tracing".Split(',') | % { "HTTP-$_" } ;"Ext,Filter".Split(',') | % { "ISAPI-$_" } ) | % { "Web-$_" } ) | Sort
+
+            Write-Theme -Action "Checking [~]" "IIS / Windows Features"
+
+            Get-WindowsFeature | ? { $_.Name -in $Web -and $_.InstallState -ne "Installed" } | % {
+
+                Write-Theme -Action "Installing [~]" "Installing $( $_.Name )"
+
+                If ( $_.Name -in "DSC-Service" , "WebDAV-Redirector" , "WindowsPowerShellWebAccess" , "WAS" , "WAS-Process-Model" , "WAS-Config-APIs" ) 
+                {
+                    Write-Theme -Action "Reboot [~]" "Required / $( $_.Name )"
+
+                    If ( $Reboot -ne $True )
+                    {
+                        $Reboot.Reboot = $True
+                    }
+                }
+    
+                Install-WindowsFeature -Name $_.Name -IncludeAllSubFeature -IncludeManagementTools
+        
+            }
+
+            $Reboot
+        }
+
+        If ( $Install )
+        {
+            # ____   _________________________
+            #//¯¯\\__[__ Table Definition ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            Resolve-HybridDSC -Share | % { 
+
+                $Site         = [ PSCustomObject ]@{
+
+                    Name      = $_.IIS_Name
+                    Pool      = $_.IIS_AppPool
+                    Host      = $_.IIS_Proxy
+                    Directory = $_.Directory
+
+                    System    = "$ENV:SystemDrive"
+                    System32  = "$ENV:SystemRoot\System32"
+                    Server    = "$ENV:ComputerName"
+
+                    AppHost   = "Machine/Webroot/AppHost"
+                    WebServer = "system.webServer"
+                    SecAuth   = "security/authentication"
+                    AutoStart = "ServerAutoStart"
+                    Static    = "StaticContent"
+
+                    Date      = Get-Date -UFormat "%m-%d-%Y"
+                    Log       = "$Home\Desktop\ACL"
+
+                    Root      = ""
+                    Site      = ""
+                    VHost     = ""
+                    AppData   = ""
+                    URL       = ""
+                }
+            }
+
+            $Site             | % { 
+            
+                $_.Root       = $_.System , "inetpub" , $_.Name -join '\'
+                $_.Site       = "IIS:\Sites" , $_.Name -join '\'
+                $_.VHost       = $_.Site , $_.Host -join '\'
+                $_.URL        = "$( $_.Name ).$env:USERDNSDOMAIN"
+                $_.AppData    = $_.Root , "AppData" -join '\'
+            }
+
+            $Site | % { $_.Root , $_.AppData } | % { 
+            
+                If ( ! ( Test-Path $_ ) )
+                { 
+                    NI $_ -ItemType Directory 
+                }
+
+                Else
+                {
+                    Write-Theme -Action "Detected [+]" $_
+                }
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[__ Set Web Services ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                
+            "WebAdministration" | % { 
+
+                IPMO $_
+                If (  $? ) { Write-Theme -Action "Loaded [~]" "$_ Module Loaded"     11 11 15 }
+                If ( !$? ) { Write-Theme -Action "Failed [!]" "$_ Module Not Loaded" 12  4 15 }
+            }
+
+            Get-Website | ? { $_.Name -eq "Default Web Site" } | Stop-Website | SP "IIS:/Sites/$( $_.Name )" ServerAutoStart False
+
+            Write-Theme -Action "Stopped [+]" "Default Web Site"
+
+            "MRxDAV" , "WebClient" | % { Get-Service -Name $_ } | % { 
+        
+                If ( $_.Status -ne "Running" ) 
+                {
+                    $Splat = @{ StartupType = "Automatic"
+                                Status      =   "Running"
+                                Name        =    $_.Name }
+                
+                    Set-Service @Splat
+
+                    Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Activated"
+                
+                }
+            
+                Else 
+                {
+                    Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Already Active"
+                }
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[__ Generate AppPool ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            If ( ( Get-IISAppPool -Name $Site.Pool ) -ne $Null )
+            { 
+                Write-Theme -Action "Removing [!]" "Prior Application Pool"
+            
+                Remove-WebAppPool -Name $Site.Pool
+            }
+
+            New-WebAppPool -Name $Site.Pool -Force
+
+            Write-Theme -Action "Configuring" "[~] Application Pool Settings"
+
+            ( "Enable32BitAppOnWin64" , "True" ) , ( "ManagedRuntimeVersion" , "v4.0" ) , ( "ManagedPipelineMode" , "Integrated" ) | % { 
+            
+                SP -Path "IIS:\AppPools\$( $Site.Pool )" -Name $_[0] -Value $_[1] -VB
+
+            }
+
+            Restart-WebAppPool -Name $Site.Pool
+            
+            # ____   _________________________
+            #//¯¯\\__[__ Generate Website ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            If ( ( Get-WebSite -Name $Site.Name ) -ne $Null )
+            { 
+                Write-Theme -Action "Removing [!]" "Prior Website"
+
+                Remove-Website -Name $Site.Name
+            }
+            
+            $Splat = @{ Name             = $Site.Name
+                        ApplicationPool  = $Site.Pool
+                        PhysicalPath     = $Site.Root 
+                        Force            = $True }
+
+            New-Website @Splat
+
+            Write-Theme -Action "Generated [+]" "IIS Web Site $( $Site.Name )"
+
+            Start-Website -Name $Site.Name
+
+            Write-Theme -Action "Started [+]" "IIS Web Site $( $Site.Name )"
+            
+            # ____   _________________________
+            #//¯¯\\__[___ Set Web Binding ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            Write-Theme -Action "Binding [+]" "IIS Web Site $( $Site.Name )"
+
+            $Splat = @{ Name             = $Site.Name
+                        HostHeader       = ""
+                        PropertyName     = "HostHeader"
+                        Value            = $Site.URL }
+
+            Set-WebBinding @Splat
+
+            Write-Theme -Action "Configured [+]" $Site.URL
+
+            $Splat = @{ Site             = $Site.Name
+                        Name             = $Site.Host
+                        PhysicalPath     = $Site.Directory
+                        Force            = $True }
+
+            New-WebVirtualDirectory @Splat
+                
+            Write-Theme -Action "Complete [+]" "http://$( $Site.URL )"
+            
+            # ____   _________________________
+            #//¯¯\\__[__ WebDAV Authoring ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            Write-Theme -Action "Configuring [~]" "WebDAV Authoring"
+            
+            $Splat = @{ PSPath           = $Site.AppHost
+                        Location         = $Site.Name
+                        Filter           = "$( $Site.WebServer )/webdav/authoring"
+                        Name             = "Enabled"
+                        Value            = "True" }
+
+            Set-WebConfigurationProperty @Splat
+
+            Write-Theme -Action "Complete [~]" "WebDAV Authoring"
+
+            # ____   _________________________
+            #//¯¯\\__[____ WebDAV Rules _____]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+           
+            Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
+            
+            $Config = $Site | % { $_.Name , $_.Host , $_.WebServer }
+
+            $Splat = @{ FilePath         = GCI "$( $Site.System32 )\inetsrv" "*appcmd.exe" | % { $_.FullName }
+                        ArgumentList     = "Set Config '{0}/{1}' /Section:{2}/webdav/authoringRules /+[Users='*',Path='*',Access='Read,Source'] /Commit:AppHost" -f $Config
+                        NoNewWindow      = $True
+                        PassThru         = $True }
+                    
+            SAPS @Splat | Out-Null
+                
+            # ____   _________________________
+            #//¯¯\\__[____ Add Mime Type ____]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+            Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
+
+            $Site | % { 
+
+                $Splat = @{ PSPath = $_.Site
+                            Filter = $_.WebServer , $_.Static -join '/'
+                            Name   = "." }
+            }
+                
+            If ( ".*" -notin ( Get-WebConfigurationProperty @Splat | % { $_.Collection } | % { $_.fileExtension } ) )
+            {
+                $Splat.Add( "Value" , @{ fileExtension = '.*' ; mimeType = 'Text/Plain' } )
+
+                Add-WebConfigurationProperty @Splat
+
+                Write-Theme -Action "Configured [+]" "[ fileExtension: '.*' ] / [ mimeType: 'Text/Plain' ]"
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[__ Directory Browse ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            Write-Theme -Action "Enabling [+]" "Directory Browsing"
+
+            $Splat     = @{ Filter = "/$( $Site.WebServer )/DirectoryBrowse"
+                            Name   = "Enabled"
+                            PSPath = $Site.Site
+                            Value  = $True }
+
+            Set-WebConfigurationProperty @Splat -vb
+
+            # ____   _________________________
+            #//¯¯\\__[____ Security/Auth ____]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            $Location = ( $Site | % { $_.Name ; $_.Name , $_.Host -join '/' } )[1,1,0,1,0,1,0,1,0]
+
+            $Filter   = @( @( "anonymous" , "windows" | % { "Authentication/$_`Authentication" } ; 
+                        "FileExtensions"  , "Verbs"   | % { "RequestFiltering/$_" } ) | % { "Security/$_" } ; 
+                        "/Properties"     , "Rules"   | % { "WebDAV/Authoring$_" } )[0,1,5,4,4,2,2,3,3] | % { $Site.WebServer , $_ -join '/' }
+    
+            $Name     = "Enabled,DefaultMimeType,AllowInfinitePropfindDepth,ApplyToWebDAV".Split(',')[0,0,1,2,2,3,3,3,3]
+
+            $Value    = "False,True,Text/XML".Split(',')[0,1,2,1,1,0,0,0,0]
+
+            ForEach ( $I in 0..8 )
+            { 
+                $Splat = @{ PSPath   = "MACHINE/WEBROOT/APPHOST"
+                            Location = $Location[$i]
+                            Filter   = $Filter[$i]
+                            Name     = $Name[$i]
+                            Value    = $Value[$i] }
+                    
+                $Names    = "Location" , "Filter" , "Name" , "Value"
+                $Values   = $Names | % { $Splat.$_ }
+                $Section  = "Setting WebConfiguration #$( $I + 1 )/9"
+
+                $Subtable = New-SubTable -Items $Names -Values $Values
+
+                $Panel    = @{ Title = "WebConfiguration"
+                               Depth = 1
+                               ID    = $Section  | % { "( $_ )" }
+                               Table = $Subtable | % { $_ } }
+        
+                $Table    = New-Table @Panel
+
+                Write-Theme -Table $Table
+
+                Set-WebConfigurationProperty @Splat
+
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[___ Hidden Segments ___] # Disabled for now, recurring error "disk changes" ( This is a security issue )
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+                # Write-Theme -Action "Restarting [~]" "IIS Service" 11 12 15
+                    
+                # IISRESET /Stop
+
+                # $Filter    = "system.webServer/security/requestFiltering"
+                # $Element   = "hiddenSegments"
+                # $Attribute = "applytoWebDav"
+
+                # Get-IISConfigSection | ? { $_.SectionPath -like "*$Filter*" } | % { $_.GetChildElement( $Element ).Attributes } | % { 
+
+                #     $_.Value = $False
+                # }
+
+                # IISRESET /Start
+            
+            # ____   _________________________
+            #//¯¯\\__[_____ File System _____]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+            
+            Write-Theme -Action "Access Control [~]" "Configuring SAM / Access Control Permissions"
+
+            'IIS_IUSRS', 'IUSR', "IIS APPPOOL\$( $Site.Pool )" | % { 
+
+                $Splat = @{ SAM     = $_
+                            Rights  = 'ReadAndExecute'
+                            Inherit = 'ContainerInherit' , 'ObjectInherit' }
+
+                New-ACLObject @Splat | % { Add-ACL -Path $Site.Root -ACL $_ }
+
+            }
+
+            'IIS_IUSRS', "IIS APPPOOL\$( $Site.Pool )"         | % {
+
+                $Splat = @{ SAM     = $_
+                            Rights  = 'Modify'
+                            Inherit = 'ContainerInherit' , 'ObjectInherit' }
+
+                New-AclObject @Splat | % { Add-Acl -Path "$( $Site.Root )\AppData" -ACL $_ }
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[__ Strictly TLS 1.2 ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                
+            Write-Theme -Action "Configuring [~]" "SCHANNEL [ SSL 2.0 - 3.0 ] & [ TLS 1.0 - 1.2 ]"
+
+            $SSLTLS    = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+
+            @( 2..3 | % { "SSL $_.0" } ; 0..2 | % { "TLS 1.$_" } ) | % { 
+                
+                If ( ! ( Test-Path "$SSLTLS\$_" ) )
+                { 
+                    NI -Path $SSLTLS -Name $_
+                }
+                    
+                ForEach ( $i in "Client" , "Server" )
+                {
+                    If ( ! ( Test-Path "$SSLTLS\$_\$I" ) )
+                    {
+                        NI -Path "$SSLTLS\$_" -Name $I
+                    }
+
+                    ForEach ( $j in "DisabledByDefault" , "Enabled" )
+                    {
+                        SP -Path "$SSLTLS\$_\$I" -Name $J -Value 0
+                    }
+
+                    If ( $_ -eq "TLS 1.2" )
+                    {
+                        SP -Path "$SSLTLS\TLS 1.2\$I" -Name "Enabled" 1
+                    }
+                }
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[___ .Net FW TLS 1.2 ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                
+            Write-Theme -Action "Configuring [~]" ".Net Framework [ v2.0.50727 ] & [ v4.0.30319 ]"
+
+            "" , "\WOW6432NODE" | % { "HKLM:\SOFTWARE$_\Microsoft\.NETFramework" } | % {
+                    
+                ForEach ( $i in "v2.0.50727" , "v4.0.30319" )
+                {
+                    If ( ! ( Test-Path "$_\$i" ) )
+                    { 
+                        NI -Path $_ -Name $I
+                    }
+                        
+                    SP -Path "$_\$I" -Name "SystemDefaultTlsVersions" -Type DWORD -Value 1
+                }
+            }
+
+            # ____   _________________________
+            #//¯¯\\__[_ Website / DNS Setup _]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                    
+            Write-Theme -Action "Pausing [~]" "Website to modify DNS record"
+
+            Stop-Website $Site.Name
+
+            $Resolve = Resolve-HybridDSC -Domain
+
+            $Splat = @{ ZoneName = $Resolve.Branch
+                        RRType   = "CNAME" }
+                    
+            Get-DNSServerResourceRecord @Splat | ? { $_.HostName -eq $Site.Name } | % {
+
+                $Splat.Add(  "Name" , $_.HostName )
+                $Splat.Add( "Force" , $True )
+
+                Remove-DNSServerResourceRecord @Splat
+            }
+
+            $Splat = @{ HostNameAlias = Resolve-DnsName 127.0.0.1 | % { $_.NameHost }
+                        Name          = $Site.Name
+                        ZoneName      = $Resolve.Branch }
+
+            Add-DNSServerResourceRecordCName @Splat
+
+            Write-Theme -Action "Resuming [+]" "Website $( $Site.Name )"
+            Start-Website $Site.Name
+
+            Write-Theme -Action "Complete [+]" "Your Web Server should now be available to the internet"
+            Start "http://$( $Site.URL )"
+
+            Write-Theme -Action "Recommendation" "[!] You may want to configure SSL Certificates manually"
         }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
