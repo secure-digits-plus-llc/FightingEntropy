@@ -3972,7 +3972,7 @@
              # ____   _________________________
              #//¯¯\\__[__ Window Resources ___]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                 $X = @( 1..3;@(3)*4;3..6;8,8,8,7,11,11;6..2;2,3,3,3,2,1 ) | % { $SP[$_] }
+                 $X = @(1..3;@(3)*4;3..6;8,8,8,7,11,11;6..2;2,3,3,3,2,2,3,3,3,3,3,2,1) | % { $SP[$_] }
 
                  $Y = @( "<Window.Resources>" , "<Style TargetType    = 'Label' x:Key = 'HeadLabel' >" ; 
     
@@ -3985,14 +3985,19 @@
                         "</$SE.Value>" , "</$SE>" , "</Style>" , "<Style TargetType = 'RadioButton' x:Key = 'RadButton' >" ;
 
                       ( "HorizontalAlignment" , "Center" ) , ( "VerticalAlignment" , "Center" ) , ( "Foreground" , "Black" ) | % { 
-                        "<Setter Property = '$( $_[0] )' Value = '$( $_[1] )'/>" } ; "</Style>" , "</Window.Resources>" )
+                        
+                        "<$SE $PR = '$( $_[0] )' Value = '$( $_[1] )' />" } ; "</Style>" , "<Style TargetType = '$TB' x:Key = 'TextBro'>" ; 
+
+                      ( "VerticalContentAlignment" , "Center" ) , ( "Margin" , 2 ) , ( "TextWrapping" , "Wrap" ) , ( "Height" , 24 ) | % { 
+
+                        "<$SE $PR = '$( $_[0] )' Value = '$( $_[1] )' />" } ; "</Style>" , "</Window.Resources>" )
         
                 $XML[1] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
              # ____   _________________________
              #//¯¯\\__[_______ Framing _______]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-                $X = @( 1,2,3,3,3,2,2,3,6,2,2,3,2,5,5,5,5,3,5,5,4,5,4 ) | % { $SP[$_] }
+                $X = @(1,2,3,3,3,2,2,3,6,2,2,3,2,5,5,5,5,3,5,5,4,5,4) | % { $SP[$_] }
 
                 $Y = @( "<$G>" , "<$GRD>" ; 250, "*" , 40 | % { "<$RD $H = '$_' />" } ; "</$GRD>" , "<$G.$BG>" ; 
                         "<ImageBrush Stretch = 'UniformToFill'" , "ImageSource = '$( $GFX.Background )' />" , "</$G.$BG>" , 
@@ -4023,13 +4028,16 @@
 
                         ( 2 , "Drive Label" , "Drive" ) , ( 3 , "Directory Path" , "Directory" ) , ( 4 , "Samba Share" , "Samba" ) | % { 
                         
-                            "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$( @{ $True = $CB ; $False = "$TB $( $VAL[1] )" }[ $_[0] -eq 2 ] ) $Q = '$( $_[2] )' />" , "</$GB>" 
-                            
+                            "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )'>" , 
+                            "<$( If ( $_[0] -eq 2 ) { "$CB $H = '24' $MA = '2'" } Else { "$TB Style = '{ StaticResource TextBro }'" }) $Q = '$( $_[2] )' />" , "</$GB>"
+                        
                         } ; "<$G $GR = '5'>" , "<$GCD>" ; "" , 2 | % { "<$CD $W = '$_*' />" } ; "</$GCD>"
 
                         ( 0 , "PS Drive" , "DSDrive" ) , ( 1 , "Description" , "Description" ) | % { 
                         
-                            "<$GB $GC = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$TB $( $VAL[1] ) $Q = '$( $_[2] )' />" , "</$GB>" } ;"</$G>" , "</$G>" , "</$GB>" )
+                            "<$GB $GC = '$( $_[0] )' $HD = '$( $_[1] )'>" , "<$TB Style = '{ StaticResource TextBro }' $Q = '$( $_[2] )' />" , "</$GB>" } ; 
+                            
+                        "</$G>" , "</$G>" , "</$GB>" )
 
                 $XML[3] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
 
@@ -4037,7 +4045,7 @@
              #//¯¯\\__[__ BITS / IIS Setup ___]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-                $X = @( 5 ; @( 7 ) * 4 ; 6..8 ; @( 8 ) * 4 ; 7,7,7,8,9,9,8,8,8,7;@(7,8,7)*3;6..3 ) | % { $SP[$_] }
+                $X = @(5;@(7)*4;6..8;@(8)*4;7,7,7,8,9,9,8,8,8,7;@(7,8,7)*3;6..3) | % { $SP[$_] }
             
                 $Y = @( "<$GB $GR = '1' " , "  $MA = '10'" , "  Padding = '5' " , "  Foreground = 'Black'" , "  $BG = 'White'>" , 
                         "<$G>" , "<$GRD>" ; "50,30,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; "</$GRD>" , 
@@ -4051,8 +4059,8 @@
                         } ; "</$G>" ;
 
                         ( 2 , "Name" , "Name" ) , ( 3 , "App Pool" , "AppPool" ) , ( 4 , "Virtual Host" , "Proxy" ) | % { 
-                    
-                                "<$GB $GR = '$( $_[0] )' Header = '$( $_[1] )'>" , "<$TB $( $VAL[1] ) $Q = 'IIS_$( $_[2] )' />" , "</$GB>"
+                        
+                            "<$GB $GR = '$( $_[0] )' Header = '$( $_[1] )'>" , "<$TB Style = '{ StaticResource TextBro }' $Q = 'IIS_$( $_[2] )' />" , "</$GB>"
                     
                         } ; "</$G>" , "</$GB>" , "</$G>" , "</TabItem>" )
 
@@ -4064,28 +4072,31 @@
 
             $X = @(3..5;4;4..6;6,5,5;@(7)*4;6,7;@(8)*6;7,7;@(7,8,7)*2;7,8,9,9,8;@(8,9,8)*2;7,7;@(8,9,9,8)*2;@(8,9,8,8)*2;7..5 ) | % { $SP[$_] }
 
-            $Y = @( "<TabItem $HD = 'Image Info' $( $HAL[1] ) $W = '280' BorderBrush = '{x:Null}' >" , "<TabItem.Effect>" , 
-            "<DropShadowEffect/>" , "</TabItem.Effect>" , "<$G>" , "<$GRD>" ; 7 , 5 | % { "<$RD $H = '$_*'/>" } ; 
-            "</$GRD>" , "<$GB $GR = '0'" , "  $MA = '10'" , "  Padding = '5' " , "  Foreground = 'Black'" ,
-            "  $BG = 'White'>" , "<$G>" , "<$GRD>" ; "50,*,*,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; 
-            "</$GRD>" , "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Image Branding Settings' />" ; 
-            "<$GB $GR = '1' $HD = 'Company $Q'>" , "<$TB $( $VAL[1] ) $Q = 'Company' />" , "</$GB>" , 
-            "<$GB $GR = '2' Header = 'Support Website' >" , "<$TB $( $VAL[1] ) $Q = 'WWW' />" , "</$GB>" ; 
-
-            "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
-
-            ( 0 , "Phone" , "Phone" ) , ( 1 , "Hours" , "Hours" ) | % { 
+            $Y = @( "<TabItem $HD = 'Image Info' $( $HAL[1] ) $W = '280' BorderBrush = '{x:Null}' >" , "<TabItem.Effect>" , "<DropShadowEffect/>" , "</TabItem.Effect>" , 
             
-                "<$GB $GC = '$( $_[0] )' $HD = 'Support $( $_[1] )'>" , "<$TB $( $VAL[1] ) $Q = '$( $_[1] )' />" , "</$GB>" 
+            "<$G>" , "<$GRD>" ; 7 , 5 | % { "<$RD $H = '$_*'/>" } ; "</$GRD>" , "<$GB $GR = '0'" , "  $MA = '10'" , "  Padding = '5' " , "  Foreground = 'Black'" , "  $BG = 'White'>" , 
+            
+            "<$G>" , "<$GRD>" ; "50,*,*,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; "</$GRD>" , 
+            
+            "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Image Branding Settings' />" ;
+            "<$GB $GR = '1' $HD = 'Company $Q'>"       , "<$TB Style = '{ StaticResource TextBro }' $Q = 'Company' />" , "</$GB>" , 
+            "<$GB $GR = '2' $HD = 'Support Website' >" , "<$TB Style = '{ StaticResource TextBro }' $Q = 'WWW' />" , "</$GB>" ; 
+             "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
+            
+            ( 0 , "Phone" ) , ( 1 , "Hours" ) | % {
+            
+                "<$GB $GC = '$( $_[0] )' $HD = 'Support $( $_[1] )'>" , "<$TB Style = '{ StaticResource TextBro }' $Q = '$( $_[1] )' />" , "</$GB>" 
                 
-            } ; "</$G>" , "<$G $GR = '4' $GR`Span = '2' >" , "<$GCD>" ; "*" , 100 | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ;
-            0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
-
-            ( "Logo [ 120x120 ]" , 0 , "Logo" ) , ( "Background" , 1 , "Background" ) | % { 
+            } ; "</$G>" , "<$G $GR = '4' $GR`Span = '2' >" , "<$GCD>" ;
             
-                "<$GB $HD = '$( $_[0] )' $GR = '$( $_[1] )' $GC = '0'>" , "<$TB $( $VAL[1] ) $GC = '1' $Q = '$( $_[2] )' />" , "</$GB>" , 
-                "<$BU $MA = '5,15,5,5' $H = '20' $GR = '$( $_[1] )' $GC = '1' $CO = '$( $_[2] )' $Q = '$( $_[2] )Browse' />" 
-
+            "*" , 100 | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$GRD>" ; 0..1 | % { "<$RD $H = '*' />" } ; "</$GRD>" ; 
+            
+            ( "Logo [ 120x120 ]" , 0 , "Logo" ) , ( "Background" , 1 , "Background" ) | % {
+            
+                "<$GB $HD = '$( $_[0] )' $GR = '$( $_[1] )' $GC = '0'>" , 
+                "<$TB Style = '{ StaticResource TextBro }' $W = '400' $GC = '1' $Q = '$( $_[2] )' />" , 
+                "</$GB>" , "<$BU $MA = '5,15,5,5' $H = '20' $GR = '$( $_[1] )' $GC = '1' $CO = '$( $_[2] )' $Q = '$( $_[2] )Browse' />" 
+                
             } ; "</$G>" , "</$G>" , "</$GB>" )
 
             $XML[5] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
@@ -4097,17 +4108,17 @@
             $X = @(5;@(7)*4;6,7;@(8)*4;7,7;@(7,8,7)*2;7,8,9,9,8;@(8,9,8)*2;7..2) | % { $SP[$_] }
             
             $Y = @( "<$GB $GR = '1'" , "  $MA = '10'" , "  Padding = '5'" , "  Foreground = 'Black'" , "  $BG = 'White'>" , "<$G>" , "<$GRD>" ; 
-                    "50,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; "</$GRD>" ,
+            "50,*,*,*".Split(',') | % { "<$RD $H = '$_' />" } ; "</$GRD>" ,
                     
-                    "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Domain / Network Credentials' />" ;
+            "<$LA $GR = '0' Style = '{ StaticResource HeadLabel }' $CO = 'Domain / Network Credentials' />" ;
                     
                     ( 1 , "Branch Name" , "Branch" ) , ( 2 , "NetBIOS Domain" , "NetBIOS" ) | % { 
 
-                        "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )' >" , "<$TB $( $VAL[1] ) $Q = '$( $_[2] )' />" , "</$GB>" 
+                        "<$GB $GR = '$( $_[0] )' $HD = '$( $_[1] )' >" , "<$TB Style = '{ StaticResource TextBro }' $Q = '$( $_[2] )' />" , "</$GB>" 
                         
                     } ; "<$G $GR = '3'>" , "<$GCD>" ; 0..1 | % { "<$CD $W = '*' />" } ; "</$GCD>" ; 
                     
-                    ( 0 , "Account" , "$TB $( $VAL[1] )" , "User" ) , ( 1 , "Password" , $PWB , "Pass' PasswordChar = '*" ) | % { 
+                    ( 0 , "Account" , "$TB Style = '{ StaticResource TextBro }'" , "User" ) , ( 1 , "Password" , "$PWB $MA = '5'" , "Pass' PasswordChar = '*" ) | % { 
 
                         "<$GB $GC = '$( $_[0] )' $HD = 'Administrator $( $_[1] )'>" , "<$( $_[2] ) $Q = 'LMCred_$( $_[3] )' />" , "</$GB>" 
                     
@@ -4792,7 +4803,7 @@
 
             $MDTFile      = @{ x86 = 86 ; AMD64 = 64 }[ $env:PROCESSOR_ARCHITECTURE ] | % { "MicrosoftDeploymentToolkit_x$_.msi" }
 
-            $Pull         = [ Ordered ]@{ }
+            $Pull         = @{ }
 
             # [ Windows ADK ] - The Awesome Deployment Kit. That's what ADK means. Really.
 
@@ -4845,13 +4856,13 @@
 
                 ElseIf ( ( $Item -eq $Null ) -or ( $Item.DisplayVersion -lt $X[1] ) )
                 {
-                    Write-Theme -Action "Collecting [~]" "$( $X[3] )"
+                    Write-Theme -Action "Collecting [~]" $X[3]
                 
                     If ( ! ( Test-Path $X[4] ) )
                     {
                         NI $X[4] -ItemType Directory
                     
-                        Write-Theme -Action "Created [+]" "$( $X[4] )"
+                        Write-Theme -Action "Created [+]" $X[4]
                     }
 
                     IPMO BitsTransfer
@@ -4859,17 +4870,19 @@
                     [ Net.ServicePointManager ]::SecurityProtocol = 3072
 
                     $Splat = @{  Source           = $X[6]
-                                 Destination      = "$( $X[4] )\$( $X[5])"
-                                 Description      = $X[3] }
+                                 Destination      = $X[4,5] -join "\"
+                                 Description      = $X[3] 
+                    }
 
                     Start-BitsTransfer @Splat
 
                     $Splat = @{  FilePath         = $X[5]
                                  Args             = $X[7] 
                                  WorkingDirectory = $X[4]
-                                 Passthru         = $True }
+                                 Passthru         = $True
+                    }
 
-                    Write-Theme -Action "Installing [+]" "$( $X[3] )"
+                    Write-Theme -Action "Installing [+]" $X[3]
                     
                     Write-Theme -Function "ETA $T"
 
@@ -4877,9 +4890,9 @@
 
                     SAPS @Splat | % {
                     
-                        For ( $j = 0 ; $j -le 100 ; $j = ( $j + 1 ) % 100 ) 
+                        For ( $j = 0 ; $j -le 100 ; ( $j ++ ) % 100 ) 
                         {
-                            $Progress = @{  Activity        = "[ Installing ] $( $X[3] )"
+                            $Progress = @{  Activity        = "[ Installing ]" , $X[3] -join " "
                                             PercentComplete = "$J"
                                             Status          = "$J% Complete" }
 
@@ -4897,9 +4910,9 @@
 
                     $Time.Stop()
 
-                    Write-Theme -Action "Installed [+]" "$( $X[3] )"
+                    Write-Theme -Action "Installed [+]" $X[3]
 
-                    Write-Theme -Function "$( $Time.Elapsed )"
+                    Write-Theme -Function $Time.Elapsed
 
                 }
             }
@@ -4927,9 +4940,13 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Import-MDTModule # Loads the module for MDT _______________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-       
-        GP "HKLM:\Software\Microsoft\Deployment 4" | % { GCI $_.Install_Dir "*Toolkit.psd1" -Recurse } | % { IPMO $_.FullName -VB }
-        Write-Theme -Action "Module [+]" "Microsoft Deployment Toolkit"
+      
+        GP "HKLM:\Software\Microsoft\Deployment 4" | % { GCI $_.Install_Dir "*Toolkit.psd1" -Recurse } | % { IPMO $_.FullName }
+
+        $X = If ( $? ) { "Successful [+]" , "Imported" , 11 , 11 , 15 } Else { "Exception [!]" , "Not Imported" , 12 , 4 , 15 }
+
+        Write-Theme -Action $X[0] "[ Module ] Microsoft Deployment Toolkit $( $X[1] )" $X[2] $X[3] $X[4]
+
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -4984,16 +5001,30 @@
             "Legacy"                     | % { $GUI.$_.IsChecked = $False ; $Code.$_ =        "-" }
         })
 
-        $GUI.IIS_Install.Add_Click({ 
-            "IIS_Install"                | % { $GUI.$_.IsChecked =  $True ; $Code.$_ = "Selected" }
-            "IIS_Skip"                   | % { $GUI.$_.IsChecked = $False ; $Code.$_ =        "-" }
-            "Name" , "AppPool" , "Proxy" | % { "IIS_$_" } | % { $GUI.$_.IsEnabled =  $True ; $GUI.$_.Text = "" ; $Code.$_ = "" }
+        $GUI.IIS_Install.Add_Click(
+        { 
+             $GUI.IIS_Install.IsChecked = $True  ; $Code.IIS_Install = "Selected" 
+             $GUI.IIS_Skip.IsChecked    = $False ; $Code.IIS_Skip    = "-" 
+
+            "Name" , "AppPool" , "Proxy" | % { "IIS_$_" } | % { 
+            
+                $GUI.$_.IsEnabled        = $True
+                $GUI.$_.Text             = ""
+                $Code.$_                 = "" 
+            }
         })
 
-        $GUI.IIS_Skip.Add_Click({
-            "IIS_Install"                | % { $GUI.$_.IsChecked = $False ; $Code.$_ =        "-" }
-            "IIS_Skip"                   | % { $GUI.$_.IsChecked =  $True ; $Code.$_ = "Selected" }
-            "Name" , "AppPool" , "Proxy" | % { "IIS_$_" } | % { $GUI.$_.IsEnabled = $False ; $GUI.$_.Text = "" ; $Code.$_ = "" }
+        $GUI.IIS_Skip.Add_Click(
+        {
+             $GUI.IIS_Install.IsChecked = $False ; $Code.IIS_Install = "-"
+             $GUI.IIS_Skip.IsChecked    =  $True ; $Code.IIS_Skip    = "Selected" 
+
+            "Name" , "AppPool" , "Proxy" | % { "IIS_$_" } | % { 
+            
+                $GUI.$_.IsEnabled        = $False
+                $GUI.$_.Text             = ""
+                $Code.$_                 = "" 
+            }
         })
 
         $GUI.LogoBrowse.Add_Click(
@@ -5009,7 +5040,7 @@
 
             $X                                      = $Dialog.ShowDialog()
 
-            $GUI.Logo.Text = @{ $True = $Dialog.FileName ; $False = "<Not Designated>" }[ $X -eq "OK" ] 
+            $GUI.Logo.Text = @{ $True = $Dialog.FileName ; $False = "" }[ $X -eq "OK" ]
 
             $Dialog.Dispose()
         
@@ -5023,12 +5054,12 @@
 
                 $_.Title                            = "Select Background"
                 $_.InitialDirectory                 = $ENV:UserProfile
-                $_.Filter                           = "bmp,gif,jpg,png,tif,dib,jfif,jpe,jpeg,wdp".Split( ',' ) | % { "$_ (*.$_) | *.$_" }
+                $_.Filter                           = "Image Files(*.bmp;*.jpg;*.gif)|*.bmp;*.gif;*.jpg;*.png;*.tif;*.dib;*.jfif;*.jpe;*.jpeg;*.wdp"
             }
 
             $X                                      = $Dialog.ShowDialog()
 
-            $GUI.Logo.Text = @{ $True = $Dialog.FileName ; $False = "<Not Designated>" }[ $X -eq "OK" ] 
+            $GUI.Background.Text = @{ $True = $Dialog.FileName ; $False = "" }[ $X -eq "OK" ]
 
             $Dialog.Dispose()
         
@@ -5145,7 +5176,26 @@
             $GUI.Branch.Text  = $_.Branch 
         }
 
-        GCIM Win32_LogicalDisk | ? { $_.DriveType -eq 3 } | % { $GUI.Drive.AddChild( $_.DeviceID ) }
+        $HDList = GCIM Win32_LogicalDisk | ? { $_.DriveType -eq 3 } | % { $_.DeviceID } | Sort
+
+        If ( $HDList.Count -gt 1 )
+        {
+            $C  = 0
+
+            0..( $HDList.Count - 1 ) | % { 
+            
+                $GUI.Drive.AddChild( $C , $HDList[$_] )
+                $C ++
+            }
+
+            $GUI.Drive.SelectedItem = $HDList[0]
+        }
+
+        If ( $HDList.Count -eq 1 )
+        {
+            $GUI.Drive.AddChild( $HDList )
+            $GUI.Drive.SelectedItem = $HDList
+        }
 
         $GUI.Legacy      | % { $_.IsChecked = $True }
         $GUI.IIS_Install | % { $_.IsChecked = $True }
