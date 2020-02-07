@@ -27,9 +27,9 @@
     Using Namespace System.Management.Automation
     Using Namespace System.DirectoryServices
     Using Namespace System.Net.NetworkInformation
-
-    $Hybrid   = @{ 
     
+    $Hybrid   = @{ # This updates the associated PSM1 File whenever the script is imported, or used.
+        
         Path  = $ENV:PSModulePath.Split( ';' ) | % { GCI $_ "*Hybrid-DSC*" -Directory } | % { "$( $_.FullName )\Hybrid-DSC.psm1" } 
         Value = @'
 <#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
@@ -55,95 +55,132 @@
 \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___    ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
  ¯¯¯¯   [ Declare Namespaces & Load Modules ] __________________________________________//¯¯\\__//¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
                                               ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
+        
         $ENV:PSModulePath.Split( ';' ) | % { GCI $_ -Recurse "*Hybrid-DSC.ps1*" } | % { IPMO $_.FullName -Force }
 
-        Export-ModuleMember -Function Resolve-HybridDSC , New-Subtable , New-Table , Convert-HashToArray , Write-Theme , Show-Message , 
-        Convert-XAMLToWindow , Show-WPFWindow , Get-XAML , Find-XAMLNamedElements , Get-LineDepth , Get-NetworkInfo , Start-PingSweep , 
-        Get-NBTSCAN , Get-NetworkHosts , Get-TelemetryData , Resolve-MacAddress , Start-NetworkInfo , Get-NetworkStatistics , 
-        Initialize-PortScan , Invoke-Login , Add-ACL , New-ACLObject , Import-MDTModule , Export-Ini , Resolve-UninstallList , 
-        Install-DSCRoot , Install-HybridDSC , Initialize-HybridIIS , Initialize-HybridDSC , Unlock-Script , Resolve-LocalMachine , 
-        Update-HybridDSC , Update-Branding , Export-BridgeScript , Get-DSCFeatureList , Confirm-DomainName , Get-DSCPromoTable , 
-        Get-DSCPromoSelection , Initialize-DomainController , Initialize-Server , Get-CurrentServices , Sync-DNSSuffix , 
-        Register-PDCTimeSource , Resolve-Windows , Get-DiskInfo , Resolve-ViperBomb , Start-ViperBombDiag , Import-ServiceConfiguration ,
-        New-ServiceTemplate , Get-ServiceProfile , Show-Console , Publish-HybridDSC
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Script Functions ]____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯    
+        Get-HybridDSC               - Gets a description of this table/Help            
+        Resolve-HybridDSC           - Collects Necessary Script Information            
+        Publish-HybridDSC           - Creates a distributable package for Hybrid-DSC   
+        New-Subtable                - Converts Key/Value Subtable for Write-Theme      
+        New-Table                   - Converts Key/Value Tables for Write-Theme        
+        Convert-HashToArray         - Converts a Hashtable to a formatted array        
+        Write-Theme                 - Stylizes Command Line Output                     
+        Show-Message                - Shows a Message Box                              
+        Convert-XAMLToWindow        - Converts a block of XAML to a hash-table object  
+        Show-WPFWindow              - Initializes the Window Object                    
+        Get-XAML                    - Loads templatized XAML GUI's                     
+        Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
+        Get-LineDepth               - Gets the spacing for clean formatting            
+        Confirm-DomainName          - Confirms whether a supplied domain name is valid  #>
 
-    <#________________________________________________________________________________#>
-    <#-[ Script Functions ]-----------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Get-HybridDSC               - Gets a description of this table/Help            #>
-    <# Resolve-HybridDSC           - Collects Necessary Script Information            #>
-    <# Publish-HybridDSC           - Creates a distributable package for Hybrid-DSC   #>
-    <# New-Subtable                - Converts Key/Value Subtable for Write-Theme      #>
-    <# New-Table                   - Converts Key/Value Tables for Write-Theme        #>
-    <# Convert-HashToArray         - Converts a Hashtable to a formatted array        #>
-    <# Write-Theme                 - Stylizes Command Line Output                     #>
-    <# Show-Message                - Shows a Message Box                              #>
-    <# Convert-XAMLToWindow        - Converts a block of XAML to a hash-table object  #>
-    <# Show-WPFWindow              - Initializes the Window Object                    #>
-    <# Get-XAML                    - Loads templatized XAML GUI's                     #>
-    <# Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     #>
-    <# Get-LineDepth               - Gets the spacing for clean formatting            #>
-    <# Confirm-DomainName          - Confirms whether a supplied domain name is valid #>
-    <#________________________________________________________________________________#>
-    <#-[ Network Functions ]----------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Get-NetworkInfo             - Collects various network information             #>
-    <# Start-PingSweep             - Scans everything on the local network address    #>
-    <# Get-NBTSCAN                 - This parses out NBTStat to return NBTScan        #>
-    <# Get-NetworkHosts            - Collects the ARP tables for MAC address Info     #>
-    <# Get-TelemetryData           - Collects external information for DNS and AD     #>
-    <# Resolve-MacAddress          - Resolves the vendor of any given MAC address     #>
-    <# Start-NetworkInfo           - Comprehensive combination of these other tools   #>
-    <# Get-NetworkStatistics       - Comprehensive netstat reparsed correctly         #>
-    <# Initialize-PortScan         - Scans some ports                                 #>
-    <#________________________________________________________________________________#>
-    <#-[ Directory Functions ]--------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Invoke-Login                - Initializes a live AD validation login context   #>
-    <# Get-DSCPromoTable           - Retrieves GUI Naming Information                 #>
-    <# Get-DSCPromoSelection       - Resets GUI Elements according to selected type   #>
-    <# Initialize-DomainController - Promotes a Domain Controller                     #>
-    <#________________________________________________________________________________#>
-    <#-[ Permissions Functions ]------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Add-ACL                     - Adds an Access Control list                      #>
-    <# New-ACLObject               - Creates a new ACL Object Template                #>
-    <# Unlock-Script               - Will allow for unlocking a file.                 #>
-    <#________________________________________________________________________________#>
-    <#-[ Server Functions ]-----------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Initialize-Server           - Orchestrates initial server configuration        #>
-    <# Get-DSCFeatureList          - Obtains the features used for this modification  #>
-    <# Sync-DNSSuffix              - Ensures the DNS Suffix is set                    #>
-    <# Register-PDCTimeSource      - Sets the Primary Domain Controller Time Source   #>
-    <# Install-DSCRoot             - Installs dependencies for MDT and Hybrid-DSC     #>
-    <# Install-HybridDSC           - Creates a Hybrid-DSC Deployment Share            #>
-    <# Initialize-HybridIIS        - Automatically Configures IIS for MDT/BITS        #>
-    <# Initialize-HybridDSC        - Will populate Applications,Images,Certificates   #>
-    <#________________________________________________________________________________#>
-    <#-[ MDT Functions ]--------------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Import-MDTModule            - Loads the Microsoft Deployment Toolkit Module    #>
-    <# Export-Ini                  - Specifically exports an INI file for MDT         #>
-    <# Export-BridgeScript         - Exports the file used to distribute Hybrid-DSC   #>
-    <# Update-HybridDSC            - Recycles all Deployment Share Content            #>
-    <# Update-Branding             - Updates the branding for a child item device     #>
-    <#________________________________________________________________________________#>
-    <#-[ Diagnostic Functions ]-------------------------------------------------------#>
-    <#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯#>
-    <# Resolve-UninstallList       - Obtains Uninstall Programs List                  #>
-    <# Resolve-LocalMachine        - Retrieves environment variables                  #>
-    <# Get-CurrentServices         - Gets a list of the systems current services      #>
-    <# Resolve-Windows             - Obtains Windows Environment Variables            #>
-    <# Get-DiskInfo                - Locates Hard Disk Statistics                     #>
-    <# Resolve-ViperBomb           - Collects Information needed for ViperBomb GUI    #>
-    <# Start-ViperBombDiag         - Loads the ViperBomb Console Configuration Panel  #>
-    <# Import-ServiceConfiguration - Collects a Service configuration for import      #>
-    <# New-ServiceTemplate         - Creates a new template instance (Immutable)      #>
-    <# Get-ServiceProfile          - Converts loaded profile into useable GUI object  #>
-    <# Show-Console                - Enables/Disables the Console                     #>
-    <#________________________________________________________________________________#>
+    Export-ModuleMember -Function Get-HybridDSC , Resolve-HybridDSC , Publish-HybridDSC , New-Subtable , New-Table , Convert-HashToArray ,
+    Write-Theme , Show-Message , Convert-XAMLToWindow , Show-WPFWindow , Get-XAML , Find-XAMLNamedElements , Get-LineDepth, Confirm-DomainName
 
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Network Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Get-NetworkInfo             - Collects various network information
+        Start-PingSweep             - Scans everything on the local network address
+        Get-NBTSCAN                 - This parses out NBTStat to return NBTScan
+        Get-NetworkHosts            - Collects the ARP tables for MAC address Info
+        Get-TelemetryData           - Collects external information for DNS and AD
+        Resolve-MacAddress          - Resolves the vendor of any given MAC address
+        Start-NetworkInfo           - Comprehensive combination of these other tools
+        Get-NetworkStatistics       - Comprehensive netstat reparsed correctly
+        Initialize-PortScan         - Scans some ports                                  #>
+
+    Export-ModuleMember -Function Get-NetworkInfo , Start-PingSweep , Get-NBTSCAN , Get-NetworkHosts , Get-TelemetryData , Resolve-MacAddress, 
+    Start-NetworkInfo , Get-NetworkStatistics , Initialize-PortScan
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Directory Functions ]_________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Invoke-Login                - Initializes a live AD validation login context
+        Get-DSCPromoTable           - Retrieves GUI Naming Information
+        Get-DSCPromoSelection       - Resets GUI Elements according to selected type
+        Initialize-DomainController - Promotes a Domain Controller                      #>
+    
+    Export-ModuleMember -Function Invoke-Login , Get-DSCPromoTable , Get-DSCPromoSelection , Initialize-DomainController
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Permissions Functions ]_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Add-ACL                     - Adds an Access Control list
+        New-ACLObject               - Creates a new ACL Object Template
+        Unlock-Script               - Will allow for unlocking a file.                  #>
+
+    Export-ModuleMember -Function Add-ACL , New-ACLObject , Unlock-Script
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Server Functions ]____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Initialize-Server           - Orchestrates initial server configuration
+        Get-DSCFeatureList          - Obtains the features used for this modification
+        Sync-DNSSuffix              - Ensures the DNS Suffix is set
+        Register-PDCTimeSource      - Sets the Primary Domain Controller Time Source
+        Install-DSCRoot             - Installs dependencies for MDT and Hybrid-DSC
+        Install-HybridDSC           - Creates a Hybrid-DSC Deployment Share
+        Initialize-HybridIIS        - Automatically Configures IIS for MDT/BITS
+        Initialize-HybridDSC        - Will populate Applications,Images,Certificates    #>
+
+    Export-ModuleMember -Function Initialize-Server , Get-DSCFeatureList , Sync-DNSSuffix , Register-PDCTimeSource , Install-DSCRoot , 
+    Install-HybridDSC , Initialize-HybridIIS , Initialize-HybridDSC
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ MDT Functions ]_______________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Import-MDTModule            - Loads the Microsoft Deployment Toolkit Module
+        Export-Ini                  - Specifically exports an INI file for MDT
+        Export-BridgeScript         - Exports the file used to distribute Hybrid-DSC
+        Update-HybridDSC            - Recycles all Deployment Share Content
+        Update-Branding             - Updates the branding for a child item device      #>
+
+    Export-ModuleMember -Function Import-MDTModule , Export-Ini , Export-BridgeScript , Update-HybridDSC , Update-Branding
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Diagnostic Functions ]________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Initialize-ViperBomb        - Loads the ViperBomb Service Configuration Tool
+        Resolve-UninstallList       - Obtains Uninstall Programs List
+        Resolve-LocalMachine        - Retrieves environment variables
+        Get-CurrentServices         - Gets a list of the systems current services
+        Resolve-Windows             - Obtains Windows Environment Variables
+        Get-DiskInfo                - Locates Hard Disk Statistics
+        Resolve-ViperBomb           - Collects Information needed for ViperBomb GUI
+        Start-ViperBombDiagnostics  - Loads the ViperBomb Console Configuration Panel
+        Import-ServiceConfiguration - Collects a Service configuration for import
+        New-ServiceTemplate         - Creates a new template instance (Immutable)
+        Get-ServiceProfile          - Converts loaded profile into useable GUI object
+        Show-Console                - Enables/Disables the Console                      
+        Get-CurrentPID              - Collects the (QMark/Processor) ID                 #>
+
+    Export-ModuleMember -Function Initialize-ViperBomb , Resolve-UninstallList , Resolve-LocalMachine , Get-CurrentServices , Resolve-Windows , 
+    Get-DiskInfo , Resolve-ViperBomb , Start-ViperBombDiagnostics , Import-ServiceConfiguration , New-ServiceTemplate , Get-ServiceProfile , 
+    Show-Console , Get-CurrentPID
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 <#___                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 //¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -151,16 +188,8 @@
  ¯¯¯#>  Write-Theme -Action "Hybrid-DSC [+]" "Module Loaded" <#_________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     #>
 '@ }
- 
-    
-    $Content = GC $Hybrid.Path
 
-    0..( $Content.Count - 1 ) | ? { $Content[$_] -ne $Hybrid.Value[$_] } | % {
-    
-        SC -Path $Hybrid.Path -Value $Hybrid.Value
-        
-   
-    }
+    SC @Hybrid
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 # ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -247,6 +276,7 @@
 
             Diagnostic                        = [ PSCustomObject ]@{
 
+                "Initialize-ViperBomb"        = "Loads the ViperBomb Service Configuration Tool"
                 "Resolve-UninstallList"       = "Obtains Uninstall Programs List"
                 "Resolve-LocalMachine"        = "Retrieves environment variables"
                 "Get-CurrentServices"         = "Gets a list of the systems current services"
@@ -644,7 +674,12 @@
 
         }
 
-        $QMark                   = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+        $QMark                   = Get-CurrentPID
+
+        If ( $QMark -eq $Null )
+        {
+            $QMark = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
+        }
 
         If ( $Version )
         {
@@ -870,245 +905,48 @@
 
         If ( $Config )
         {
-            [ PSCustomObject ]@{ 
+            $Return   = @{  
+            
+                Names = ( "AJRouter;ALG;AppHostSvc;AppIDSvc;Appinfo;AppMgmt;AppReadiness;AppVClient;aspnet_state;AssignedAccessManagerSvc;" +
+                "AudioEndpointBuilder;AudioSrv;AxInstSV;BcastDVRUserService_$QMARK;BDESVC;BFE;BITS;BluetoothUserService_$QMARK;Browser;BTAGService;" + 
+                "BthAvctpSvc;BthHFSrv;bthserv;c2wts;camsvc;CaptureService_$QMARK;CDPSvc;CDPUserSvc_$QMARK;CertPropSvc;COMSysApp;CryptSvc;CscService;" + 
+                "defragsvc;DeviceAssociationService;DeviceInstall;DevicePickerUserSvc_$QMARK;DevQueryBroker;Dhcp;diagnosticshub.standardcollector.service;" + 
+                "diagsvc;DiagTrack;DmEnrollmentSvc;dmwappushsvc;Dnscache;DoSvc;dot3svc;DPS;DsmSVC;DsRoleSvc;DsSvc;DusmSvc;EapHost;EFS;embeddedmode;" + 
+                "EventLog;EventSystem;Fax;fdPHost;FDResPub;fhsvc;FontCache;FontCache3.0.0.0;FrameServer;ftpsvc;GraphicsPerfSvc;hidserv;hns;HomeGroupListener;" + 
+                "HomeGroupProvider;HvHost;icssvc;IKEEXT;InstallService;iphlpsvc;IpxlatCfgSvc;irmon;KeyIso;KtmRm;LanmanServer;LanmanWorkstation;lfsvc;" + 
+                "LicenseManager;lltdsvc;lmhosts;LPDSVC;LxssManager;MapsBroker;MessagingService_$QMARK;MSDTC;MSiSCSI;MsKeyboardFilter;MSMQ;MSMQTriggers;" + 
+                "NaturalAuthentication;NcaSVC;NcbService;NcdAutoSetup;Netlogon;Netman;NetMsmqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator;" + 
+                "NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK;p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc;" + 
+                "PolicyAgent;Power;PrintNotify;PrintWorkflowUserSvc_$QMARK;ProfSvc;PushToInstall;QWAVE;RasAuto;RasMan;RemoteAccess;RemoteRegistry;" + 
+                "RetailDemo;RmSvc;RpcLocator;SamSs;SCardSvr;ScDeviceEnum;SCPolicySvc;SDRSVC;seclogon;SEMgrSvc;SENS;Sense;SensorDataService;SensorService;" + 
+                "SensrSvc;SessionEnv;SgrmBroker;SharedAccess;SharedRealitySvc;ShellHWDetection;shpamsvc;smphost;SmsRouter;SNMPTRAP;spectrum;Spooler;" + 
+                "SSDPSRV;ssh-agent;SstpSvc;StiSvc;StorSvc;svsvc;swprv;SysMain;TabletInputService;TapiSrv;TermService;Themes;TieringEngineService;TimeBroker;" + 
+                "TokenBroker;TrkWks;TrustedInstaller;tzautoupdate;UevAgentService;UI0Detect;UmRdpService;upnphost;UserManager;UsoSvc;VaultSvc;vds;vmcompute;" + 
+                "vmicguestinterface;vmicheartbeat;vmickvpexchange;vmicrdv;vmicshutdown;vmictimesync;vmicvmsession;vmicvss;vmms;VSS;W32Time;W3LOGSVC;W3SVC;" + 
+                "WaaSMedicSvc;WalletService;WarpJITSvc;WAS;wbengine;WbioSrvc;Wcmsvc;wcncsvc;WdiServiceHost;WdiSystemHost;WebClient;Wecsvc;WEPHOSTSVC;" + 
+                "wercplsupport;WerSvc;WFDSConSvc;WiaRpc;WinHttpAutoProxySvc;Winmgmt;WinRM;wisvc;WlanSvc;wlidsvc;wlpasvc;wmiApSrv;WMPNetworkSvc;WMSVC;" + 
+                "workfolderssvc;WpcMonSvc;WPDBusEnum;WpnService;WpnUserService_$QMARK;wscsvc;WSearch;wuauserv;wudfsvc;WwanSvc;xbgm;XblAuthManager;" + 
+                "XblGameSave;XboxGipSvc;XboxNetApiSvc" ).Split( ';' )
 
-                'AJRouter'                                      = '2,2,2,2,2,2,1,1,2,2'
-                'ALG'                                           = '2,2,2,2,1,1,1,1,1,1'
-                'AppHostSvc'                                    = '3,0,3,0,3,0,3,0,3,0'
-                'AppIDSvc'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'Appinfo'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'AppMgmt'                                       = '0,0,2,2,2,2,1,1,2,2'
-                'AppReadiness'                                  = '2,0,2,0,2,0,2,0,2,0'
-                'AppVClient'                                    = '0,0,1,0,1,0,1,0,1,0'
-                'aspnet_state'                                  = '2,0,2,0,2,0,2,0,2,0'
-                'AssignedAccessManagerSvc'                      = '0,0,2,0,2,0,2,0,2,0'
-                'AudioEndpointBuilder'                          = '3,0,3,0,3,0,3,0,3,0'
-                'AudioSrv'                                      = '3,0,3,0,3,0,3,0,3,0'
-                'AxInstSV'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'BcastDVRUserService_?????'                     = '2,0,2,0,2,0,2,0,2,0'
-                'BDESVC'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'BFE'                                           = '3,0,3,0,3,0,3,0,3,0'
-                'BITS'                                          = '4,0,4,0,4,0,4,0,4,0'
-                'BluetoothUserService_?????'                    = '2,0,2,0,2,0,2,0,2,0'
-                'Browser'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'BTAGService'                                   = '2,2,2,2,2,2,1,1,2,2'
-                'BthAvctpSvc'                                   = '2,2,2,2,2,2,1,1,2,2'
-                'BthHFSrv'                                      = '2,2,2,2,2,2,1,1,2,2'
-                'bthserv'                                       = '2,2,2,2,2,2,1,1,2,2'
-                'c2wts'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'camsvc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'CaptureService_?????'                          = '0,0,2,2,2,2,1,1,2,2'
-                'CDPSvc'                                        = '4,0,4,0,4,0,4,0,4,0'
-                'CDPUserSvc_?????'                              = '3,0,3,0,3,0,3,0,3,0'
-                'CertPropSvc'                                   = '2,2,2,2,2,2,1,1,2,2'
-                'COMSysApp'                                     = '2,0,2,0,2,0,2,0,2,0'
-                'CryptSvc'                                      = '3,0,3,0,3,0,3,0,3,0'
-                'CscService'                                    = '0,0,2,2,1,1,1,1,1,1'
-                'defragsvc'                                     = '2,0,2,0,2,0,2,0,2,0'
-                'DeviceAssociationService'                      = '2,0,2,0,2,0,2,0,2,0'
-                'DeviceInstall'                                 = '2,0,2,0,2,0,2,0,2,0'
-                'DevicePickerUserSvc_?????'                     = '2,0,2,0,2,0,2,0,2,0'
-                'DevQueryBroker'                                = '2,0,2,0,2,0,2,0,2,0'
-                'Dhcp'                                          = '3,0,3,0,3,0,3,0,3,0'
-                'diagnosticshub.standardcollector.service'      = '2,0,2,0,2,0,2,0,2,0'
-                'diagsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'DiagTrack'                                     = '3,0,3,0,3,0,3,0,3,0'
-                'DmEnrollmentSvc'                               = '2,0,2,0,2,0,2,0,2,0'
-                'dmwappushsvc'                                  = '2,2,2,2,1,1,1,1,1,1'
-                'Dnscache'                                      = '3,0,3,0,3,0,3,0,3,0'
-                'DoSvc'                                         = '4,0,4,0,4,0,4,0,4,0'
-                'dot3svc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'DPS'                                           = '3,0,3,0,3,0,3,0,3,0'
-                'DsmSVC'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'DsRoleSvc'                                     = '2,0,2,0,2,0,2,0,2,0'
-                'DsSvc'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'DusmSvc'                                       = '3,0,3,0,3,0,3,0,3,0'
-                'EapHost'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'EFS'                                           = '2,0,2,0,2,0,2,0,2,0'
-                'embeddedmode'                                  = '2,0,2,0,2,0,2,0,2,0'
-                'EventLog'                                      = '3,0,3,0,3,0,3,0,3,0'
-                'EventSystem'                                   = '3,0,3,0,3,0,3,0,3,0'
-                'Fax'                                           = '2,2,2,2,1,1,1,1,1,1'
-                'fdPHost'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'FDResPub'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'fhsvc'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'FontCache'                                     = '3,0,3,0,3,0,3,0,3,0'
-                'FontCache3.0.0.0'                              = '2,0,2,0,2,0,2,0,2,0'
-                'FrameServer'                                   = '2,2,2,2,1,1,1,1,1,1'
-                'ftpsvc'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'GraphicsPerfSvc'                               = '2,0,2,0,2,0,2,0,2,0'
-                'hidserv'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'hns'                                           = '0,0,2,0,2,0,2,0,2,0'
-                'HomeGroupListener'                             = '2,0,2,0,2,0,2,0,2,0'
-                'HomeGroupProvider'                             = '2,0,2,0,2,0,2,0,2,0'
-                'HvHost'                                        = '2,2,2,2,1,1,1,1,1,1'
-                'icssvc'                                        = '2,2,2,2,1,1,1,1,1,1'
-                'IKEEXT'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'InstallService'                                = '2,0,2,0,2,0,2,0,2,0'
-                'iphlpsvc'                                      = '3,3,3,3,3,3,1,1,3,3'
-                'IpxlatCfgSvc'                                  = '2,2,2,2,2,2,1,1,2,2'
-                'irmon'                                         = '2,2,2,2,1,1,1,1,1,1'
-                'KeyIso'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'KtmRm'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'LanmanServer'                                  = '3,0,3,0,3,0,3,0,3,0'
-                'LanmanWorkstation'                             = '3,0,3,0,3,0,3,0,3,0'
-                'lfsvc'                                         = '2,2,2,2,1,1,1,1,1,1'
-                'LicenseManager'                                = '2,0,2,0,2,0,2,0,2,0'
-                'lltdsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'lmhosts'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'LPDSVC'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'LxssManager'                                   = '2,0,2,0,2,0,2,0,2,0'
-                'MapsBroker'                                    = '4,4,4,4,1,1,1,1,1,1'
-                'MessagingService_?????'                        = '2,0,2,0,2,0,2,0,2,0'
-                'MSDTC'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'MSiSCSI'                                       = '2,2,2,2,1,1,1,1,1,1'
-                'MsKeyboardFilter'                              = '0,0,0,0,0,0,0,0,0,0'
-                'MSMQ'                                          = '3,0,3,0,3,0,3,0,3,0'
-                'MSMQTriggers'                                  = '3,0,3,0,3,0,3,0,3,0'
-                'NaturalAuthentication'                         = '2,2,2,2,2,2,1,1,2,2'
-                'NcaSVC'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'NcbService'                                    = '2,0,2,0,2,0,2,0,2,0'
-                'NcdAutoSetup'                                  = '2,2,2,2,2,2,1,1,2,2'
-                'Netlogon'                                      = '2,2,2,2,2,2,1,1,2,2'
-                'Netman'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'NetMsmqActivator'                              = '3,0,3,0,3,0,3,0,3,0'
-                'NetPipeActivator'                              = '3,0,3,0,3,0,3,0,3,0'
-                'netprofm'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'NetSetupSvc'                                   = '2,0,2,0,2,0,2,0,2,0'
-                'NetTcpActivator'                               = '3,0,3,0,3,0,3,0,3,0'
-                'NetTcpPortSharing'                             = '2,2,2,2,1,1,1,1,1,1'
-                'NlaSvc'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'nsi'                                           = '3,0,3,0,3,0,3,0,3,0'
-                'OneSyncSvc_?????'                              = '4,0,4,0,4,0,4,0,4,0'
-                'p2pimsvc'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'p2psvc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'PcaSvc'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'PeerDistSvc'                                   = '0,0,2,2,1,1,1,1,1,1'
-                'PerfHost'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'PhoneSvc'                                      = '2,2,2,2,1,1,1,1,1,1'
-                'pla'                                           = '2,0,2,0,2,0,2,0,2,0'
-                'PlugPlay'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'PNRPAutoReg'                                   = '2,0,2,0,2,0,2,0,2,0'
-                'PNRPsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'PolicyAgent'                                   = '2,0,2,0,2,0,2,0,2,0'
-                'Power'                                         = '3,0,3,0,3,0,3,0,3,0'
-                'PrintNotify'                                   = '2,0,2,0,2,0,2,0,2,0'
-                'PrintWorkflowUserSvc_?????'                    = '2,0,2,0,2,0,2,0,2,0'
-                'ProfSvc'                                       = '3,0,3,0,3,0,3,0,3,0'
-                'PushToInstall'                                 = '2,0,2,0,2,0,2,0,2,0'
-                'QWAVE'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'RasAuto'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'RasMan'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'RemoteAccess'                                  = '1,0,1,0,1,0,1,0,1,0'
-                'RemoteRegistry'                                = '1,0,1,0,1,0,1,0,1,0'
-                'RetailDemo'                                    = '2,2,2,2,1,1,1,1,1,1'
-                'RmSvc'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'RpcLocator'                                    = '2,2,2,2,1,1,1,1,1,1'
-                'SamSs'                                         = '3,0,3,0,3,0,3,0,3,0'
-                'SCardSvr'                                      = '1,0,1,0,1,0,1,0,1,0'
-                'ScDeviceEnum'                                  = '2,2,2,2,1,1,1,1,1,1'
-                'SCPolicySvc'                                   = '2,2,2,2,1,1,1,1,1,1'
-                'SDRSVC'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'seclogon'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'SEMgrSvc'                                      = '2,2,2,2,1,1,1,1,1,1'
-                'SENS'                                          = '3,0,3,0,3,0,3,0,3,0'
-                'Sense'                                         = '0,0,2,0,2,0,2,0,2,0'
-                'SensorDataService'                             = '2,2,2,2,1,1,1,1,2,2'
-                'SensorService'                                 = '2,2,2,2,1,1,1,1,2,2'
-                'SensrSvc'                                      = '2,2,2,2,1,1,1,1,2,2'
-                'SessionEnv'                                    = '2,2,2,2,2,2,1,1,2,2'
-                'SgrmBroker'                                    = '4,0,4,0,4,0,4,0,4,0'
-                'SharedAccess'                                  = '2,2,2,2,1,1,1,1,1,1'
-                'SharedRealitySvc'                              = '2,0,2,0,2,0,2,0,2,0'
-                'ShellHWDetection'                              = '3,0,3,0,3,0,3,0,3,0'
-                'shpamsvc'                                      = '1,0,1,0,1,0,1,0,1,0'
-                'smphost'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'SmsRouter'                                     = '2,2,2,2,1,1,1,1,1,1'
-                'SNMPTRAP'                                      = '2,2,2,2,1,1,1,1,1,1'
-                'spectrum'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'Spooler'                                       = '3,0,3,0,3,0,3,0,3,0'
-                'SSDPSRV'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'ssh-agent'                                     = '2,0,2,0,2,0,2,0,2,0'
-                'SstpSvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'StiSvc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'StorSvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'svsvc'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'swprv'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'SysMain'                                       = '3,0,3,0,3,0,3,0,3,0'
-                'TabletInputService'                            = '2,2,2,2,1,1,1,1,2,2'
-                'TapiSrv'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'TermService'                                   = '2,2,2,2,2,2,1,1,2,2'
-                'Themes'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'TieringEngineService'                          = '2,0,2,0,2,0,2,0,2,0'
-                'TimeBroker'                                    = '2,0,2,0,2,0,2,0,2,0'
-                'TokenBroker'                                   = '2,0,2,0,2,0,2,0,2,0'
-                'TrkWks'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'TrustedInstaller'                              = '2,0,2,0,2,0,2,0,2,0'
-                'tzautoupdate'                                  = '1,0,1,0,1,0,1,0,1,0'
-                'UevAgentService'                               = '0,0,1,0,1,0,1,0,1,0'
-                'UI0Detect'                                     = '2,0,2,0,2,0,2,0,2,0'
-                'UmRdpService'                                  = '2,2,2,2,2,2,1,1,2,2'
-                'upnphost'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'UserManager'                                   = '3,0,3,0,3,0,3,0,3,0'
-                'UsoSvc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'VaultSvc'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'vds'                                           = '2,0,2,0,2,0,2,0,2,0'
-                'vmcompute'                                     = '0,0,2,0,2,0,2,0,2,0'
-                'vmicguestinterface'                            = '2,2,2,2,1,1,1,1,1,1'
-                'vmicheartbeat'                                 = '2,2,2,2,1,1,1,1,1,1'
-                'vmickvpexchange'                               = '2,2,2,2,1,1,1,1,1,1'
-                'vmicrdv'                                       = '2,2,2,2,1,1,1,1,1,1'
-                'vmicshutdown'                                  = '2,2,2,2,1,1,1,1,1,1'
-                'vmictimesync'                                  = '2,2,2,2,1,1,1,1,1,1'
-                'vmicvmsession'                                 = '2,2,2,2,1,1,1,1,1,1'
-                'vmicvss'                                       = '2,2,2,2,1,1,1,1,1,1'
-                'vmms'                                          = '0,0,3,0,3,0,3,0,3,0'
-                'VSS'                                           = '2,0,2,0,2,0,2,0,2,0'
-                'W32Time'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'W3LOGSVC'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'W3SVC'                                         = '3,0,3,0,3,0,3,0,3,0'
-                'WaaSMedicSvc'                                  = '2,0,2,0,2,0,2,0,2,0'
-                'WalletService'                                 = '2,0,2,0,2,0,2,0,2,0'
-                'WarpJITSvc'                                    = '2,0,2,0,2,0,2,0,2,0'
-                'WAS'                                           = '2,0,2,0,2,0,2,0,2,0'
-                'wbengine'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'WbioSrvc'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'Wcmsvc'                                        = '3,0,3,0,3,0,3,0,3,0'
-                'wcncsvc'                                       = '2,2,2,2,2,2,1,1,2,2'
-                'WdiServiceHost'                                = '2,0,2,0,2,0,2,0,2,0'
-                'WdiSystemHost'                                 = '2,0,2,0,2,0,2,0,2,0'
-                'WebClient'                                     = '2,2,2,2,2,2,1,1,2,2'
-                'Wecsvc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'WEPHOSTSVC'                                    = '2,0,2,0,2,0,2,0,2,0'
-                'wercplsupport'                                 = '2,0,2,0,2,0,2,0,2,0'
-                'WerSvc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'WFDSConSvc'                                    = '2,2,2,2,1,1,1,1,2,2'
-                'WiaRpc'                                        = '2,0,2,0,2,0,2,0,2,0'
-                'WinHttpAutoProxySvc'                           = '2,0,2,0,2,0,2,0,2,0'
-                'Winmgmt'                                       = '3,0,3,0,3,0,3,0,3,0'
-                'WinRM'                                         = '2,2,2,2,1,1,1,1,1,1'
-                'wisvc'                                         = '2,2,2,2,1,1,1,1,1,1'
-                'WlanSvc'                                       = '3,3,3,3,2,2,2,2,3,3'
-                'wlidsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'wlpasvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'wmiApSrv'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'WMPNetworkSvc'                                 = '2,2,2,2,1,1,1,1,1,1'
-                'WMSVC'                                         = '2,0,2,0,2,0,2,0,2,0'
-                'workfolderssvc'                                = '2,2,2,2,1,1,1,1,1,1'
-                'WpcMonSvc'                                     = '2,2,2,2,1,1,1,1,1,1'
-                'WPDBusEnum'                                    = '2,0,2,0,2,0,2,0,2,0'
-                'WpnService'                                    = '3,0,3,0,3,0,3,0,3,0'
-                'WpnUserService_?????'                          = '3,0,3,0,3,0,3,0,3,0'
-                'wscsvc'                                        = '4,0,4,0,4,0,4,0,4,0'
-                'WSearch'                                       = '4,0,4,0,4,0,4,0,4,0'
-                'wuauserv'                                      = '2,0,2,0,2,0,2,0,2,0'
-                'wudfsvc'                                       = '2,0,2,0,2,0,2,0,2,0'
-                'WwanSvc'                                       = '2,2,2,2,1,1,1,1,1,1'
-                'xbgm'                                          = '2,0,2,0,2,0,2,0,2,0'
-                'XblAuthManager'                                = '2,2,2,2,1,1,1,1,1,1'
-                'XblGameSave'                                   = '2,2,2,2,1,1,1,1,1,1'
-                'XboxGipSvc'                                    = '2,0,2,0,2,0,2,0,2,0'
-                'XboxNetApiSvc'                                 = '2,2,2,2,1,1,1,1,1,1'
+                Values = ( "0;1;2;3;3;4;3;5;3;6;2;2;3;3;3;2;7;3;3;0;0;0;0;3;3;4;7;2;0;3;2;8;3;3;3;3;3;2;3;3;2;3;1;2;7;3;2;3;3;3;2;3;3;3;2;2;1;3;3;3;2;3;1;2;" + 
+                "3;3;6;3;3;1;1;3;3;9;0;1;3;3;2;2;1;3;3;3;2;3;1;0;3;3;1;11;2;2;0;3;3;0;0;3;2;2;3;3;2;1;2;2;7;3;3;2;8;3;1;3;3;3;3;3;2;3;3;2;3;3;3;3;12;12;1;3;" + 
+                "1;2;12;1;1;3;3;1;2;6;13;13;13;0;7;1;3;2;12;3;1;1;3;2;3;3;3;3;3;3;3;2;13;3;0;2;3;3;3;2;3;12;5;3;0;3;2;3;3;3;6;1;1;1;1;1;1;1;1;14;3;3;3;2;3;3;" + 
+                "3;3;3;3;2;0;3;3;0;3;3;3;3;13;3;3;2;1;1;15;3;3;3;1;3;1;1;3;2;2;7;7;3;3;1;3;1;1;3;1" ).Split( ';' )
+
+                Profile = ( "2,2,2,2,2,2,1,1,2,2;2,2,2,2,1,1,1,1,1,1;3,0,3,0,3,0,3,0,3,0;2,0,2,0,2,0,2,0,2,0;0,0,2,2,2,2,1,1,2,2;0,0,1,0,1,0,1,0,1,0;" + 
+                "0,0,2,0,2,0,2,0,2,0;4,0,4,0,4,0,4,0,4,0;0,0,2,2,1,1,1,1,1,1;3,3,3,3,3,3,1,1,3,3;4,4,4,4,1,1,1,1,1,1;0,0,0,0,0,0,0,0,0,0;1,0,1,0,1,0,1,0,1,0;" + 
+                "2,2,2,2,1,1,1,1,2,2;0,0,3,0,3,0,3,0,3,0;3,3,3,3,2,2,2,2,3,3" ).Split( ';' )
+                
+            } | % { 
+
+                ForEach ( $i in 0..( $_.Names.Count - 1 ) ) 
+                { 
+                    [ PSCustomObject ]@{ 
+                
+                        Service = $_.Names[$I]
+                        Profile = $_.Profile[ $_.Values[$I]]
+                    }
+                }
             }
         }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
@@ -1487,6 +1325,7 @@
             }
         }
 
+        $Return
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -9278,7 +9117,7 @@
 
                 ForEach ( $i in "ps1" , "zip" )
                 {
-                    "$Path.$I" | % { 
+                    "$Path.$I" | % {
 
                         $Splat              = @{
 
@@ -9295,6 +9134,12 @@
                 }
             }
         }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-CurrentPID # What Free Actually Means __________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯       
+        ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]         #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
