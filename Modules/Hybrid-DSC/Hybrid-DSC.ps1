@@ -1,4 +1,4 @@
-<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+﻿<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -877,7 +877,7 @@
 
             Config              = $ServiceConfig | % {
                 
-                ForEach ( $i in 0..( $_.Names.Count - 1 ) ) 
+                ForEach ( $i in 0..( $_.Names.Count - 1 ) )
                 { 
                     [ PSCustomObject ]@{ 
                 
@@ -900,6 +900,7 @@
             If ( $Message   ) { $_.Message   }
             If ( $Help      ) { $_.Help      }
             If ( $Services  ) { $_.Services  }
+            If ( $Types     ) { $_.Types     }
             If ( $Names     ) { $_.Names     }
             If ( $Config    ) { $_.Config    }
             If ( $All       ) { $_ }
@@ -914,117 +915,127 @@
 
             [ Parameter ( ) ] [ PSCustomObject ] $Model )
 
-        $Section              = @( "Script" , "System" | % { "$_ Information" } ; "Initialization" ; "Display" , "Miscellaneous" , 
-                                   "Development" , "Bypass/Force" , "Logging" , "Backup" | % { "$_ Settings" } ; "Version Control" ) | % { "[ $_ ]" }
+        $Collect              = [ PSCustomObject ]@{ 
 
-        $Subtable             = 0..9
+            Section           = @( "Script" , "System" | % { "$_ Information" } ; "Initialization" ; ( "Display,Miscellaneous,Development," +
+                                   "Bypass/Force,Logging,Backup" ).Split(',') | % { "$_ Settings" } ; "Version Control" ) | % { "[ $_ ]" }
         
-        #---------------------------------------------#
-        
-        $Script               = Resolve-ViperBomb -Version
-
-        $Splat                = @{ 
+            Script            = Resolve-ViperBomb -Version
             
-            Items             = "Version" , "Date" , "Script" , "Service" , "Release"
-            Values            = $Script | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
+            System            = [ PSCustomObject ]@{
+    
+                MSInfo        = Resolve-Windows -MSInfo    | % { "$( $_.Caption ) [$( $_.OSArchitecture )]" }
+                SKU           = Resolve-Windows -SKU       | % { $_.SKU }
+                Build         = Resolve-Windows -Edition   | % { $_.Build }
+                Version       = Resolve-Windows -Edition   | % { $_.Version }
+                Chassis       = Resolve-Windows -Type      | % { $_.Chassis }
+            }
+
+            Initialization    = $Model | % { If ( $_ -ne $Null ) { $_ } Else { Resolve-ViperBomb -Control } }
         }
 
-        $Subtable[0]          = New-SubTable @Splat
+        $Control              = $Collect.Initialization
+
+        $Diagnostics          = [ PSCustomObject ]@{ 
+
+            Script            = [ PSCustomObject ]@{ # [ Script Information ]
+
+                Items         = "Version" , "Date" , "Script" , "Service" , "Release"
+                Values        = $Collect.Script | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
+                Subtable      = ""
+            }
+
+            System            = [ PSCustomObject ]@{ # [ System Information ]
+
+                Items         = "Operating System" , "Edition / SKU" , "Build" , "Version" , "Chassis Type"
+                Values        = $Collect.System | % { $_.MSInfo  , $_.SKU , $_.Build , $_.Version , $_.Chassis }
+                Subtable      = ""
+            }
+
+            Initialization    = [ PSCustomObject ]@{ # [ Initialization ]
+
+                Items         = "Argument List" , "Terms of Service" 
+                Values        = $Collect.Initialization | % { $_.PassedArgs , $_.TermsOfService }
+                Subtable      = ""
+            }
+
+            Display           = [ PSCustomObject ]@{ # [ Display Settings ]
+
+                Items         = "Active" , "Inactive" , "Skipped" | % { "Show $_ SVC" }
+                Values        = $Control | % { $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped }
+                Subtable      = ""
+            }
+
+            Miscellaneous     = [ PSCustomObject ]@{ # [ Miscellaneous Settings ]
+
+                Items         = "Simulate Changes" , "Xbox Services" , "Change * SVC State" , "Stop * Disabled SVC"
+                Values        = $Control | % { $_.MiscSimulate , $_.MiscXbox , $_.MiscChange ,$_.MiscStopDisabled }
+                Subtable      = ""
+            }
+
+            Development       = [ PSCustomObject ]@{ #[ Development Settings ]
+
+                Items         = "Diagnostic Errors" , "Devel Log" , "Enable Console" , "Report Diagnostic"
+                Values        = $Control | % { $_.DevelDiagErrors , $_.DevelLog , $_.DevelConsole , $_.DevelDiagReport }
+                Subtable      = ""
+            }
+
+            Bypass            = [ PSCustomObject ]@{ # [ Bypass/Force Settings ]
+
+                Items         = "Build" , "Edition" , "Laptop" | % { "Bypass $_" }
+                Values        = $Control | % { $_.BypassBuild , $_.BypassEdition , $_.BypassLaptop }
+                Subtable      = "" 
+            }
+
+            Logging           = [ PSCustomObject ]@{ # [ Logging Settings ]
+
+                Items             = "Service" , "Script" | % { "Log $_ File" }
+                Values            = $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile }
+                Subtable          = "" 
+            }
+
+            Backup            = [ PSCustomObject ]@{ # [ Backup Settings ]
+
+                Items         = "Registry" , "Template" | % { "Backup $_" }
+                Values        = $Control | % { $_.BackupRegistryFile , $_.BackupTemplateFile }
+                Subtable      = "" 
+            }
+
+            Version           = [ PSCustomObject ]@{ # [ Version Control ]
+
+                Items         = "Service" ,"Script" | % { "$_ Config" }
+                Values        = $Control | % { $_.ServiceConfig , $_.ScriptConfig }
+                Subtable      = ""
+
+            }
+        }
+
+        $Diagnostics          | % { 
         
-        #---------------------------------------------#
-
-        $MSInfo               = Resolve-Windows -MSInfo  | % { "$( $_.Caption ) [$( $_.OSArchitecture )]" }
-
-        $SKU                  = Resolve-Windows -SKU     | % { $_.SKU }
-
-                                Resolve-Windows -Edition | % { 
-
-            $Build            = $_.Build
-            $Version          = $_.Version 
+            $_.Script         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.System         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Initialization | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Display        | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Miscellaneous  | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Development    | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Bypass         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Logging        | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Backup         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $_.Version        | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
         }
-
-        $Chassis              = Resolve-Windows -Type    | % { $_.Chassis }
 
         $Splat                = @{ 
 
-            Items             = "Operating System" , "Edition / SKU" , "Build" , "Version" , "Chassis Type"
-            Values            = $MSInfo  , $SKU , $Build , $Version , $Chassis
+            Title             = "Diagnostic/Startup Panel"
+            Depth             = 10
+            ID                = $Collect.Section
+            Table             = $Diagnostics | % { $_.Script , $_.System , $_.Initialization , $_.Display , $_.Miscellaneous , 
+                                $_.Development , $_.Bypass , $_.Logging , $_.Backup , $_.Version } | % { $_.Subtable }
         }
 
-        $Subtable[1]          = New-SubTable @Splat
-
-        #---------------------------------------------#
-
-        $Control              = $( $Model | % { If ( $_ -ne $Null ) { $_ } Else { Resolve-ViperBomb -Control } } )
-
-        $Splat                = @{
-
-            Items             = "Argument List" , "Terms of Service" 
-            Values            = $Control | % { $_.PassedArgs , $_.TermsOfService }
-        }
-
-        $Subtable[2]          = New-SubTable @Splat
-
-        $Splat                = @{
-
-            Items             = "Active" , "Inactive" , "Skipped" | % { "Show $_ SVC" }
-            Values            = $Control | % { $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped }
-        }
-        
-        $Subtable[3]          = New-SubTable @Splat
-        
-        $Splat                = @{ 
-        
-            Items             = "Simulate Changes" , "Xbox Services" , "Change * SVC State" , "Stop * Disabled SVC"
-            Values            = $Control | % { $_.MiscSimulate , $_.MiscXbox , $_.MiscChange ,$_.MiscStopDisabled }
-        }
-
-        $Subtable[4]          = New-SubTable @Splat
-
-        $Splat                = @{ 
-
-            Items             = "Diagnostic Errors" , "Devel Log" , "Enable Console" , "Report Diagnostic"
-            Values            = $Control | % { $_.DevelDiagErrors , $_.DevelLog , $_.DevelConsole , $_.DevelDiagReport }
-        }
-
-        $Subtable[5]          = New-Subtable @Splat
-
-        $Splat                = @{ 
-
-            Items             = "Build" , "Edition" , "Laptop" | % { "Bypass $_" }
-            Values            = $Control | % { $_.BypassBuild , $_.BypassEdition , $_.BypassLaptop }
-        }
-
-        $Subtable[6]          = New-SubTable @Splat
-
-        $Splat                = @{
-
-            Items             = "Service" , "Script" | % { "Log $_ File" }
-            Values            = $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile }
-        }
-
-        $Subtable[7]          = New-SubTable @Splat
-
-        $Splat                = @{ 
-
-            Items             = "Registry" , "Template" | % { "Backup $_" }
-            Values            = $Control | % { $_.BackupRegistryFile , $_.BackupTemplateFile }
-        }
-
-        $Subtable[8]          = New-SubTable @Splat
-
-        $Splat                = @{
-
-            Items             = "Service" ,"Script" | % { "$_ Config" }
-            Values            = $Control | % { $_.ServiceConfig , $_.ScriptConfig }
-        }
-
-        $Subtable[9]          = New-Subtable @Splat
-
-        $Table                = New-Table -Title "Diagnostic/Startup Panel" -Depth 10 -ID $Section -Table $Subtable
+        $Table                = New-Table @Splat
         
         Write-Theme -Table $Table -Prompt "Press Enter to Continue, CTRL+C to Exit"
-
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -1037,34 +1048,40 @@
             [ Parameter ( ParameterSetName =    "Load" ) ] [ Switch ] $Load    ,
             [ Parameter ( ParameterSetname =  "Custom" ) ] [ String ] $Custom  )
 
-        $C                   = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-        $X                   = @( '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)' )
+        $Configuration          = Resolve-ViperBomb -Config
+
+        $Collect                = [ PSCustomObject ]@{
+
+            PID                 = Get-CurrentPID
+            State               = '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)'
+            Service             = $Configuration.Service
+            Profile             = $Configuration.Profile
+            Types               = Resolve-ViperBomb -Types | % { $_.Types }
+
+        }
 
         If ( $Default )
         {
-            $Config          = Resolve-ViperBomb -Config
+            $Collect            | % {
 
-            $Services        = $Config | GM | ? { $_.MemberType -eq "NoteProperty" } | % { $_.Name }
+                $Split          = $_.Profile.Split(',')
 
-            $Return          = @( )
+                $Return         = ForEach ( $i in 0..( $_.Service.Count - 1 ) )
+                {
+                    [ PSCustomObject ]@{
 
-            0..( $Services.Count - 1 ) | % { 
-                
-                $S           = $Config.$( $Services[$_] ).Split(',')
-            
-                $Return     += [ PSCustomObject ]@{
-                    
-                    Service  = $Services[$_].Replace( "?????" , $C )
-                    "10H:D+" = $X[$S[0]]
-                    "10H:D-" = $X[$S[1]]
-                    "10P:D+" = $X[$S[2]]
-                    "10P:D-" = $X[$S[3]]
-                    "DT:S+"  = $X[$S[4]]
-                    "DT:S-"  = $X[$S[5]]
-                    "DT:T+"  = $X[$S[6]]
-                    "DT:T-"  = $X[$S[7]]
-                    "LT:S+"  = $X[$S[8]]
-                    "LT:S-"  = $X[$S[9]]
+                        Service     = $_.Service[$I]
+                        "10H:D+"    = $_.State[$Split[0]]
+                        "10H:D-"    = $_.State[$Split[1]]
+                        "10P:D+"    = $_.State[$Split[2]]
+                        "10P:D-"    = $_.State[$Split[3]]
+                        "DT:S+"     = $_.State[$Split[4]]
+                        "DT:S-"     = $_.State[$Split[5]]
+                        "DT:T+"     = $_.State[$Split[6]]
+                        "DT:T-"     = $_.State[$Split[7]]
+                        "LT:S+"     = $_.State[$Split[8]]
+                        "LT:S-"     = $_.State[$Split[9]]
+                    }
                 }
             }
 
@@ -4974,17 +4991,7 @@
             PreferredLifeTime            = [ TimeSpan ]::MaxValue 
         }
 
-        New-NetIpAddress @IPAddress
-    
-        $Splat                           = @{    
-        
-            InterfaceIndex               = $Adapter
-            ServerAddresses              = "1.1.1.1" , "1.0.0.1" 
-        }
-
-        Set-DNSClientServerAddress @Splat
-    
-        0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
+        New-NetIpAddress @IPAddress            $Splat                           = @{                        InterfaceIndex               = $Adapter            ServerAddresses              = "1.1.1.1" , "1.0.0.1"         }        Set-DNSClientServerAddress @Splat            0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
 
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -8984,83 +8991,98 @@
                 $Path                    = $Package | % { $_.Root , $_.Install -join '\' }
 
                 SC -Path "$Path.ps1" -Value @'
-    
                 Function Get-ScriptDirectory 
                 {
-                    $( If ( $psise ) { $psise.CurrentFile.FullPath } Else { $PSScriptRoot } ) | % {
-        
-                        [ PSCustomObject ]@{
+                    ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
 
-                            Path = Split-Path $_ -Parent
-                            File = Split-Path $_ -Leaf
+                        [ PSCustomObject ]@{ 
+            
+                            Parent = Split-Path $_ -Parent
+                            Leaf   = Split-Path $_ -Leaf 
                         }
                     }
                 }
     
                 Function Install-HybridDSCModule
                 {
-                    $Path  = $env:USERPROFILE
-                    $Tree  = "Documents\WindowsPowerShell\Modules\Hybrid-DSC"
-                    $Split = $Tree.Split( '\' )
+                    $Control          = [ PSCustomObject ]@{ 
 
-                    ForEach ( $I in 0..( $Split.Count - 1 ) ) 
+                        Path          = $env:USERPROFILE
+                        Target        = "Documents\WindowsPowerShell\Modules\Hybrid-DSC"
+                        Chunk         = ""
+                        Full          = ""
+                        Source        = Get-ScriptDirectory | % { $_.Parent }
+                    }
+        
+                    $Control          | % { 
+        
+                        $_.Full       = "{0}\{1}" -f $_.Path , $_.Target
+                        $_.Chunk      = $_.Target.Split('\')
+                        $Path         = $_.Path
+                    }
+
+                    ForEach ( $i in 0..( $Control.Chunk.Count - 1 ) )
                     {
-                        "$Path\$( $Split[$I] )" | % {
+                        $Leaf         = $Control.Chunk[$I]
 
-                            If ( ! ( Test-Path $_ ) )
-                            {
-                                NI $_ -ItemType Directory | Out-Null
-                                Write-Host "   Created [+] $_" -F 11
-                            }
-
-                            Else 
-                            {
-                                Write-Host "  Detected [~] $_" -F 14
-                            }
-
-                            $Path = $_
-                        }
-                    }
-
-                    GCI $Path | % { 
-        
-                        If ( $_ -ne $Null ) 
-                        { 
-                            Write-Host " Detected [!] $( $_.Name ), removing" -F 11 
-                            RI $_.FullName -Recurse -Force 
-                        }
-                    }
-
-                    $Source = Get-ScriptDirectory | % { $_.Path }
-    
-                    'Hybrid-DSC' | % { 
-        
-                        If ( Test-Path "$Source\$_.zip" ) 
+                        If ( ! ( Test-Path "$Path\$Leaf" ) )
                         {
-                            Write-Host "Extracting [~] $Path\$_" -F 14
-
-                            Expand-Archive "$Source\$_.zip" "$Path" -VB
+                            NI "$Path\$Leaf" -ItemType Directory | Out-Null
+                            Write-Host "   Created [+] $Path" -F 11
                         }
 
                         Else
                         {
-                            Write-Host " Exception [!] Zip file not found"
+                            Write-Host "  Detected [~] $_" -F 11
                         }
+                
+                        $Path = "$Path\$Leaf"
                     }
 
-                    "Graphics" , "Control" , "Map" , "Services" | % { 
+                    If ( $Path -eq $Control.Full )
+                    {
+                        GCI $Control.Full | % { 
+        
+                            If ( $_ -ne $Null ) 
+                            { 
+                                Write-Host " Detected [!] $( $_.Name ), removing" -F 11 
+                                RI $_.FullName -Recurse -Force 
+                            }
+                        }
 
-                        Write-Host "Extracting [~] $Path\$_.zip" -F 11
+                        $Control | % { 
 
-                        Expand-Archive "$Path\$_.zip" $Path
+                            ForEach ( $i in "Install-HybridDSCModule" )
+                            {
+                                If ( Test-Path "$( $_.Source )\$I.zip" )
+                                {
+                                    Write-Host "Extracting [~] $Path\$I" -F 14
+                            
+                                    Expand-Archive "$( $_.Source )\$I.zip" $_.Full -VB
+                                }
 
-                        RI "$Path\$_.zip"
+                                Else
+                                {
+                                    Write-Host " Exception [!] Zip file not found"
+                                }
+                            }
+
+                            ForEach ( $i in "Graphics" , "Control" , "Map" , "Services" ) 
+                            {
+                                Write-Host "Extracting [~] $( $_.Full )\$I.zip" -F 11
+                        
+                                Expand-Archive "$( $_.Full )\$I.zip" $_.Full
+                        
+                                RI "$Path\$I.zip"
+                            }
+                        }
+
+                        IPMO Hybrid-DSC -Force
                     }
-    
-                    IPMO Hybrid-DSC -Force
                 }
-
+    
                 Install-HybridDSCModule
+
 '@
 
                 $Output = "$( $Package.Full ).zip"
