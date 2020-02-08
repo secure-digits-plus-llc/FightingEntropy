@@ -43,7 +43,8 @@
         Get-XAML                    - Loads templatized XAML GUI's                     
         Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
         Get-LineDepth               - Gets the spacing for clean formatting            
-        Confirm-DomainName          - Confirms whether a supplied domain name is valid  #>
+        Confirm-DomainName          - Confirms whether a supplied domain name is valid
+        Get-ScriptRoot              - Determines the scripthost's relative location     #>
 
     Export-ModuleMember -Function Get-HybridDSC , Resolve-HybridDSC , Publish-HybridDSC , New-Subtable , New-Table , Convert-HashToArray ,
     Write-Theme , Show-Message , Convert-XAMLToWindow , Show-WPFWindow , Get-XAML , Find-XAMLNamedElements , Get-LineDepth, Confirm-DomainName
