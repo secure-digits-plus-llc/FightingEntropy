@@ -77,7 +77,8 @@
         Get-XAML                    - Loads templatized XAML GUI's                     
         Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
         Get-LineDepth               - Gets the spacing for clean formatting            
-        Confirm-DomainName          - Confirms whether a supplied domain name is valid  #>
+        Confirm-DomainName          - Confirms whether a supplied domain name is valid
+        Get-ScriptRoot              - Determines the scripthost's relative location     #>
 
     Export-ModuleMember -Function Get-HybridDSC , Resolve-HybridDSC , Publish-HybridDSC , New-Subtable , New-Table , Convert-HashToArray ,
     Write-Theme , Show-Message , Convert-XAMLToWindow , Show-WPFWindow , Get-XAML , Find-XAMLNamedElements , Get-LineDepth, Confirm-DomainName
@@ -194,6 +195,16 @@
 # ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-ScriptRoot # Returns the current execution context path _______________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
+            
+            [ PSCustomObject ]@{ Parent = Split-Path $_ -Parent ; Leaf = Split-Path $_ -Leaf }
+
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-HybridDSC # Provides ViperBomb Script Definitions _____________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
@@ -222,7 +233,8 @@
                 "Show-WPFWindow"              = "Initializes the Window Object"
                 "Get-XAML"                    = "Loads templatized XAML GUIs"
                 "Find-XAMLNamedElements"      = "Looks for XAML 'Named' Items"
-                "Confirm-DomainName"          = "Confirms whether a supplied domain name is valid" 
+                "Confirm-DomainName"          = "Confirms whether a supplied domain name is valid"
+                "Get-ScriptRoot"              = "Determines the scripthost's relative location"
             }
 
             Network                           = [ PSCustomObject ]@{
@@ -288,10 +300,11 @@
                 "New-ServiceTemplate"         = "Creates a new template instance (Immutable)"
                 "Get-ServiceProfile"          = "Converts loaded profile into useable GUI object"
                 "Show-Console"                = "Enables/Disables the Console"
+                "Get-CurrentPID"              = "Collects the (QMark/Processor) ID"
             }
         }
 
-        $Functions | % { 
+        $Functions | % {
 
             If ( $Script      ) { $_.Script      }
             If ( $Network     ) { $_.Network     }
@@ -435,40 +448,15 @@
 
         $Return | % {     
             
-            If ( $_.Child.Count -lt 1 )
-            {
-                & $Install.Share
-            }
-                
-            If ( $_.Child.Count -gt 1 )
-            {
-                ICM $Install.Select -ArgumentList "Channels" , $_.Child , "Channel"
-            }
+            If (   $_.Child.Count -lt 1 ) { & $Install.Share } If (    $_.Child.Count -gt 1 ) { ICM $Install.Select -ArgumentList  "Channels" ,   $_.Child , "Channel" }
 
             $_.Company = GCI ( $_.Registry , $_.Child -join '\' ) | % { $_.PSChildName }
 
-            If ( $_.Company.Count -lt 1 )
-            {
-                & $Install.Share   
-            }
-
-            If ( $_.Company.Count -gt 1 )
-            {
-                ICM $Install.Select -ArgumentList "Companies" , $_.Company , "Company"
-
-            }
+            If ( $_.Company.Count -lt 1 ) { & $Install.Share } If (  $_.Company.Count -gt 1 ) { ICM $Install.Select -ArgumentList "Companies" , $_.Company , "Company" }
 
             $_.Drive = GCI ( $_.Registry , $_.Child , $_.Company -join '\' ) | % { $_.PSChildName }
 
-            If ( $_.Drive.Count -lt 1 )
-            {
-                & $Install.Share  
-            }
-
-            If ( $_.Drive.Count -gt 1 )
-            {
-                ICM $Install.Select -ArgumentList "Drives" , $_.Drive , "Drive"
-            }
+            If (   $_.Drive.Count -lt 1 ) { & $Install.Share } If (    $_.Drive.Count -gt 1 ) { ICM $Install.Select -ArgumentList    "Drives" ,   $_.Drive ,   "Drive" }
 
             $_.Drive = $_.Registry , $_.Child , $_.Company , $_.Drive -join '\'
 
@@ -575,8 +563,8 @@
             
             $_.Graphics = [ PSCustomObject ]@{ 
 
-                Author     = $Return.Author
-                Title      = $Return.Author + " | Hybrid-DSC"
+                Author     = $_.Author
+                Title      = $_.Author + " | Hybrid-DSC"
                 Background = $GFX[0]
                 Banner     = $GFX[1]
                 Icon       = $GFX[2]
@@ -644,7 +632,8 @@
             [ Parameter ( ParameterSetName =   "Services" ) ] [ Switch ] $Services  ,
             [ Parameter ( ParameterSetName =      "Names" ) ] [ Switch ] $Names     ,
             [ Parameter ( ParameterSetName =      "Types" ) ] [ Switch ] $Types     ,
-            [ Parameter ( ParameterSetName =     "Config" ) ] [ Switch ] $Config    )
+            [ Parameter ( ParameterSetName =     "Config" ) ] [ Switch ] $Config    ,
+            [ Parameter ( ParameterSetName =        "All" ) ] [ Switch ] $All       )
 
         $Default                 = [ PSCustomObject ]@{
 
@@ -674,271 +663,220 @@
 
         }
 
-        $QMark                   = Get-CurrentPID
+        $QMark                   = Get-CurrentPID 
 
-        If ( $QMark -eq $Null )
-        {
-            $QMark = ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]
-        }
-
-        If ( $Version )
-        {
-            $Default | % { 
-
-                [ PSCustomObject ]@{
-    
-                    Version        = "ViperBomb v7.0.0"
-                    Date           = "2020-02-07"
-                    Script         = $_.ScriptConfig
-                    Service        = $_.ServiceConfig
-                    Release        = "Development"
-                }
-            }
-        }
-
-        If ( $Company )
-        {
-            "https://github.com/secure-digits-plus-llc/FightingEntropy" | % {
-
-                [ PSCustomObject ]@{
-
-                    Base    = "$_"
-                    About   = "$_#secure-digits-plus-fighting-entropy"
-                    Service = "$_/blob/master/Module/Services/$( $Default.ServiceConfig )"
-                    Site    = "https://www.securedigitsplus.com"
-                }
-            }
-        }
-
-        If ( $MadBomb )
-        {
-            "https://github.com/madbomb122/BlackViperScript" | % { 
-
-                [ PSCustomObject ]@{
-
-                    Base   = "$_"
-                    About  = "$_/blob/master/README.md"
-                    Donate = "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/"
-                }
-            }
-        }
-
-        If ( $Sparks )
-        {
-            [ PSCustomObject ]@{
-
-                Site       = "http://www.blackviper.com"
-            }
-        }
-
-        If ( $Path )
-        {
-            ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
+        $ServiceConfig           = [ PSCustomObject ]@{  
             
-                [ PSCustomObject ]@{ 
+            Names = ( "AJRouter;ALG;AppHostSvc;AppIDSvc;Appinfo;AppMgmt;AppReadiness;AppVClient;aspnet_state;AssignedAccessManagerSvc;" +
+            "AudioEndpointBuilder;AudioSrv;AxInstSV;BcastDVRUserService_$QMARK;BDESVC;BFE;BITS;BluetoothUserService_$QMARK;Browser;BTAGService;" + 
+            "BthAvctpSvc;BthHFSrv;bthserv;c2wts;camsvc;CaptureService_$QMARK;CDPSvc;CDPUserSvc_$QMARK;CertPropSvc;COMSysApp;CryptSvc;CscService;" + 
+            "defragsvc;DeviceAssociationService;DeviceInstall;DevicePickerUserSvc_$QMARK;DevQueryBroker;Dhcp;diagnosticshub.standardcollector.service;" + 
+            "diagsvc;DiagTrack;DmEnrollmentSvc;dmwappushsvc;Dnscache;DoSvc;dot3svc;DPS;DsmSVC;DsRoleSvc;DsSvc;DusmSvc;EapHost;EFS;embeddedmode;" + 
+            "EventLog;EventSystem;Fax;fdPHost;FDResPub;fhsvc;FontCache;FontCache3.0.0.0;FrameServer;ftpsvc;GraphicsPerfSvc;hidserv;hns;HomeGroupListener;" + 
+            "HomeGroupProvider;HvHost;icssvc;IKEEXT;InstallService;iphlpsvc;IpxlatCfgSvc;irmon;KeyIso;KtmRm;LanmanServer;LanmanWorkstation;lfsvc;" + 
+            "LicenseManager;lltdsvc;lmhosts;LPDSVC;LxssManager;MapsBroker;MessagingService_$QMARK;MSDTC;MSiSCSI;MsKeyboardFilter;MSMQ;MSMQTriggers;" + 
+            "NaturalAuthentication;NcaSVC;NcbService;NcdAutoSetup;Netlogon;Netman;NetMsmqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator;" + 
+            "NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK;p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc;" + 
+            "PolicyAgent;Power;PrintNotify;PrintWorkflowUserSvc_$QMARK;ProfSvc;PushToInstall;QWAVE;RasAuto;RasMan;RemoteAccess;RemoteRegistry;" + 
+            "RetailDemo;RmSvc;RpcLocator;SamSs;SCardSvr;ScDeviceEnum;SCPolicySvc;SDRSVC;seclogon;SEMgrSvc;SENS;Sense;SensorDataService;SensorService;" + 
+            "SensrSvc;SessionEnv;SgrmBroker;SharedAccess;SharedRealitySvc;ShellHWDetection;shpamsvc;smphost;SmsRouter;SNMPTRAP;spectrum;Spooler;" + 
+            "SSDPSRV;ssh-agent;SstpSvc;StiSvc;StorSvc;svsvc;swprv;SysMain;TabletInputService;TapiSrv;TermService;Themes;TieringEngineService;TimeBroker;" + 
+            "TokenBroker;TrkWks;TrustedInstaller;tzautoupdate;UevAgentService;UI0Detect;UmRdpService;upnphost;UserManager;UsoSvc;VaultSvc;vds;vmcompute;" + 
+            "vmicguestinterface;vmicheartbeat;vmickvpexchange;vmicrdv;vmicshutdown;vmictimesync;vmicvmsession;vmicvss;vmms;VSS;W32Time;W3LOGSVC;W3SVC;" + 
+            "WaaSMedicSvc;WalletService;WarpJITSvc;WAS;wbengine;WbioSrvc;Wcmsvc;wcncsvc;WdiServiceHost;WdiSystemHost;WebClient;Wecsvc;WEPHOSTSVC;" + 
+            "wercplsupport;WerSvc;WFDSConSvc;WiaRpc;WinHttpAutoProxySvc;Winmgmt;WinRM;wisvc;WlanSvc;wlidsvc;wlpasvc;wmiApSrv;WMPNetworkSvc;WMSVC;" + 
+            "workfolderssvc;WpcMonSvc;WPDBusEnum;WpnService;WpnUserService_$QMARK;wscsvc;WSearch;wuauserv;wudfsvc;WwanSvc;xbgm;XblAuthManager;" + 
+            "XblGameSave;XboxGipSvc;XboxNetApiSvc" ).Split( ';' )
+
+            Values = ( "0;1;2;3;3;4;3;5;3;6;2;2;3;3;3;2;7;3;3;0;0;0;0;3;3;4;7;2;0;3;2;8;3;3;3;3;3;2;3;3;2;3;1;2;7;3;2;3;3;3;2;3;3;3;2;2;1;3;3;3;2;3;1;2;" + 
+            "3;3;6;3;3;1;1;3;3;9;0;1;3;3;2;2;1;3;3;3;2;3;1;0;3;3;1;11;2;2;0;3;3;0;0;3;2;2;3;3;2;1;2;2;7;3;3;2;8;3;1;3;3;3;3;3;2;3;3;2;3;3;3;3;12;12;1;3;" + 
+            "1;2;12;1;1;3;3;1;2;6;13;13;13;0;7;1;3;2;12;3;1;1;3;2;3;3;3;3;3;3;3;2;13;3;0;2;3;3;3;2;3;12;5;3;0;3;2;3;3;3;6;1;1;1;1;1;1;1;1;14;3;3;3;2;3;3;" + 
+            "3;3;3;3;2;0;3;3;0;3;3;3;3;13;3;3;2;1;1;15;3;3;3;1;3;1;1;3;2;2;7;7;3;3;1;3;1;1;3;1" ).Split( ';' )
+
+            Profile = ( "2,2,2,2,2,2,1,1,2,2;2,2,2,2,1,1,1,1,1,1;3,0,3,0,3,0,3,0,3,0;2,0,2,0,2,0,2,0,2,0;0,0,2,2,2,2,1,1,2,2;0,0,1,0,1,0,1,0,1,0;" + 
+            "0,0,2,0,2,0,2,0,2,0;4,0,4,0,4,0,4,0,4,0;0,0,2,2,1,1,1,1,1,1;3,3,3,3,3,3,1,1,3,3;4,4,4,4,1,1,1,1,1,1;0,0,0,0,0,0,0,0,0,0;1,0,1,0,1,0,1,0,1,0;" + 
+            "2,2,2,2,1,1,1,1,2,2;0,0,3,0,3,0,3,0,3,0;3,3,3,3,2,2,2,2,3,3" ).Split( ';' )
+        }
+
+        $Ref                     = [ PSCustomObject ]@{ 
             
-                    Parent = Split-Path $_ -Parent
-                    Leaf   = Split-Path $_ -Leaf
-                }
+            Company              = "https://github.com/secure-digits-plus-llc/FightingEntropy"
+            MadBomb              = "https://github.com/madbomb122/BlackViperScript"
+        }
+
+        $Return                  = [ PSCustomObject ]@{ 
+
+            PID                  = $QMark
+
+            Version              = [ PSCustomObject ]@{ 
+
+                Version          = "ViperBomb v7.0.0"
+                Date             = "2020-02-07"
+                Script           = $Default.ScriptConfig
+                Service          = $Default.ServiceConfig
+                Release          = "Development"
             }
-        }
 
-        If ( $Control )
-        {
-            $Default
-        }
+            Company              = [ PSCustomObject ]@{
 
-        If ( $Copyright )
-        {   
-            "Copyright (c) 2019 Zero Rights Reserved                                 " ,
-            "Services Configuration by Charles 'Black Viper' Sparks                  " ,
-            "------------------------------------------------------------------------" ,
-            "The MIT License (MIT) + an added Condition " ,
-            ( " " * 72 ) , 
-            "Copyright (c) 2017-2019 Madbomb122 " ,
-            "[ Black Viper Service Script ] " ,
-            ( " " * 72 ) , 
-            "Permission is hereby granted, free of charge, to any person obtaining a " ,
-            "copy of this software and associated documentation files (the Software)," , 
-            "to deal in the Software without restriction, including w/o limitation   " , 
-            "the rights to: use/copy/modify/merge/publish/distribute/sublicense,     " , 
-            "and/or sell copies of the Software, and to permit persons to whom the   " , 
-            "Software is furnished to do so, subject to the following conditions:    " ,
-            ( " " * 72 ) , 
-            "The above copyright notice(s), this permission notice and ANY original  " , 
-            "donation link shall be included in all copies or substantial portions of" , 
-            "the Software.                                                           " ,
-            ( " " * 72 ) , 
-            " The software is provided 'As Is', without warranty of any kind, express" ,
-            "or implied, including but not limited to warranties of merchantibility, " ,
-            "or fitness for a particular purpose and noninfringement. In no event    " , 
-            "shall the authors or copyright holders be liable for any claim, damages " ,
-            "or other liability, whether in an action of contract, tort or otherwise," , 
-            "arising from, out of or in connection with the software or the use or   " ,
-            "other dealings in the software.                                         " ,
-            ( " " * 72 ) ,
-            "In other words, these terms of service must be accepted in order to use," ,
-            "and in no circumstance may the author(s) be subjected to any liability  " ,
-            "or damage resultant to its use.                                         " 
-        }
-
-        If ( $Message )
-        {
-            "This utility provides an interface to load and customize " ,
-                          "service configuration profiles, such as:`n"                ,
-                          "`n"                                                        ,
-                          "    Default: Black Viper (Sparks v1.0)`n"                  ,
-                          "    Custom: If in proper format`n"                         ,
-                          "    Backup: Created via this utility"               -join ''    
-        }
-
-        If ( $Help )
-        {
-            "List of Switches                                                                                          " , 
-            "$( "-" * 108 )" , 
-            "   " ,
-            " Switch            Description of Switch                                                                  " , 
-            "   " , 
-            " -- Basic Switches --                                                                                     " , 
-            "  -atos            Accepts ToS                                                                            " , 
-            "  -auto            Implies -atos ... Runs the script to be Automated..                                    " , 
-            "                   Closes on - User Input, Errors, or End of Script                                       " , 
-            "   " , 
-	        " -- Service Configuration Switches --                                                                     " , 
-	        "  -default         Runs the script with Services to Default Configuration                                 " , 
-            "  -safe            Runs the script with Services to Black Viper's Safe Configuration                      " , 
-            "  -tweaked         Runs the script with Services to Black Viper's Tweaked Configuration                   " , 
-            "  -lcsc File.csv   Loads Custom Service Configuration, File.csv = Name of your backup/custom file         " , 
-            "   " ,
-            " --Service Choice Switches--                                                                              " , 
-            "  -all             Every windows services will change                                                     " , 
-            "  -min             Just the services different from the default to safe/tweaked list                      " , 
-            "  -sxb             Skips changes to all XBox Services                                                     " , 
-            "   " ,
-            " --Update Switches--                                                                                      " , 
-	        "  -usc             Checks for Update to Script file before running                                        " , 
-            "  -use             Checks for Update to Service file before running                                       " , 
-            "  -sic             Skips Internet Check, if you can't ping GitHub.com for some reason                     " , 
-            "   " ,
-            " --Log Switches--                                                                                         " , 
-            "  -log             Makes a log file named using default name Script.log                                   " , 
-            "  -log File.log    Makes a log file named File.log                                                        " , 
-            "  -baf             Log File of Services Configuration Before and After the script                         " , 
-            "   " ,
-            " --Backup Service Configuration--                                                                         " , 
-            "  -bscc            Backup Current Service Configuration, Csv File                                         " , 
-            "  -bscr            Backup Current Service Configuration, Reg File                                         " , 
-            "  -bscb            Backup Current Service Configuration, Csv and Reg File                                 " , 
-            "   " ,
-            " --Display Switches--                                                                                     " , 
-            "  -sas             Show Already Set Services                                                              " , 
-            "  -snis            Show Not Installed Services                                                            " , 
-            "  -sss             Show Skipped Services                                                                  " , 
-            "   " ,
-            " --Misc Switches--                                                                                        " , 
-            "  -dry             Runs the Script and Shows what services will be changed                                " , 
-            "  -css             Change State of Service                                                                " , 
-            "  -sds             Stop Disabled Service                                                                  " , 
-            "   " ,
-            " --AT YOUR OWN RISK Switches--                                                                            " , 
-            "  -secp            Skips Edition Check by Setting Edition as Pro                                          " , 
-            "  -sech            Skips Edition Check by Setting Edition as Home                                         " , 
-            "  -sbc             Skips Build Check                                                                      " , 
-            "   " ,
-            " --Dev Switches--                                                                                         " ,
-            "  -devl            Makes a log file with various Diagnostic information, Nothing is Changed               " , 
-            "  -diag            Shows diagnostic information, Stops -auto                                              " , 
-            "  -diagf           Forced diagnostic information, Script does nothing else                                " , 
-            "   " ,
-            " --Help--                                                                                                 " ,
-            "  -help            Shows list of switches, then exits script.. alt -h                                     " , 
-            "  -copy            Shows Copyright/License Information, then exits script                                 "
-        }
-
-        If ( $Services )
-        {
-            [ PSCustomObject ]@{
-
-                Xbox     = 'XblAuthManager' , 'XblGameSave' , 'XboxNetApiSvc' , 'XboxGipSvc' , 'xbgm'
-
-                NetTCP   = 'Msmq' , 'Pipe' , 'Tcp' | % { "Net$_`Activator" }
-
-                DataGrid = 'Index' , 'Scoped' , 'Profile' , 'Name' , 'Status' , 'StartType' , 'DelayedAutoStart' , 'DisplayName' , 'PathName' , 'Description'
-
-                Skip     = @( "BcastDVRUserService" , "DevicePickerUserSvc" , "DevicesFlowUserSvc" , "PimIndexMaintenanceSvc" , 
-                              "PrintWorkflowUserSvc" , "UnistoreSvc" , "UserDataSvc" , "WpnUserService" | % { $_ , $QMark -join '_' } ; 
-                              
-                              'AppXSVC' , 'BrokerInfrastructure' , 'ClipSVC' , 'CoreMessagingRegistrar' , 'DcomLaunch' , 'EntAppSvc' , 'gpsvc' , 'LSM' , 
-                              'MpsSvc' , 'msiserver' , 'NgcCtnrSvc' , 'NgcSvc' , 'RpcEptMapper' , 'RpcSs' , 'Schedule' , 'SecurityHealthService' , 'sppsvc' , 
-                              'StateRepository' , 'SystemEventsBroker' , 'tiledatamodelsvc' , 'WdNisSvc' , 'WinDefend' ) | Sort
+                Base             = $Ref.Company
+                About            = $Ref.Company + "#secure-digits-plus-fighting-entropy"
+                Service          = $Ref.Company + "/blob/master/Module/Services/" + $Default.ServiceConfig
+                Site             = "https://www.securedigitsplus.com"
             }
-        }
 
-        If ( $Types )
-        {
-            [ PSCustomObject ]@{
+            MadBomb              = [ PSCustomObject ]@{
 
-                Types  = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
-                Titles = @( "Home" , "Pro" | % { "Win10 $_ | Default" } ; "Safe" , "Tweaked" | % { "Desktop | $_" } ; "Laptop | Safe" ) | % { "$_ Max" , "$_ Min" }
+                Base             = $Ref.MadBomb
+                About            = $Ref.MadBomb + "/blob/master/README.md"
+                Donate           = "https://www.amazon.com/gp/registry/wishlist/YBAYWBJES5DE/"
             }
-        }
-        
-        If ( $Names )
-        {
-            @(
+
+            Sparks               = [ PSCustomObject ]@{ 
+
+                Site             = "http://www.blackviper.com"
+            }
+
+            Path                 = Get-ScriptRoot
+
+            Control              = $Default
+
+            Copyright            = 
             
-            (0,4),(1,4),(2,5),(2,6),(3,5) | % { 
+                "Copyright (c) 2019 Zero Rights Reserved                                 " ,
+                "Services Configuration by Charles 'Black Viper' Sparks                  " ,
+                "------------------------------------------------------------------------" ,
+                "The MIT License (MIT) + an added Condition" , 
+                "$( " " * 72 )" , 
+                "Copyright (c) 2017-2019 Madbomb122 " ,
+                "[ Black Viper Service Script ] " ,
+                "$( " " * 72 )" , 
+                "Permission is hereby granted, free of charge, to any person obtaining a " ,
+                "copy of this software and associated documentation files (the Software)," , 
+                "to deal in the Software without restriction, including w/o limitation   " , 
+                "the rights to: use/copy/modify/merge/publish/distribute/sublicense,     " , 
+                "and/or sell copies of the Software, and to permit persons to whom the   " , 
+                "Software is furnished to do so, subject to the following conditions:    " ,
+                "$( " " * 72 )" ,
+                "The above copyright notice(s), this permission notice and ANY original  " , 
+                "donation link shall be included in all copies or substantial portions of" , 
+                "the Software.                                                           " ,
+                "$( " " * 72 )" ,
+                " The software is provided 'As Is', without warranty of any kind, express" ,
+                "or implied, including but not limited to warranties of merchantibility, " ,
+                "or fitness for a particular purpose and noninfringement. In no event    " , 
+                "shall the authors or copyright holders be liable for any claim, damages " ,
+                "or other liability, whether in an action of contract, tort or otherwise," , 
+                "arising from, out of or in connection with the software or the use or   " ,
+                "other dealings in the software.                                         " ,
+                "$( " " * 72 )" ,
+                "In other words, these terms of service must be accepted in order to use," ,
+                "and in no circumstance may the author(s) be subjected to any liability  " ,
+                "or damage resultant to its use.                                         "
+
+            Message              = 
+            
+                "This utility provides an interface to load and customize`n" ,
+                "service configuration profiles, such as:`n"                 ,
+                "`n"                                                         ,
+                "    Default: Black Viper (Sparks v1.0)`n"                   ,
+                "    Custom: If in proper format`n"                          ,
+                "    Backup: Created via this utility`n"                     -join '' 
+
+            Help                 = 
+            
+                "Legacy Switches - [ Pending ] List of Switches                                                            " , 
+                "$( "-" * 108 )" , 
+                "   " ,
+                " Switch            Description of Switch                                                                  " , 
+                "   " , 
+                " -- Basic Switches --                                                                                     " , 
+                "  -atos            Accepts ToS                                                                            " , 
+                "  -auto            Implies -atos ... Runs the script to be Automated..                                    " , 
+                "                   Closes on - User Input, Errors, or End of Script                                       " , 
+                "   " , 
+	            " -- Service Configuration Switches --                                                                     " , 
+	            "  -default         Runs the script with Services to Default Configuration                                 " , 
+                "  -safe            Runs the script with Services to Black Viper's Safe Configuration                      " , 
+                "  -tweaked         Runs the script with Services to Black Viper's Tweaked Configuration                   " , 
+                "  -lcsc File.csv   Loads Custom Service Configuration, File.csv = Name of your backup/custom file         " , 
+                "   " ,
+                " --Service Choice Switches--                                                                              " , 
+                "  -all             Every windows services will change                                                     " , 
+                "  -min             Just the services different from the default to safe/tweaked list                      " , 
+                "  -sxb             Skips changes to all XBox Services                                                     " , 
+                "   " ,
+                " --Update Switches--                                                                                      " , 
+	            "  -usc             Checks for Update to Script file before running                                        " , 
+                "  -use             Checks for Update to Service file before running                                       " , 
+                "  -sic             Skips Internet Check, if you can't ping GitHub.com for some reason                     " , 
+                "   " ,
+                " --Log Switches--                                                                                         " , 
+                "  -log             Makes a log file named using default name Script.log                                   " , 
+                "  -log File.log    Makes a log file named File.log                                                        " , 
+                "  -baf             Log File of Services Configuration Before and After the script                         " , 
+                "   " ,
+                " --Backup Service Configuration--                                                                         " , 
+                "  -bscc            Backup Current Service Configuration, Csv File                                         " , 
+                "  -bscr            Backup Current Service Configuration, Reg File                                         " , 
+                "  -bscb            Backup Current Service Configuration, Csv and Reg File                                 " , 
+                "   " ,
+                " --Display Switches--                                                                                     " , 
+                "  -sas             Show Already Set Services                                                              " , 
+                "  -snis            Show Not Installed Services                                                            " , 
+                "  -sss             Show Skipped Services                                                                  " , 
+                "   " ,
+                " --Misc Switches--                                                                                        " , 
+                "  -dry             Runs the Script and Shows what services will be changed                                " , 
+                "  -css             Change State of Service                                                                " , 
+                "  -sds             Stop Disabled Service                                                                  " , 
+                "   " ,
+                " --AT YOUR OWN RISK Switches--                                                                            " , 
+                "  -secp            Skips Edition Check by Setting Edition as Pro                                          " , 
+                "  -sech            Skips Edition Check by Setting Edition as Home                                         " , 
+                "  -sbc             Skips Build Check                                                                      " , 
+                "   " ,
+                " --Dev Switches--                                                                                         " ,
+                "  -devl            Makes a log file with various Diagnostic information, Nothing is Changed               " , 
+                "  -diag            Shows diagnostic information, Stops -auto                                              " , 
+                "  -diagf           Forced diagnostic information, Script does nothing else                                " , 
+                "   " ,
+                " --Help--                                                                                                 " ,
+                "  -help            Shows list of switches, then exits script.. alt -h                                     " , 
+                "  -copy            Shows Copyright/License Information, then exits script                                 "
+
+            Types                = [ PSCustomObject ]@{
+
+                Types            = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
+                Titles           = @( "Home" , "Pro" | % { "Win10 $_ | Default" } ; "Safe" , "Tweaked" | % { "Desktop | $_" } ; "Laptop | Safe" ) | % { "$_ Max" , "$_ Min" }
+            }
+
+            Services             = [ PSCustomObject ]@{ 
+
+                Xbox             = 'XblAuthManager,XblGameSave,XboxNetApiSvc,XboxGipSvc,xbgm'.Split(',')
+
+                NetTCP           = 'Msmq,Pipe,Tcp' | % { "Net$_`Activator" }
+
+                DataGrid         = 'Index,Scoped,Profile,Name,Status,StartType,DelayedAutoStart,DisplayName,PathName,Description'.Split(',')
+
+                Skip             = @( ( 'BcastDVRUserService,DevicePickerUserSvc,DevicesFlowUserSvc,PimIndexMaintenanceSvc,PrintWorkflowUserSvc,UnistoreSvc,' + 
+                'UserDataSvc,WpnUserService' -join '' ).Split(',') | % { "$_`_$QMark" } ) + @( 'AppXSVC,BrokerInfrastructure,ClipSVC,CoreMessagingRegistrar,' + 
+                'DcomLaunch,EntAppSvc,gpsvc,LSM,MpsSvc,msiserver,NgcCtnrSvc,NgcSvc,RpcEptMapper,RpcSs,Schedule,SecurityHealthService,sppsvc,StateRepository,' + 
+                'SystemEventsBroker,tiledatamodelsvc,WdNisSvc,WinDefend' -join '' ).Split(',') | Sort
+            }
+
+            Names                = 
+            
+                @( 0..4 | % { "MenuConfig" , 'Home,Pro,Desktop,Desktop,Laptop'.Split(',')[$_] , 'Default,Default,Safe,Tweaked,Safe'.Split(',')[$_] -join '' } | % {
+                "$_`Max" , "$_`Min" } ; 'Feedback,FAQ,About,Copyright,MadBombDonate,MadBombGitHub,BlackViper,SecureDigitsPlus'.Split(',') | % { "MenuInfo$_" } ;
+                'Search,Select,Grid,Empty'.Split(',') | % { "ServiceDialog$_" } ; 'OS,Profile,Build,Chassis'.Split(',') | % { "Current$_" } ; 
+                'Active,Inactive,Skipped'.Split(',') | % { "Display$_" } ; 'Simulate,Xbox,Change,StopDisabled'.Split(',') | % { "Misc$_" } ; 
+                'DiagErrors,Log,Console,DiagReport'.Split(',') | % { "Devel$_" } ; 'Build,Edition,Laptop'.Split(',') | % { "Bypass$_" } ;
+                @( 'Service,Script'.Split(',') | % { "Logging$_" } ; 'Registry,Template'.Split(',') | % { "Backup$_" } ) | % { "$_`Browse,$_`File".Split(',') } ;
+                'Service,Script'.Split(',') | % { "$_`Profile" , "$_`Label"  } ; "Start,Cancel" -Split ',' )
+
+            Config              = $ServiceConfig | % {
                 
-                "Home,Pro,Desktop,Laptop,Default,Safe,Tweaked".Split(',')[$_] -join '' | % { "$_`Max" , "$_`Min" } | % { "MenuConfig$_" } 
-            } ;
-            "Feedback,FAQ,About,Copyright,MadBombDonate,MadBombGitHub,BlackViper,SecureDigitsPlus".Split(',') | % { "MenuInfo$_" } ;
-            "Search,Select,Grid,Empty"          -Split ',' | % { "ServiceDialog$_" } ;
-            "OS,Profile,Build,Chassis"          -Split ',' | % {       "Current$_" } ;
-            "Active,Inactive,Skipped"           -Split ',' | % {       "Display$_" } ;
-            "Simulate,Xbox,Change,StopDisabled" -Split ',' | % {          "Misc$_" } ;
-            "DiagErrors,Log,Console,DiagReport" -Split ',' | % {         "Devel$_" } ;
-            "Build,Edition,Laptop"              -Split ',' | % {        "Bypass$_" } ;
-            "Service,Script"                    -Split ',' | % { "$_`Browse"  , "$_`File"   } | % { "Logging$_" } ;
-            "Registry,Template"                 -Split ',' | % { "$_`Browse"  , "$_`File"   } | % { "Backup$_"  } ;
-            "Service,Script"                    -Split ',' | % { "$_`Profile" , "$_`Label"  } ; "Start,Cancel" -Split ',' )
-        }
-
-        If ( $Config )
-        {
-            $Return   = @{  
-            
-                Names = ( "AJRouter;ALG;AppHostSvc;AppIDSvc;Appinfo;AppMgmt;AppReadiness;AppVClient;aspnet_state;AssignedAccessManagerSvc;" +
-                "AudioEndpointBuilder;AudioSrv;AxInstSV;BcastDVRUserService_$QMARK;BDESVC;BFE;BITS;BluetoothUserService_$QMARK;Browser;BTAGService;" + 
-                "BthAvctpSvc;BthHFSrv;bthserv;c2wts;camsvc;CaptureService_$QMARK;CDPSvc;CDPUserSvc_$QMARK;CertPropSvc;COMSysApp;CryptSvc;CscService;" + 
-                "defragsvc;DeviceAssociationService;DeviceInstall;DevicePickerUserSvc_$QMARK;DevQueryBroker;Dhcp;diagnosticshub.standardcollector.service;" + 
-                "diagsvc;DiagTrack;DmEnrollmentSvc;dmwappushsvc;Dnscache;DoSvc;dot3svc;DPS;DsmSVC;DsRoleSvc;DsSvc;DusmSvc;EapHost;EFS;embeddedmode;" + 
-                "EventLog;EventSystem;Fax;fdPHost;FDResPub;fhsvc;FontCache;FontCache3.0.0.0;FrameServer;ftpsvc;GraphicsPerfSvc;hidserv;hns;HomeGroupListener;" + 
-                "HomeGroupProvider;HvHost;icssvc;IKEEXT;InstallService;iphlpsvc;IpxlatCfgSvc;irmon;KeyIso;KtmRm;LanmanServer;LanmanWorkstation;lfsvc;" + 
-                "LicenseManager;lltdsvc;lmhosts;LPDSVC;LxssManager;MapsBroker;MessagingService_$QMARK;MSDTC;MSiSCSI;MsKeyboardFilter;MSMQ;MSMQTriggers;" + 
-                "NaturalAuthentication;NcaSVC;NcbService;NcdAutoSetup;Netlogon;Netman;NetMsmqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator;" + 
-                "NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK;p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc;" + 
-                "PolicyAgent;Power;PrintNotify;PrintWorkflowUserSvc_$QMARK;ProfSvc;PushToInstall;QWAVE;RasAuto;RasMan;RemoteAccess;RemoteRegistry;" + 
-                "RetailDemo;RmSvc;RpcLocator;SamSs;SCardSvr;ScDeviceEnum;SCPolicySvc;SDRSVC;seclogon;SEMgrSvc;SENS;Sense;SensorDataService;SensorService;" + 
-                "SensrSvc;SessionEnv;SgrmBroker;SharedAccess;SharedRealitySvc;ShellHWDetection;shpamsvc;smphost;SmsRouter;SNMPTRAP;spectrum;Spooler;" + 
-                "SSDPSRV;ssh-agent;SstpSvc;StiSvc;StorSvc;svsvc;swprv;SysMain;TabletInputService;TapiSrv;TermService;Themes;TieringEngineService;TimeBroker;" + 
-                "TokenBroker;TrkWks;TrustedInstaller;tzautoupdate;UevAgentService;UI0Detect;UmRdpService;upnphost;UserManager;UsoSvc;VaultSvc;vds;vmcompute;" + 
-                "vmicguestinterface;vmicheartbeat;vmickvpexchange;vmicrdv;vmicshutdown;vmictimesync;vmicvmsession;vmicvss;vmms;VSS;W32Time;W3LOGSVC;W3SVC;" + 
-                "WaaSMedicSvc;WalletService;WarpJITSvc;WAS;wbengine;WbioSrvc;Wcmsvc;wcncsvc;WdiServiceHost;WdiSystemHost;WebClient;Wecsvc;WEPHOSTSVC;" + 
-                "wercplsupport;WerSvc;WFDSConSvc;WiaRpc;WinHttpAutoProxySvc;Winmgmt;WinRM;wisvc;WlanSvc;wlidsvc;wlpasvc;wmiApSrv;WMPNetworkSvc;WMSVC;" + 
-                "workfolderssvc;WpcMonSvc;WPDBusEnum;WpnService;WpnUserService_$QMARK;wscsvc;WSearch;wuauserv;wudfsvc;WwanSvc;xbgm;XblAuthManager;" + 
-                "XblGameSave;XboxGipSvc;XboxNetApiSvc" ).Split( ';' )
-
-                Values = ( "0;1;2;3;3;4;3;5;3;6;2;2;3;3;3;2;7;3;3;0;0;0;0;3;3;4;7;2;0;3;2;8;3;3;3;3;3;2;3;3;2;3;1;2;7;3;2;3;3;3;2;3;3;3;2;2;1;3;3;3;2;3;1;2;" + 
-                "3;3;6;3;3;1;1;3;3;9;0;1;3;3;2;2;1;3;3;3;2;3;1;0;3;3;1;11;2;2;0;3;3;0;0;3;2;2;3;3;2;1;2;2;7;3;3;2;8;3;1;3;3;3;3;3;2;3;3;2;3;3;3;3;12;12;1;3;" + 
-                "1;2;12;1;1;3;3;1;2;6;13;13;13;0;7;1;3;2;12;3;1;1;3;2;3;3;3;3;3;3;3;2;13;3;0;2;3;3;3;2;3;12;5;3;0;3;2;3;3;3;6;1;1;1;1;1;1;1;1;14;3;3;3;2;3;3;" + 
-                "3;3;3;3;2;0;3;3;0;3;3;3;3;13;3;3;2;1;1;15;3;3;3;1;3;1;1;3;2;2;7;7;3;3;1;3;1;1;3;1" ).Split( ';' )
-
-                Profile = ( "2,2,2,2,2,2,1,1,2,2;2,2,2,2,1,1,1,1,1,1;3,0,3,0,3,0,3,0,3,0;2,0,2,0,2,0,2,0,2,0;0,0,2,2,2,2,1,1,2,2;0,0,1,0,1,0,1,0,1,0;" + 
-                "0,0,2,0,2,0,2,0,2,0;4,0,4,0,4,0,4,0,4,0;0,0,2,2,1,1,1,1,1,1;3,3,3,3,3,3,1,1,3,3;4,4,4,4,1,1,1,1,1,1;0,0,0,0,0,0,0,0,0,0;1,0,1,0,1,0,1,0,1,0;" + 
-                "2,2,2,2,1,1,1,1,2,2;0,0,3,0,3,0,3,0,3,0;3,3,3,3,2,2,2,2,3,3" ).Split( ';' )
-                
-            } | % { 
-
                 ForEach ( $i in 0..( $_.Names.Count - 1 ) ) 
                 { 
                     [ PSCustomObject ]@{ 
@@ -948,6 +886,23 @@
                     }
                 }
             }
+        }
+
+        $Return | % { 
+        
+            If ( $Version   ) { $_.Version   }
+            If ( $Company   ) { $_.Company   }
+            If ( $MadBomb   ) { $_.MadBomb   }
+            If ( $Sparks    ) { $_.Sparks    }
+            If ( $Path      ) { $_.Path      }
+            If ( $Control   ) { $_.Control   }
+            If ( $Copyright ) { $_.Copyright }
+            If ( $Message   ) { $_.Message   }
+            If ( $Help      ) { $_.Help      }
+            If ( $Services  ) { $_.Services  }
+            If ( $Names     ) { $_.Names     }
+            If ( $Config    ) { $_.Config    }
+            If ( $All       ) { $_ }
         }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -9138,7 +9093,7 @@
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-CurrentPID # What Free Actually Means __________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯       
+    {#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]         #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
