@@ -1,4 +1,4 @@
-﻿<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -216,7 +216,8 @@
             [ Parameter ( Mandatory , ParameterSetName =      "Server" ) ] [ Switch ] $Server      ,
             [ Parameter ( Mandatory , ParameterSetName =         "MDT" ) ] [ Switch ] $MDT         ,
             [ Parameter ( Mandatory , ParameterSetName =  "Diagnostic" ) ] [ Switch ] $Diagnostic  ,
-            [ Parameter ( Mandatory , ParameterSetName =         "All" ) ] [ Switch ] $All         )
+            [ Parameter ( Mandatory , ParameterSetName =         "All" ) ] [ Switch ] $All         ,
+            [ Parameter ( Mandatory , ParameterSetName =      "Report" ) ] [ Switch ] $Report      )
 
         $Functions                            = [ PSCustomObject ]@{ 
 
@@ -314,6 +315,46 @@
             If ( $MDT         ) { $_.MDT         }
             If ( $Diagnostic  ) { $_.Diagnostic  }
             If ( $All         ) { $_             }
+            If ( $Report      ) 
+            { 
+                $Return           = [ PSCustomObject ]@{ 
+                
+                    Section       = "Script,Network,Directory,Permissions,Server,MDT,Diagnostic".Split(',')
+                    SubTable      = ""
+                    
+                }
+                    
+                $Return                   | % { 
+
+                    $_.Subtable           = ForEach ( $i in 0..6 )
+                    {
+                        $_.Section[$I]    | % { 
+
+                            $Splat        = @{
+                        
+                                Items     = $Functions.$_ | GM | ? { $_.MemberType -eq "NoteProperty" } | % { $_.Name }
+                            }
+                        
+                            $Splat.Add( "Values" , @( ForEach ( $J in $Splat.Items ) { $Functions.$_.$J } ) )
+
+                            New-Subtable @Splat
+
+                        }
+                    }
+
+                    $Splat              = @{ 
+
+                        Title             = "Hybrid-DSC Function Table"
+                        Depth             = 7
+                        ID                = ForEach ( $i in 0..6 ) { "([ $($_.Section[$i] ) ])" }
+                        Table             = ForEach ( $i in 0..6 ) { $_.Subtable[$i] }
+                    }
+
+                    $Splat = New-Table @Splat
+                }
+
+                Write-Theme -Table $Splat 
+            }
         }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -666,36 +707,38 @@
         $QMark                   = Get-CurrentPID 
 
         $ServiceConfig           = [ PSCustomObject ]@{  
-            
-            Names = ( "AJRouter;ALG;AppHostSvc;AppIDSvc;Appinfo;AppMgmt;AppReadiness;AppVClient;aspnet_state;AssignedAccessManagerSvc;" +
-            "AudioEndpointBuilder;AudioSrv;AxInstSV;BcastDVRUserService_$QMARK;BDESVC;BFE;BITS;BluetoothUserService_$QMARK;Browser;BTAGService;" + 
-            "BthAvctpSvc;BthHFSrv;bthserv;c2wts;camsvc;CaptureService_$QMARK;CDPSvc;CDPUserSvc_$QMARK;CertPropSvc;COMSysApp;CryptSvc;CscService;" + 
-            "defragsvc;DeviceAssociationService;DeviceInstall;DevicePickerUserSvc_$QMARK;DevQueryBroker;Dhcp;diagnosticshub.standardcollector.service;" + 
-            "diagsvc;DiagTrack;DmEnrollmentSvc;dmwappushsvc;Dnscache;DoSvc;dot3svc;DPS;DsmSVC;DsRoleSvc;DsSvc;DusmSvc;EapHost;EFS;embeddedmode;" + 
-            "EventLog;EventSystem;Fax;fdPHost;FDResPub;fhsvc;FontCache;FontCache3.0.0.0;FrameServer;ftpsvc;GraphicsPerfSvc;hidserv;hns;HomeGroupListener;" + 
-            "HomeGroupProvider;HvHost;icssvc;IKEEXT;InstallService;iphlpsvc;IpxlatCfgSvc;irmon;KeyIso;KtmRm;LanmanServer;LanmanWorkstation;lfsvc;" + 
-            "LicenseManager;lltdsvc;lmhosts;LPDSVC;LxssManager;MapsBroker;MessagingService_$QMARK;MSDTC;MSiSCSI;MsKeyboardFilter;MSMQ;MSMQTriggers;" + 
-            "NaturalAuthentication;NcaSVC;NcbService;NcdAutoSetup;Netlogon;Netman;NetMsmqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator;" + 
-            "NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK;p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc;" + 
-            "PolicyAgent;Power;PrintNotify;PrintWorkflowUserSvc_$QMARK;ProfSvc;PushToInstall;QWAVE;RasAuto;RasMan;RemoteAccess;RemoteRegistry;" + 
-            "RetailDemo;RmSvc;RpcLocator;SamSs;SCardSvr;ScDeviceEnum;SCPolicySvc;SDRSVC;seclogon;SEMgrSvc;SENS;Sense;SensorDataService;SensorService;" + 
-            "SensrSvc;SessionEnv;SgrmBroker;SharedAccess;SharedRealitySvc;ShellHWDetection;shpamsvc;smphost;SmsRouter;SNMPTRAP;spectrum;Spooler;" + 
-            "SSDPSRV;ssh-agent;SstpSvc;StiSvc;StorSvc;svsvc;swprv;SysMain;TabletInputService;TapiSrv;TermService;Themes;TieringEngineService;TimeBroker;" + 
-            "TokenBroker;TrkWks;TrustedInstaller;tzautoupdate;UevAgentService;UI0Detect;UmRdpService;upnphost;UserManager;UsoSvc;VaultSvc;vds;vmcompute;" + 
-            "vmicguestinterface;vmicheartbeat;vmickvpexchange;vmicrdv;vmicshutdown;vmictimesync;vmicvmsession;vmicvss;vmms;VSS;W32Time;W3LOGSVC;W3SVC;" + 
-            "WaaSMedicSvc;WalletService;WarpJITSvc;WAS;wbengine;WbioSrvc;Wcmsvc;wcncsvc;WdiServiceHost;WdiSystemHost;WebClient;Wecsvc;WEPHOSTSVC;" + 
-            "wercplsupport;WerSvc;WFDSConSvc;WiaRpc;WinHttpAutoProxySvc;Winmgmt;WinRM;wisvc;WlanSvc;wlidsvc;wlpasvc;wmiApSrv;WMPNetworkSvc;WMSVC;" + 
-            "workfolderssvc;WpcMonSvc;WPDBusEnum;WpnService;WpnUserService_$QMARK;wscsvc;WSearch;wuauserv;wudfsvc;WwanSvc;xbgm;XblAuthManager;" + 
-            "XblGameSave;XboxGipSvc;XboxNetApiSvc" ).Split( ';' )
-
-            Values = ( "0;1;2;3;3;4;3;5;3;6;2;2;3;3;3;2;7;3;3;0;0;0;0;3;3;4;7;2;0;3;2;8;3;3;3;3;3;2;3;3;2;3;1;2;7;3;2;3;3;3;2;3;3;3;2;2;1;3;3;3;2;3;1;2;" + 
-            "3;3;6;3;3;1;1;3;3;9;0;1;3;3;2;2;1;3;3;3;2;3;1;0;3;3;1;11;2;2;0;3;3;0;0;3;2;2;3;3;2;1;2;2;7;3;3;2;8;3;1;3;3;3;3;3;2;3;3;2;3;3;3;3;12;12;1;3;" + 
-            "1;2;12;1;1;3;3;1;2;6;13;13;13;0;7;1;3;2;12;3;1;1;3;2;3;3;3;3;3;3;3;2;13;3;0;2;3;3;3;2;3;12;5;3;0;3;2;3;3;3;6;1;1;1;1;1;1;1;1;14;3;3;3;2;3;3;" + 
-            "3;3;3;3;2;0;3;3;0;3;3;3;3;13;3;3;2;1;1;15;3;3;3;1;3;1;1;3;2;2;7;7;3;3;1;3;1;1;3;1" ).Split( ';' )
-
-            Profile = ( "2,2,2,2,2,2,1,1,2,2;2,2,2,2,1,1,1,1,1,1;3,0,3,0,3,0,3,0,3,0;2,0,2,0,2,0,2,0,2,0;0,0,2,2,2,2,1,1,2,2;0,0,1,0,1,0,1,0,1,0;" + 
-            "0,0,2,0,2,0,2,0,2,0;4,0,4,0,4,0,4,0,4,0;0,0,2,2,1,1,1,1,1,1;3,3,3,3,3,3,1,1,3,3;4,4,4,4,1,1,1,1,1,1;0,0,0,0,0,0,0,0,0,0;1,0,1,0,1,0,1,0,1,0;" + 
-            "2,2,2,2,1,1,1,1,2,2;0,0,3,0,3,0,3,0,3,0;3,3,3,3,2,2,2,2,3,3" ).Split( ';' )
+ 
+            Names                = ("AJRouter;ALG;AppHostSvc;AppIDSvc;Appinfo;AppMgmt;AppReadiness;AppVClient;aspnet_state;AssignedAccessManagerSvc;" + 
+                                   "AudioEndpointBuilder;AudioSrv;AxInstSV;BcastDVRUserService_$QMARK;BDESVC;BFE;BITS;BluetoothUserService_$QMARK;Br" + 
+                                   "owser;BTAGService;BthAvctpSvc;BthHFSrv;bthserv;c2wts;camsvc;CaptureService_$QMARK;CDPSvc;CDPUserSvc_$QMARK;CertP" + 
+                                   "ropSvc;COMSysApp;CryptSvc;CscService;defragsvc;DeviceAssociationService;DeviceInstall;DevicePickerUserSvc_$QMARK" + 
+                                   ";DevQueryBroker;Dhcp;diagnosticshub.standardcollector.service;diagsvc;DiagTrack;DmEnrollmentSvc;dmwappushsvc;Dns" + 
+                                   "cache;DoSvc;dot3svc;DPS;DsmSVC;DsRoleSvc;DsSvc;DusmSvc;EapHost;EFS;embeddedmode;EventLog;EventSystem;Fax;fdPHost" + 
+                                   ";FDResPub;fhsvc;FontCache;FontCache3.0.0.0;FrameServer;ftpsvc;GraphicsPerfSvc;hidserv;hns;HomeGroupListener;Home" + 
+                                   "GroupProvider;HvHost;icssvc;IKEEXT;InstallService;iphlpsvc;IpxlatCfgSvc;irmon;KeyIso;KtmRm;LanmanServer;LanmanWo" + 
+                                   "rkstation;lfsvc;LicenseManager;lltdsvc;lmhosts;LPDSVC;LxssManager;MapsBroker;MessagingService_$QMARK;MSDTC;MSiSC" + 
+                                   "SI;MsKeyboardFilter;MSMQ;MSMQTriggers;NaturalAuthentication;NcaSVC;NcbService;NcdAutoSetup;Netlogon;Netman;NetMs" + 
+                                   "mqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator; NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK" + 
+                                   ";p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc; PolicyAgent;Power;PrintN" + 
+                                   "otify;PrintWorkflowUserSvc_$QMARK;ProfSvc;PushToInstall;QWAVE;RasAuto;RasMan;RemoteAccess;RemoteRegistry;RetailD" + 
+                                   "emo;RmSvc;RpcLocator;SamSs;SCardSvr;ScDeviceEnum;SCPolicySvc;SDRSVC;seclogon;SEMgrSvc;SENS;Sense;SensorDataServi" + 
+                                   "ce;SensorService;SensrSvc;SessionEnv;SgrmBroker;SharedAccess;SharedRealitySvc;ShellHWDetection;shpamsvc;smphost;" + 
+                                   "SmsRouter;SNMPTRAP;spectrum;Spooler;SSDPSRV;ssh-agent;SstpSvc;StiSvc;StorSvc;svsvc;swprv;SysMain;TabletInputServ" + 
+                                   "ice;TapiSrv;TermService;Themes;TieringEngineService;TimeBroker;TokenBroker;TrkWks;TrustedInstaller;tzautoupdate;" + 
+                                   "UevAgentService;UI0Detect;UmRdpService;upnphost;UserManager;UsoSvc;VaultSvc;vds;vmcompute;vmicguestinterface;vmi" + 
+                                   "cheartbeat;vmickvpexchange;vmicrdv;vmicshutdown;vmictimesync;vmicvmsession;vmicvss;vmms;VSS;W32Time;W3LOGSVC;W3S" + 
+                                   "VC;WaaSMedicSvc;WalletService;WarpJITSvc;WAS;wbengine;WbioSrvc;Wcmsvc;wcncsvc;WdiServiceHost;WdiSystemHost;WebCl" + 
+                                   "ient;Wecsvc;WEPHOSTSVC;wercplsupport;WerSvc;WFDSConSvc;WiaRpc;WinHttpAutoProxySvc;Winmgmt;WinRM;wisvc;WlanSvc;wl" + 
+                                   "idsvc;wlpasvc;wmiApSrv;WMPNetworkSvc;WMSVC;workfolderssvc;WpcMonSvc;WPDBusEnum;WpnService;WpnUserService_$QMARK;" + 
+                                   "wscsvc;WSearch;wuauserv;wudfsvc;WwanSvc;xbgm;XblAuthManager;XblGameSave;XboxGipSvc;XboxNetApiSvc" ).Split( ';' )
+            Values               = ("0;1;2;3;3;4;3;5;3;6;2;2;3;3;3;2;7;3;3;0;0;0;0;3;3;4;7;2;0;3;2;8;3;3;3;3;3;2;3;3;2;3;1;2;7;3;2;3;3;3;2;3;3;3;2;2" + 
+                                   ";1;3;3;3;2;3;1;2;3;3;6;3;3;1;1;3;3;9;0;1;3;3;2;2;1;3;3;3;2;3;1;0;3;3;1;11;2;2;0;3;3;0;0;3;2;2;3;3;2;1;2;2;7;3;3;" + 
+                                   "2;8;3;1;3;3;3;3;3;2;3;3;2;3;3;3;3;12;12;1;3;1;2;12;1;1;3;3;1;2;6;13;13;13;0;7;1;3;2;12;3;1;1;3;2;3;3;3;3;3;3;3;2" + 
+                                   ";13;3;0;2;3;3;3;2;3;12;5;3;0;3;2;3;3;3;6;1;1;1;1;1;1;1;1;14;3;3;3;2;3;3;3;3;3;3;2;0;3;3;0;3;3;3;3;13;3;3;2;1;1;1" + 
+                                   "5;3;3;3;1;3;1;1;3;2;2;7;7;3;3;1;3;1;1;3;1").Split(';')
+            Profile              = ("2,2,2,2,2,2,1,1,2,2;2,2,2,2,1,1,1,1,1,1;3,0,3,0,3,0,3,0,3,0;2,0,2,0,2,0,2,0,2,0;0,0,2,2,2,2,1,1,2,2;0,0,1,0,1,0" + 
+                                   ",1,0,1,0;0,0,2,0,2,0,2,0,2,0;4,0,4,0,4,0,4,0,4,0;0,0,2,2,1,1,1,1,1,1;3,3,3,3,3,3,1,1,3,3;4,4,4,4,1,1,1,1,1,1;0,0" + 
+                                   ",0,0,0,0,0,0,0,0;1,0,1,0,1,0,1,0,1,0;2,2,2,2,1,1,1,1,2,2;0,0,3,0,3,0,3,0,3,0;3,3,3,3,2,2,2,2,3,3" ).Split( ';' )
         }
 
         $Ref                     = [ PSCustomObject ]@{ 
@@ -865,9 +908,7 @@
                 'SystemEventsBroker,tiledatamodelsvc,WdNisSvc,WinDefend' -join '' ).Split(',') | Sort
             }
 
-            Names                = 
-            
-                @( 0..4 | % { "MenuConfig" , 'Home,Pro,Desktop,Desktop,Laptop'.Split(',')[$_] , 'Default,Default,Safe,Tweaked,Safe'.Split(',')[$_] -join '' } | % {
+            Names                = @( 0..4 | % { "MenuConfig" , 'Home,Pro,Desktop,Desktop,Laptop'.Split(',')[$_] , 'Default,Default,Safe,Tweaked,Safe'.Split(',')[$_] -join '' } | % {
                 "$_`Max" , "$_`Min" } ; 'Feedback,FAQ,About,Copyright,MadBombDonate,MadBombGitHub,BlackViper,SecureDigitsPlus'.Split(',') | % { "MenuInfo$_" } ;
                 'Search,Select,Grid,Empty'.Split(',') | % { "ServiceDialog$_" } ; 'OS,Profile,Build,Chassis'.Split(',') | % { "Current$_" } ; 
                 'Active,Inactive,Skipped'.Split(',') | % { "Display$_" } ; 'Simulate,Xbox,Change,StopDisabled'.Split(',') | % { "Misc$_" } ; 
@@ -938,70 +979,70 @@
 
         $Diagnostics          = [ PSCustomObject ]@{ 
 
-            Script            = [ PSCustomObject ]@{ # [ Script Information ]
+            Script            = [ PSCustomObject ]@{
 
                 Items         = "Version" , "Date" , "Script" , "Service" , "Release"
                 Values        = $Collect.Script | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
                 Subtable      = ""
             }
 
-            System            = [ PSCustomObject ]@{ # [ System Information ]
+            System            = [ PSCustomObject ]@{
 
                 Items         = "Operating System" , "Edition / SKU" , "Build" , "Version" , "Chassis Type"
                 Values        = $Collect.System | % { $_.MSInfo  , $_.SKU , $_.Build , $_.Version , $_.Chassis }
                 Subtable      = ""
             }
 
-            Initialization    = [ PSCustomObject ]@{ # [ Initialization ]
+            Initialization    = [ PSCustomObject ]@{
 
                 Items         = "Argument List" , "Terms of Service" 
                 Values        = $Collect.Initialization | % { $_.PassedArgs , $_.TermsOfService }
                 Subtable      = ""
             }
 
-            Display           = [ PSCustomObject ]@{ # [ Display Settings ]
+            Display           = [ PSCustomObject ]@{
 
                 Items         = "Active" , "Inactive" , "Skipped" | % { "Show $_ SVC" }
                 Values        = $Control | % { $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped }
                 Subtable      = ""
             }
 
-            Miscellaneous     = [ PSCustomObject ]@{ # [ Miscellaneous Settings ]
+            Miscellaneous     = [ PSCustomObject ]@{
 
                 Items         = "Simulate Changes" , "Xbox Services" , "Change * SVC State" , "Stop * Disabled SVC"
                 Values        = $Control | % { $_.MiscSimulate , $_.MiscXbox , $_.MiscChange ,$_.MiscStopDisabled }
                 Subtable      = ""
             }
 
-            Development       = [ PSCustomObject ]@{ #[ Development Settings ]
+            Development       = [ PSCustomObject ]@{
 
                 Items         = "Diagnostic Errors" , "Devel Log" , "Enable Console" , "Report Diagnostic"
                 Values        = $Control | % { $_.DevelDiagErrors , $_.DevelLog , $_.DevelConsole , $_.DevelDiagReport }
                 Subtable      = ""
             }
 
-            Bypass            = [ PSCustomObject ]@{ # [ Bypass/Force Settings ]
+            Bypass            = [ PSCustomObject ]@{
 
                 Items         = "Build" , "Edition" , "Laptop" | % { "Bypass $_" }
                 Values        = $Control | % { $_.BypassBuild , $_.BypassEdition , $_.BypassLaptop }
+                Subtable      = ""
+            }
+
+            Logging           = [ PSCustomObject ]@{
+
+                Items         = "Service" , "Script" | % { "Log $_ File" }
+                Values        = $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile }
                 Subtable      = "" 
             }
 
-            Logging           = [ PSCustomObject ]@{ # [ Logging Settings ]
-
-                Items             = "Service" , "Script" | % { "Log $_ File" }
-                Values            = $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile }
-                Subtable          = "" 
-            }
-
-            Backup            = [ PSCustomObject ]@{ # [ Backup Settings ]
+            Backup            = [ PSCustomObject ]@{
 
                 Items         = "Registry" , "Template" | % { "Backup $_" }
                 Values        = $Control | % { $_.BackupRegistryFile , $_.BackupTemplateFile }
                 Subtable      = "" 
             }
 
-            Version           = [ PSCustomObject ]@{ # [ Version Control ]
+            Version           = [ PSCustomObject ]@{
 
                 Items         = "Service" ,"Script" | % { "$_ Config" }
                 Values        = $Control | % { $_.ServiceConfig , $_.ScriptConfig }
@@ -1040,145 +1081,28 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Import-ServiceConfiguration #______________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param ( 
-        
-            [ Parameter ( ParameterSetName = "Default" ) ] [ Switch ] $Default ,
-            [ Parameter ( ParameterSetName =    "Load" ) ] [ Switch ] $Load    ,
-            [ Parameter ( ParameterSetname =  "Custom" ) ] [ String ] $Custom  )
-
-        $Configuration          = Resolve-ViperBomb -Config
-
-        $Collect                = [ PSCustomObject ]@{
-
-            PID                 = Get-CurrentPID
-            State               = '[X]' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)'
-            Service             = $Configuration.Service
-            Profile             = $Configuration.Profile
-            Types               = Resolve-ViperBomb -Types | % { $_.Types }
-
-        }
-
-        If ( $Default )
-        {
-            $Collect            | % {
-
-                $Split          = $_.Profile.Split(',')
-
-                $Return         = ForEach ( $i in 0..( $_.Service.Count - 1 ) )
-                {
-                    [ PSCustomObject ]@{
-
-                        Service     = $_.Service[$I]
-                        "10H:D+"    = $_.State[$Split[0]]
-                        "10H:D-"    = $_.State[$Split[1]]
-                        "10P:D+"    = $_.State[$Split[2]]
-                        "10P:D-"    = $_.State[$Split[3]]
-                        "DT:S+"     = $_.State[$Split[4]]
-                        "DT:S-"     = $_.State[$Split[5]]
-                        "DT:T+"     = $_.State[$Split[6]]
-                        "DT:T-"     = $_.State[$Split[7]]
-                        "LT:S+"     = $_.State[$Split[8]]
-                        "LT:S-"     = $_.State[$Split[9]]
-                    }
-                }
-            }
-
-            $Return
-        }
-
-        If ( $Load )
-        {
-            $Scale           = @{  
-            
-                Base         = Resolve-ViperBomb -Path    | % { "$( $_.Parent        )\Services" }
-                File         = Resolve-ViperBomb -Control | % { "$( $_.ServiceConfig ).csv"      }
-        
-            } | % { IPCSV ( "{0}\{1}" -f $_.Base , $_.File ) } | % { 
-            
-                IPCSV $_ | % {
-                
-                    [ PSCustomObject ]@{ 
-                    
-                        Service  = $_.Service
-                        "10H:D+" = $X[$_."10H:D+"]
-                        "10H:D-" = $X[$_."10H:D-"]
-                        "10P:D+" = $X[$_."10P:D+"]
-                        "10P:D-" = $X[$_."10P:D-"]
-                        "DT:S+"  = $X[$_."DT:S+"]
-                        "DT:S-"  = $X[$_."DT:S-"]
-                        "DT:T+"  = $X[$_."DT:T+"]
-                        "DT:T-"  = $X[$_."DT:T-"]
-                        "LT:S+"  = $X[$_."LT:S+"]
-                        "LT:S-"  = $X[$_."LT:S-"]
-                    }
-                }
-            }
-        }
-
-        If ( $Custom )
-        {
-            $Custom = Read-Host "Enter full path to custom service configuration"
-            
-            If ( ! ( Test-Path $Custom ) )
-            {
-                Write-Theme -Action "Exception [!]" "Path not a valid file."
-            }
-
-            If ( $Custom.Split('.')[-1] -ne ".csv" )
-            {
-                Write-Theme -Action "Exception [!]" "File not in a valid .csv format"
-            }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function New-ServiceTemplate #______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
-
-            [ ValidateNotNullOrEmpty () ]
-            [ Parameter ( ParameterSetname = "Object" ) ] [ String [] ] $Names )
-
-        
-        $Return = [ PSCustomObject ]@{ }
-
-        $Names | % { $Return | Add-Member -MemberType NoteProperty -Name $_ -Value "-" }
-
-        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____ 
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-ServiceProfile #_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
 
         Write-Theme -Action "Collecting [+]" "[ Service Configuration ]: Current Profile"
 
-        Resolve-ViperBomb -Services             | % {
+        $Return                              = [ PSCustomObject ]@{
 
-            $Filter                          = [ PSCustomObject ]@{ 
+            Cfg                              = Resolve-ViperBomb -Config
+            Index                            = @( )
+            Filter                           = Resolve-ViperBomb -Services | % {
+    
+                [ PSCustomObject ]@{ 
                 
-                Skipped                      = $_.Skip 
-                Xbox                         = $_.Xbox
-                DataGrid                     = $_.DataGrid
+                    Skipped                  = $_.Skip 
+                    Xbox                     = $_.Xbox
+                    DataGrid                 = $_.DataGrid
+                    NetTCP                   = $_.NetTCP
+                }
             }
-        }
 
-        $Current                             = Get-CurrentServices | Sort Name
-
-        Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
-
-        $List                                = Import-ServiceConfiguration -Default
-        $Index                               = 0..( $List.Count - 1 )
-
-        Write-Theme -Action "Processing [+]" "[ Service Configuration ]: Overlay"
-
-        # Create Template & Output Containers
-
-        $Service                             = [ PSCustomObject ]@{
-        
-            Profile                          = [ PSCustomObject ]@{ }
+            Current                          = Get-CurrentServices | Sort Name
+            Profile                          = [ Ordered ]@{ }
             Master                           = @( )
             Active                           = @( )
             Inactive                         = @( )
@@ -1186,114 +1110,61 @@
             Xbox                             = @( )
         }
 
-        $Types                               = Resolve-ViperBomb -Types | % { $_.Types }
-
-        $Types                               | % {
+        Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
         
-            $Splat                           = @{
-
-                MemberType                   = "NoteProperty"
-                Name                         = $_
-                Value                        = ForEach ( $i in $Index )
-                {
-                    [ PSCustomObject ]@{
-
-                        Index                = $I
-                        Scoped               = "-"
-                        Profile              = $List[$I].$_
-                        Name                 = $List[$I].Service
-                        
-                    }
-                }
-            }
-
-            $Service.Profile                 | Add-Member @Splat
-        }
-
-        ForEach ( $I in $Index )
-        {
-            $New                             = New-ServiceTemplate -Names $Filter.DataGrid
-
-            $New.Index                       = "{0:d3}" -f $I
-            $New.Name                        = $List[$I].Service
-            
-            If ( $New.Name -in $Current.Name )
+        $Return                              | % { 
+        
+            If ( $_.Cfg.Count -gt $_.Current.Count )
             {
-                $X                           = $Current | ? { $_.Name -eq $New.Name }
-
-                $New.Scoped                  = "+"
-                $New.Status                  = $X.Status
-                $New.StartType               = $X.StartType
-                $New.DelayedAutoStart        = $X.DelayedAutoStart
-                $New.DisplayName             = $X.DisplayName
-                $New.PathName                = $X.PathName
-                $New.Description             = $X.Description
+                $_.Index                     = 0..( $_.Cfg.Count - 1 )
+            } 
+            
+            Else 
+            {  
+                $_.Index                     = 0..( $_.Current.Count - 1 )
             }
 
-            $New.Status                      | % {
-
-                If ( $_ -eq "Running" )
-                {
-                    $Service.Active         += $New.Name
-                }
-
-                If ( $_ -eq "Stopped" )
-                {
-                    $Service.Inactive       += $New.Name
-                }
-
-                If ( ( $_ -eq "-" ) -or ( $New.Name -in $Filter.Skipped ) )
-                {
-                    $Service.Skipped        += $New.Name
-                }
-
-                If ( $New.Name -in $Filter.Xbox )
-                { 
-                    $Service.Xbox           += $New.Name
-                }
-
-                If ( $New.Name -in $List.Service )
-                {
-                    If ( $New.Scoped -eq "+" )
-                    {
-                        ForEach ( $T in $Types )
-                        {
-                            $Service.Profile.$T[$I] | % { 
-
-                                $_.Scoped = "+"
-
-                                If ( ( $_.Profile -eq $New.StartType ) -or ( $_.Profile -like "*DS*" -and $New.DelayedAutoStart -ne $Null ) )
-                                {
-                                    $_.Scoped = "@"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            $Service.Master += $New
+            $_.Profile                       = 0..9
+            $_.Master                        = $_.Index.Clone()
         }
 
-        $Service | % { 
+        ForEach ( $i in $Return.Index )
+        {
+            $Service                         = $Return.CFG[$I]
 
-            $Return                          = [ PSCustomObject ]@{
+            If ( $Service.Service -in $Return.Current.Name )
+            {
+                $Scoped                      = "+"
+                $CurrentProfile              = $Service.Profile.Split(',')
+                $Current                     = $Return.Current | ? { $_.Name -eq $Service.Service }
+            }
 
-                "10H:D+"                         = $_.Profile."10H:D+"
-                "10H:D-"                         = $_.Profile."10H:D-"
-                "10P:D+"                         = $_.Profile."10P:D+"
-                "10P:D-"                         = $_.Profile."10P:D-"
-                "DT:S+"                          = $_.Profile."DT:S+"
-                "DT:S-"                          = $_.Profile."DT:S-"
-                "DT:T+"                          = $_.Profile."DT:T+"
-                "DT:T-"                          = $_.Profile."DT:T-"
-                "LT:S+"                          = $_.Profile."LT:S+"
-                "LT:S-"                          = $_.Profile."LT:S-"
-                Master                           = @( $_.Master )
-                DisplayActive                    = @( $_.Active )
-                DisplayInactive                  = @( $_.Inactive )
-                DisplaySkipped                   = @( $_.Skipped )
-                MiscXbox                         = @( $_.Xbox )
+            Else
+            {
+                $Scoped                      = "-"
+                $CurrentProfile              = @( '-' ) * 10
+                $Current                     = [ PSCustomObject ]@{
+
+                    Name                     = $Service.Service
+                    StartMode                = '-'
+                    State                    = '-'
+                    DisplayName              = '-'
+                    PathName                 = '-'
+                    Description              = '-'
+                }
+            }
+
+            $Return.Master[$I]               = [ PSCustomObject ]@{
+            
+                Index                        = "{0:d3}" -f $I
+                Scoped                       = $Scoped
+                Profile                      = $CurrentProfile
+                Name                         = $Service.Service
+                StartMode                    = $Current.StartMode
+                State                        = $Current.State
+                DisplayName                  = $Current.DisplayName
+                PathName                     = $Current.PathName
+                Description                  = $Current.Description
             }
         }
 
@@ -1302,11 +1173,53 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Filter-ServiceProfile #____________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
+
+            [ ValidateNotNullOrEmpty () ]
+            [ Parameter ( Mandatory ) ] [ PSCustomObject ] $ProfileObject )
+
+        $ProfileObject                | % { 
+        
+            ForEach ( $i in 0..( $_.Master.Count - 1 ) )
+            {
+                $Current              = $_.Master[$I]
+
+                If ( $Current.State -eq "Running" )
+                {
+                    $_.Active        += $Current.Name
+                }
+
+                If ( $Current.State -eq "Stopped" )
+                {
+                    $_.Inactive      += $Current.Name
+                }
+
+                If ( $Current.Scoped -eq "-" ) 
+                {
+                    $_.Skipped       += $Current.Name 
+                }
+                
+                If ( $Current.Name -in $_.Filter.Skipped )
+                {
+                    $_.Skipped       += $Current.Name
+                }
+
+                If ( $Current.Name -in $_.Filter.Xbox )
+                { 
+                    $_.Xbox           += $New.Name
+                }
+            }
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Show-Console #_____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Param ( [ Bool ] $Switch )
-
-            [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , $( If ( $Switch ) { 5 } Else { 0 } ) )
+        Param ( [ Int ] $Switch )
+            
+            [ Console.Window ]::ShowWindow( [ Console.Window ]::GetConsoleWindow() , $Switch )
     
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -1332,8 +1245,11 @@
                 
                     Name             = "Window"
                     Namespace        = "Console"
-                    MemberDefinition = '[DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();' , 
-                                       '[DllImport("user32.dll")]   public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);' -join "`n"
+                    MemberDefinition = ( "Kernel;IntPtr GetConsoleWindow()" , "user;bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)" | % { 
+
+                        '[DllImport("{0}32.dll")] public static extern {1};' -f $_.Split(';')
+                    
+                    }) -join "`n"
                 }
 
                 Add-Type @Splat
@@ -1364,65 +1280,163 @@
             }
         }
 
-        $Control                                   = Resolve-ViperBomb -Control
- 
-        If ( $Control.TermsOfService -eq 0 )
-        {
-            Write-Theme -Array ( Resolve-ViperBomb -Copyright ) -Title "Terms of Service / Copyright" -Prompt "Press Enter to Continue" | % { 
+        Write-Theme -Array ( Resolve-ViperBomb -Copyright ) -Title "Terms of Service / Copyright" -Prompt "Press Enter to Continue" | % { 
 
-                If ( $_ -eq $True )
-                {
-                    Write-Theme -Action "Accepted [+]" "Terms of Service" 11 11 15
+            If ( $_ -eq $True )
+            {
+                Write-Theme -Action "Accepted [+]" "Terms of Service" 11 11 15
                     
-                    $Control.TermsOfService        = 1
+                #$Control.TermsOfService        = 1
 
-                    $MSInfo                        = Resolve-Windows -MSInfo
-                    $System                        = Resolve-Windows -System
-                    $Path                          = Resolve-ViperBomb -Path | % { $_.Parent , "Services" -join '\' }
-                    $MadBomb                       = Resolve-ViperBomb -MadBomb
-                    $Company                       = Resolve-ViperBomb -Company
-                    $Sparks                        = Resolve-ViperBomb -Sparks
-        
-                    $Chassis                       = Resolve-Windows -Type | % { $_.Chassis }
+                #$Collection                    = Resolve-ViperBomb -All
+                #$Windows                       = Resolve-Windows -All
+                #$Config                        = Get-ServiceProfile
 
-                    $Config                        = Get-ServiceProfile
-        
-                    $Service                       = @( )
-
-                    Resolve-ViperBomb -Types       | % {
+                #Resolve-ViperBomb -Types       | % {
                 
-                        $Types                     = $_.Types 
-                        $Titles                    = $_.Titles
+                #    $Type                      = $_.Types 
+                #    $Titles                    = $_.Titles
+                #}
+
+                #$MSInfo                        = $Windows.OS
+                #$System                        = $Windows.CS
+                #$Chassis                       = $Windows.Chassis
+                #$Path                          = $Collection.Path.Parent + "\Services"
+                #$MadBomb                       = $Collection.MadBomb
+                #$Company                       = $Collection.Company
+                #$Sparks                        = $Collection.Sparks
+
+                $Master                        = [ PSCustomObject ]@{ 
+
+                    Sys                        = Resolve-Windows -All | % { 
+                    
+                        [ PSCustomObject ]@{
+
+                            MSInfo             = $_.OS
+                            System             = $_.CS
+                            Chassis            = $_.Chassis
+                        }
                     }
 
-                    $XAML                          = Get-XAML -Service
-                    $Named                         = Resolve-ViperBomb -Names
-                    $GUI                           = Convert-XAMLToWindow -Xaml $XAML -NE $Named -Passthru
+                    Inf                        = Resolve-ViperBomb -All | % { 
+                    
+                        [ PSCustomObject ]@{ 
+                            
+                            Path               = $_.Path.Parent + "\Services"
+                            MadBomb            = $_.MadBomb
+                            Company            = $_.Company
+                            Sparks             = $_.Sparks
+                            Control            = $_.Control
+                        }
+                    }
+ 
+                    Cfg                        = Get-ServiceProfile | % { 
+                    
+                        [ PSCustomObject ]@{ 
+
+                            Master             = $_.Master
+                            "10H:D+"           = $_."10H:D+"
+                            "10H:D-"           = $_."10H:D-"
+                            "10P:D+"           = $_."10P:D+"
+                            "10P:D-"           = $_."10P:D-"
+                            "DT:S+"            = $_."DT:S+"
+                            "DT:S-"            = $_."DT:S-"
+                            "DT:T+"            = $_."DT:T+"
+                            "DT:T-"            = $_."DT:T-"
+                            "LT:S+"            = $_."LT:S+"
+                            "LT:S-"            = $_."LT:S-"
+                            DisplayActive      = $_.DisplayActive
+                            DisplayInactive    = $_.DisplayInactive
+                            DisplaySkipped     = $_.DisplaySkipped
+                            MiscXbox           = $_.MiscXbox
+                            Types              = ""
+                            Titles             = ""
+                        }
+                    }
+
+                    WPF                        = [ PSCustomObject ]@{
+
+                        XAML                   = Get-XAML -Service
+                        Named                  = Resolve-ViperBomb -Names
+                        GUI                    = ""
+                    }
+                }
+                 
+                Resolve-ViperBomb -Types       | % {
+                    
+                    $Master.Cfg.Types          = $_.Types
+                    $Master.Cfg.Titles         = $_.Titles
                 }
 
-                Else 
-                {
-                    Write-Theme -Action "Exception [!]" "Terms of Service was not accepted, aborting" 12 4 15
-                    Read-Host "Press Enter to Exit"
-                    Break
+                $Master                        | % {
+                
+                    $_.Inf.Control.TermsOfService  = 1
+                    $_.WPF                     | % { 
+                    
+                        $_.GUI                 = Convert-XAMLToWindow -Xaml $_.XAML -NE $_.Named -Passthru 
+                    }
                 }
+
+                $Service                       = @( )
+            }
+
+            Else 
+            {
+                Write-Theme -Action "Exception [!]" "Terms of Service was not accepted, aborting" 12 4 15
+                Read-Host "Press Enter to Exit"
+                Break
             }
         }
 
         # Defaults
 
-        $GUI.DisplayActive.IsChecked                = $True
-        $GUI.DisplayInactive.IsChecked              = $True
-        $GUI.DisplaySkipped.IsChecked               = $True
+        $Master.WPF.GUI | % { 
+        
+            $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped | % { $_.IsChecked = $True }
+            
+            $_.CurrentOS.Text                         = "{0} ({1})" -f $Master.Windows.MSInfo.Caption , $env:PROCESSOR_ARCHITECTURE.Replace( 'AMD' , 'x' )
+            $_.CurrentBuild.Text                      = $PSVersionTable.BuildVersion
+            $_.CurrentChassis.Text                    = $Chassis
 
-        $GUI.CurrentOS.Text                         = "{0} ({1})" -f $MSInfo.Caption , $env:PROCESSOR_ARCHITECTURE.Replace( 'AMD' , 'x' )
-        $GUI.CurrentBuild.Text                      = $PSVersionTable.BuildVersion
-        $GUI.CurrentChassis.Text                    = $Chassis
+            $I.ServiceDialogEmpty.Text                = "Select a profile from the configuration menu to begin"
+            $I.ServiceDialogSearch.IsEnabled          = $False
+            $I.ServiceLabel.Text                      = $I.ServiceProfile.SelectedItem.Content
+            $I.ScriptLabel.Text                       = $I.ScriptProfile.SelectedItem.Content
+        }
 
-        $GUI.ServiceDialogEmpty.Text                = "Select a profile from the configuration menu to begin"
-        $GUI.ServiceDialogSearch.IsEnabled          = $False
-        $GUI.ServiceLabel.Text                      = $GUI.ServiceProfile.SelectedItem.Content
-        $GUI.ScriptLabel.Text                       = $GUI.ScriptProfile.SelectedItem.Content
+        Function Select-ServiceProfile
+        {
+            [ CmdLetBinding () ] Param ( [ Parameter ( Mandatory ) ] [ PSCustomObject ] $Master )
+
+                $Control = $Master.Collect.Control
+                $Types   = $Master.Profile.Types
+
+
+        }
+
+        Function Filter-DataGrid
+        {
+            [ CmdLetBinding () ] Param (
+
+                [ Parameter ( Mandatory ) ] [ PSCustomObject ] $Master )
+
+            $Master.Config
+            $Types = $Master.Profile.Types
+            $Output                                 = @( )
+
+            @{ 1 = $Config.DisplayActive    }[ $Control.DisplayActive   ] | % { $Output += $_ }
+            @{ 1 = $Config.DisplayInactive  }[ $Control.DisplayInactive ] | % { $Output += $_ }
+            @{ 1 = $Config.DisplaySkipped   }[ $Control.DisplaySkipped  ] | % { $Output += $_ }
+            @{ 1 = $Config.MiscXbox         }[ $Control.MiscXbox        ] | % { $Output += $_ }
+
+            If ( $Output.Count -gt 0 )
+            {
+                $Output                             = $Output  | ? { $_ -ne $Null } | Sort
+                $Service                            = $Service | ? { $_.Name -in $Output }
+            }
+
+            [ PSCustomObject ]@{ Service = $Service }
+        }
 
         Function Refresh-DataGrid
         {
@@ -1464,14 +1478,16 @@
                 }
             }
 
+            Filter-Datagrid -Control $Control -Service $Service | % { $Service = $_.Service }
+
             $GUI.ServiceDialogGrid.ItemsSource      = $Null
 
             $Output                                 = @( )
 
-            If ( $Control.DisplayActive   -eq 1 ) { $Output += @( $Config.DisplayActive   ) }
-            If ( $Control.DisplayInactive -eq 1 ) { $Output += @( $Config.DisplayInactive ) }
-            If ( $Control.DisplaySkipped  -eq 1 ) { $Output += @( $Config.DisplaySkipped  ) }
-            If ( $Control.MiscXbox        -eq 1 ) { $Output += @( $Config.MiscXbox        ) }
+            If ( $Control.DisplayActive   -eq 1 ) { $Config.DisplayActive   | % { $Output += $_ } }
+            If ( $Control.DisplayInactive -eq 1 ) { $Config.DisplayInactive | % { $Output += $_ } }
+            If ( $Control.DisplaySkipped  -eq 1 ) { $Config.DisplaySkipped  | % { $Output += $_ } }
+            If ( $Control.MiscXbox        -eq 1 ) { $Config.MiscXbox        | % { $Output += $_ } }
 
             If ( $Output.Count -gt 0 )
             {
@@ -1500,7 +1516,7 @@
         $GUI.MenuInfoMadBombGitHub.Add_Click({        Start $MadBomb.Base    })
         $GUI.MenuInfoBlackViper.Add_Click({           Start $Sparks.Website  })
         $GUI.MenuInfoSecureDigitsPlus.Add_Click({     Start $Company.Site    })
-
+            
         $GUI.MenuConfigHomeDefaultMax.Add_Click({     $Control.Profile         = 0 ; & $Select })
         $GUI.MenuConfigHomeDefaultMin.Add_Click({     $Control.Profile         = 1 ; & $Select })
         $GUI.MenuConfigProDefaultMax.Add_Click({      $Control.Profile         = 2 ; & $Select })
@@ -1523,39 +1539,53 @@
 
         $GUI.ServiceDialogSearch.Add_TextChanged(
         {
-            If ( ( $GUI.ServiceDialogSearch.Text -ne "" ) -and ( $GUI.ServiceDialogSelect.IsEnabled -eq $True ) )
-            {
-                $GUI.ServiceDialogSelect.IsEnabled      = $False
-                $Filter                                 = $GUI.ServiceDialogSelect.SelectedItem.Content
-                $Immute                                 = $GUI.ServiceDialogGrid.ItemsSource.Clone()
-            }
+            $Text = $GUI.ServiceDialogSearch.Text
 
             If ( $GUI.ServiceDialogSearch.Text -ne "" )
             {
-                $GUI.ServiceDialogGrid.ItemsSource      = $Null
-                $Text                                   = $GUI.ServiceDialogSearch.Text
+                If ( $GUI.ServiceDialogSelect.IsEnabled -eq $True )
+                {
+                    $Filter                                 = $GUI.ServiceDialogSelect.SelectedItem.Content
+                    $Service                                = $GUI.ServiceDialogGrid.ItemsSource.Clone()
+                    $GUI.ServiceDialogSelect.IsEnabled      = $False
 
-                $Return                                 = $Immute.Clone() | ? { $_.$Filter -match $Text }
+                    Filter-Datagrid -Control $Control -Service $Service | % { $Immute = $_.Service }
+                }
 
-                $Out                                    = @{  
-                
-                    $True  = "Visible"   , $Return , "Collapsed" , "" 
-                    $False = "Collapsed" , $Null   , "Visible"   , "No results found" 
-                    
-                }[ $Return.Count -gt 0 ]
+                $GUI.ServiceDialogGrid.ItemsSource          = $Null
 
+                $Return                                     = @( )
+
+                $Immute.Clone() | ? { $_.$Filter -match $Text } | % { $Return += $_ }
+            
+                If ( $Return.Count -gt 0 )
+                {
+                    $GUI.ServiceDialogGrid.Visibility       = "Visible" 
+                    $GUI.ServiceDialogGrid.ItemsSource      = $Return
+                    $GUI.ServiceDialogEmpty.Visibility      = "Collapsed"
+                    $GUI.ServiceDialogEmpty.Text            = ""
+                }
+
+                If ( $Return.Count -eq 0 )
+                {
+                    $GUI.ServiceDialogGrid.Visibility       = "Collapsed"
+                    $GUI.ServiceDialogGrid.ItemsSource      = $Null
+                    $GUI.ServiceDialogEmpty.Visibility      = "Visible"
+                    $GUI.ServiceDialogEmpty.Text            = "No results found"
+                }
             }
-
-            If ( ( $GUI.ServiceDialogSearch.Text -eq "" ) -and ( $GUI.ServiceDialogSelect.IsEnabled -ne $True ) )
+            
+            If ( $GUI.ServiceDialogSearch.Text -eq "" )
             {
-                $GUI.ServiceDialogSelect.IsEnabled  = $True
-                $Out                                = "Visible" , $Immute.Clone() , "Collapsed" , ""
+                If ( $GUI.ServiceDialogSelect.IsEnabled -eq $False )
+                {
+                    $GUI.ServiceDialogSelect.IsEnabled  = $True
+                    $GUI.ServiceDialogGrid.Visibility   = "Visible"
+                    $GUI.ServiceDialogGrid.ItemsSource  = $Immute
+                    $GUI.ServiceDialogEmpty.Visibility  = "Collapsed"
+                    $GUI.ServiceDialogEmpty.Text        = ""
+                }
             }
-
-            $GUI.ServiceDialogGrid.Visibility       = $Out[0]
-            $GUI.ServiceDialogGrid.ItemsSource      = $Out[1]
-            $GUI.ServiceDialogEmpty.Visibility      = $Out[2]
-            $GUI.ServiceDialogEmpty.Text            = $Out[3]
         })
 
         # ----------- #
@@ -1815,8 +1845,13 @@
                 If ( $_.Value.GetType().Name -eq "Hashtable" )
                 {
                     $Output += "[$( $_.Name )]"
-                    $Output += $Table.$( $_.Name ).GetEnumerator() | % { $_.Name , $_.Value -join '=' }
-                    $Output                               += ""
+
+                    $Table.$( $_.Name ).GetEnumerator() | % { 
+                    
+                        $Output += $_.Name , $_.Value -join '=' 
+                    }
+
+                    $Output += ""
                 }
 
                 Else
@@ -1825,7 +1860,7 @@
                 }
             }
 
-            $Output                                       += ""
+            $Output         += ""
         }
 
         Return $Output                                                               #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
@@ -3407,25 +3442,25 @@
         $GUI                              = Convert-XAMLToWindow   -XAML $Promo -NE $Named -PassThru
         $Code                             = [ PSCustomObject ]@{ 
         
-                    Command     = "" ; Process     = "" ; Forest      = "" ; Tree        = "" ; Child       = "" ; Clone       = "" ; 
+        Command     = "" ; Process     = "" ; Forest      = "" ; Tree        = "" ; Child       = "" ; Clone       = "" ; 
         
-                    DomainType  = "" ; ForestMode  = "" ; DomainMode  = "" ; ParentDomainName               = "" ;
+        DomainType  = "" ; ForestMode  = "" ; DomainMode  = "" ; ParentDomainName               = "" ;
         
-                    AD_Domain_Services             = "" ; DHCP        = "" ; DNS         = "" ; GPMC        = "" ; RSAT        = "" ; 
-                    RSAT_AD_AdminCenter            = "" ; RSAT_AD_PowerShell             = "" ; RSAT_AD_Tools                  = "" ; 
-                    RSAT_ADDS                      = "" ; RSAT_ADDS_Tools                = "" ; RSAT_DHCP                      = "" ; 
-                    RSAT_DNS_Server                = "" ; RSAT_Role_Tools                = "" ; WDS                            = "" ; 
-                    WDS_AdminPack                  = "" ; WDS_Deployment                 = "" ; WDS_Transport                  = "" ;
+        AD_Domain_Services             = "" ; DHCP        = "" ; DNS         = "" ; GPMC        = "" ; RSAT        = "" ; 
+        RSAT_AD_AdminCenter            = "" ; RSAT_AD_PowerShell             = "" ; RSAT_AD_Tools                  = "" ; 
+        RSAT_ADDS                      = "" ; RSAT_ADDS_Tools                = "" ; RSAT_DHCP                      = "" ; 
+        RSAT_DNS_Server                = "" ; RSAT_Role_Tools                = "" ; WDS                            = "" ; 
+        WDS_AdminPack                  = "" ; WDS_Deployment                 = "" ; WDS_Transport                  = "" ;
         
-                    InstallDNS                     = "" ; CreateDNSDelegation            = "" ; 
-                    NoGlobalCatalog                = "" ; CriticalReplicationOnly        = "" ;
+        InstallDNS                     = "" ; CreateDNSDelegation            = "" ; 
+        NoGlobalCatalog                = "" ; CriticalReplicationOnly        = "" ;
         
-                    DatabasePath                   = "" ; LogPath     = "" ; SysvolPath  = "" ;
+        DatabasePath                   = "" ; LogPath     = "" ; SysvolPath  = "" ;
         
-                    Credential  = "" ; DomainName  = "" ; DomainNetBIOSName              = "" ; NewDomainName                  = "" ; 
-                    NewDomainNetBIOSName           = "" ; SiteName                       = "" ; ReplicationSourceDC            = "" ; 
+        Credential  = "" ; DomainName  = "" ; DomainNetBIOSName              = "" ; NewDomainName                  = "" ; 
+        NewDomainNetBIOSName           = "" ; SiteName                       = "" ; ReplicationSourceDC            = "" ; 
         
-                    SafeModeAdministratorPassword  = "" ; Profile                        = "" }
+        SafeModeAdministratorPassword  = "" ; Profile                        = "" }
 
         Get-DSCPromoSelection -Type $P -Control $Code -Services $ST -GUI $GUI | % { 
         
@@ -3904,289 +3939,277 @@
                 }
             }
 
-            If ( $GUI.Clone.IsChecked )
-            {
-                $GUI.DomainName.Text | % { 
-                        
-                    If ( $_ -eq "" )
-                    {
-                        Show-Message "Error" "Domain Name cannot be empty"
-                        Break
-                    }
-
-                    $X = Confirm-DomainName -Domain $_
-                        
-                    If ( $X -ne $_ ) 
-                    { 
-                        Show-Message "Error" $X
-                        Break
-                    } 
-                        
-                    Else
-                    { 
-                        $Code.DomainName = $_ 
-                    }
-                }
-            
-                $GUI.ReplicationSourceDC.Text | % { 
-            
-                    If ( $_ -eq "" )
-                    {
-                        Show-Message "Error" "Source Domain Controller Missing"
-                        Break
-                    }
-
-                    $X = Resolve-DNSName $_ -Type CName | % { $_.PrimaryServer }
-
-                    If ( $X -ne $_ ) 
-                    { 
-                        Show-Message "Error" $X
-                        Break
-                    }
-
-                    Else 
-                    { 
-                        $Code.ReplicationSourceDC  = $_ 
-                    } 
-                }
-            }
-
-            "Database" , "Log" , "Sysvol" | % { "$_`Path" } | % { $Code.$_ = $GUI.$_.Text }
-
-            If ( $GUI.SafeModeAdministratorPassword.Password -eq "" )                          
-            { 
-                Show-Message "Error" "DSRM Key is empty"
-                Break
-            }
-
-            If ( $GUI.SafeModeAdministratorPassword.Password.Length -lt 8 )
-            { 
-                Show-Message "Error" "Password is too short"
-                Break
-            }
-
-            If ( $GUI.SafeModeAdministratorPassword.Password -notmatch $GUI.Confirm.Password )
-            { 
-                Show-Message "Error" "Invalid Confirmation"
-                Break
-            }
-            
-            $Code.SafeModeAdministratorPassword = $GUI.SafeModeAdministratorPassword.SecurePassword
-
-            "ForestMode" , "DomainMode" | % { 
-            
-                $Code.$_ = $GUI.$_.SelectedIndex
-
-                If ( $Code.$_ -eq 7 )
+                If ( $GUI.Clone.IsChecked )
                 {
-                    $Code.$_ = 6
-                } 
-            }
-                
-            Get-DSCPromoTable -Roles | % {
+                    $GUI.DomainName.Text | % { 
+                        
+                        If ( $_ -eq "" )
+                        {
+                            Show-Message "Error" "Domain Name cannot be empty"
+                            Break
+                        }
+
+                        $X = Confirm-DomainName -Domain $_
+                        
+                        If ( $X -ne $_ ) 
+                        { 
+                            Show-Message "Error" $X
+                            Break
+                        } 
+                        
+                        Else
+                        { 
+                            $Code.DomainName = $_ 
+                        }
+                    }
             
-                If ( $GUI.$_.IsEnabled ) 
-                { 
-                    $Code.$_ = $GUI.$_.IsChecked
+                    $GUI.ReplicationSourceDC.Text | % { 
+            
+                        If ( $_ -eq "" )
+                        {
+                            Show-Message "Error" "Source Domain Controller Missing"
+                            Break
+                        }
+
+                        $X = Resolve-DNSName $_ -Type CName | % { $_.PrimaryServer }
+
+                        If ( $X -ne $_ ) 
+                        { 
+                            Show-Message "Error" $X
+                            Break
+                        }
+
+                        Else 
+                        { 
+                            $Code.ReplicationSourceDC  = $_ 
+                        } 
+                    }
                 }
-            }
 
-            $GUI.DialogResult = $True
-        })
+                "Database" , "Log" , "Sysvol" | % { "$_`Path" } | % { $Code.$_ = $GUI.$_.Text }
 
-        ( "Database" , "NTDS" ) , ( "Log" , "NTDS" ) , ( "Sysvol" , "SYSVOL" ) | % { 
+                If ( $GUI.SafeModeAdministratorPassword.Password -eq "" )                          
+                { 
+                    Show-Message "Error" "DSRM Key is empty"
+                    Break
+                }
+
+                If ( $GUI.SafeModeAdministratorPassword.Password.Length -lt 8 )
+                { 
+                    Show-Message "Error" "Password is too short"
+                    Break
+                }
+
+                If ( $GUI.SafeModeAdministratorPassword.Password -notmatch $GUI.Confirm.Password )
+                { 
+                    Show-Message "Error" "Invalid Confirmation"
+                    Break
+                }
+            
+                $Code.SafeModeAdministratorPassword = $GUI.SafeModeAdministratorPassword.SecurePassword
+
+                "ForestMode" , "DomainMode" | % { 
+            
+                    $Code.$_ = $GUI.$_.SelectedIndex
+
+                    If ( $Code.$_ -eq 7 )
+                    {
+                        $Code.$_ = 6
+                    } 
+                }
+                
+                Get-DSCPromoTable -Roles | % {
+            
+                    If ( $GUI.$_.IsEnabled ) 
+                    { 
+                        $Code.$_ = $GUI.$_.IsChecked
+                    }
+                }
+
+                $GUI.DialogResult = $True
+            })
+
+            ( "Database" , "NTDS" ) , ( "Log" , "NTDS" ) , ( "Sysvol" , "SYSVOL" ) | % { 
         
-            $GUI.$( $_[0] + "Path" ).Text = "C:\Windows\$( $_[1] )"
-        }
+                $GUI.$( $_[0] + "Path" ).Text = "C:\Windows\$( $_[1] )"
+            }
 
-        $Null = $GUI.SafeModeAdministratorPassword.Focus()
+            $Null = $GUI.SafeModeAdministratorPassword.Focus()
 
-        $OP   = Show-WPFWindow -GUI $GUI
+            $OP   = Show-WPFWindow -GUI $GUI
 
-        If ( $OP -eq $True )
-        {
-            $DSCLoadout      = @( ) 
+            If ( $OP -eq $True )
+            {
+                $DSCLoadout      = @( ) 
             
-            Get-DSCPromoTable -Services | ? { $Code.$_ -eq "Available" -and $GUI.$_.IsChecked -eq $True } | % {
+                Get-DSCPromoTable -Services | ? { $Code.$_ -eq "Available" -and $GUI.$_.IsChecked -eq $True } | % {
             
-                $DSCLoadout += $_.Replace( '_' , '-' )
-            }
+                    $DSCLoadout += $_.Replace( '_' , '-' )
+                }
 
-            $Command         = $Code.Command
+                $Command         = $Code.Command
 
-            $Provision       = [ Ordered ]@{ }
+                $Provision       = [ Ordered ]@{ }
 
-            $Code.Process    | ? { $_ -in 1..2 } | % {
+                $Code.Process    | ? { $_ -in 1..2 } | % {
 
-                $Provision.Add( "DomainType" , ( Get-DSCPromoTable -DomainType )[$_] )
-            }
+                    $Provision.Add( "DomainType" , ( Get-DSCPromoTable -DomainType )[$_] )
+                }
             
-            $Code.Profile    | % { 
+                $Code.Profile    | % { 
 
-                $Provision.Add( $_ , $Code.$_ )
-            }
+                    $Provision.Add( $_ , $Code.$_ )
+                }
 
-            "Database" , "Log" , "Sysvol" | % { "$_`Path" } | % { 
+                "Database" , "Log" , "Sysvol" | % { "$_`Path" } | % { 
 
-                $Provision.Add( $_ , $Code.$_ )
-            }
+                    $Provision.Add( $_ , $Code.$_ )
+                }
 
-            # Report/Confirmation Screen
-
+                # Report/Confirmation Screen
              #_    ____________________________
              #\\__//¯¯[_______ Services ______]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                If ( $DSCLoadOut.Count -ge 1 )
+                {
+                    $Section     = 0..2
+                    $SubTable    = 0..2
+                    $Z           = 0
 
-            If ( $DSCLoadOut.Count -ge 1 )
-            {
-                $Section     = 0..2
-                $SubTable    = 0..2
-                $Z           = 0
+                    $Section[$Z]  = "Service Configuration"
 
-                $Section[$Z]  = "Service Configuration"
-
-                $Names       = @( )
-                $Values      = @( )
+                    $Names       = @( )
+                    $Values      = @( )
             
-                ForEach ( $I in 0..( $DSCLoadOut.Count - 1 ) ) 
-                { 
-                    $Names  += "Service [$I]" 
-                    $Values += $DSCloadout[$I]
-                }
+                    ForEach ( $I in 0..( $DSCLoadOut.Count - 1 ) ) 
+                    { 
+                        $Names  += "Service [$I]" 
+                        $Values += $DSCloadout[$I]
+                    }
                 
-                $Subtable[$Z] = New-SubTable -Items $Names -Values $Values
+                    $Subtable[$Z] = New-SubTable -Items $Names -Values $Values
 
-                $Z ++
-            }
-
+                    $Z ++
+                }
              #_    ____________________________
              #\\__//¯¯[_______ Command _______]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                If ( $DSCLoadOut.Count -eq 0 )
+                {
+                    $Section     = 0..1
+                    $SubTable    = 0..1
+                    $Z           = 0
+                }
 
-            If ( $DSCLoadOut.Count -eq 0 )
-            {
-                $Section     = 0..1
-                $SubTable    = 0..1
-                $Z           = 0
-            }
+                $Section[$Z]  = "Domain Controller Promotion"
+                $Subtable[$Z] = New-SubTable -Items "Command/Type" -Values $Command
 
-            $Section[$Z]  = "Domain Controller Promotion"
-            $Subtable[$Z] = New-SubTable -Items "Command/Type" -Values $Command
-
-            $Z ++
-
+                $Z ++
              #_    ____________________________
              #\\__//¯¯[______ Parameters _____]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            $Section[$Z]  = "Parameters"
-            $Names        = @( $Provision.Keys ) 
-            $Values       = @( $Provision.Values )
+                $Section[$Z]  = "Parameters"
+                $Names        = @( $Provision.Keys ) 
+                $Values       = @( $Provision.Values )
             
-            $Subtable[$Z] = New-SubTable -Items $Names -Values $Values
-
+                $Subtable[$Z] = New-SubTable -Items $Names -Values $Values
              #_    ____________________________
              #\\__//¯¯[_____ Confirmation ____]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            $Splat       = @{ 
+                $Splat       = @{ 
                 
-                Title    = "Hybrid-DSC Promo Loadout"
-                Depth    = $Section.Count
-                ID       = ForEach ( $I in 0..( $Section.Count - 1 ) ) { "( $( $Section[$I] ) )" }
-                Table    = ForEach ( $I in 0..( $Section.Count - 1 ) ) { $Subtable[$I] } 
-            }
+                    Title    = "Hybrid-DSC Promo Loadout"
+                    Depth    = $Section.Count
+                    ID       = ForEach ( $I in 0..( $Section.Count - 1 ) ) { "( $( $Section[$I] ) )" }
+                    Table    = ForEach ( $I in 0..( $Section.Count - 1 ) ) { $Subtable[$I] } 
+                }
             
-            $Table       = New-Table @Splat
+                $Table       = New-Table @Splat
 
-            Write-Theme -Table $Table -Prompt "Press Enter to Continue, CTRL + C to Exit"
-
+                Write-Theme -Table $Table -Prompt "Press Enter to Continue, CTRL + C to Exit"
              #_    ____________________________
              #\\__//¯¯[__ Service Installer __]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                If ( $DSCLoadout.Count -gt 0 )
+                {
+                    Write-Theme -Action "Installing [~]" "Loadout Services"
 
-            If ( $DSCLoadout.Count -gt 0 )
-            {
-                Write-Theme -Action "Installing [~]" "Loadout Services"
+                    $DSCLoadOut    | % {
 
-                $DSCLoadOut    | % {
+                        $Splat     = @{ Name                   = $_
+                                        IncludeAllSubFeature   = $True 
+                                        IncludeManagementTools = $True }
 
-                    $Splat     = @{ Name                   = $_
-                                    IncludeAllSubFeature   = $True 
-                                    IncludeManagementTools = $True }
-
-                    Install-WindowsFeature @Splat
+                        Install-WindowsFeature @Splat
+                    }
                 }
-            }
 
-            IPMO ADDSDeployment -VB
-
+                IPMO ADDSDeployment -VB
              #_    ____________________________
              #\\__//¯¯[____ DCPromo Tester ___]
              # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                Write-Theme -Action "Testing [~]" "Promotion Parameters"
 
-            Write-Theme -Action "Testing [~]" "Promotion Parameters"
+                $Promote = 0
 
-            $Promote = 0
+                If ( $Command -eq "Install-ADDSForest" ) 
+                { 
+                    $EXE = 0
+                    $MSG = "Test-ADDSForestInstallation"
 
-            If ( $Command -eq "Install-ADDSForest" ) 
-            { 
-                $EXE = 0
-                $MSG = "Test-ADDSForestInstallation"
+                    Test-ADDSForestInstallation @Provision
+                }
 
-                Test-ADDSForestInstallation @Provision
-            }
-
-            If ( $Command -eq "Install-ADDSDomain" )
-            {
-                $EXE = 1
-                $MSG = "Test-ADDSDomainInstallation"
-
-                Test-ADDSDomainInstallation @Provision
-            }
-
-            If ( $Command -eq "Install-ADDSDomainController" )
-            {
-                $EXE = 2
-                $MSG = "Test-ADDSDomainControllerInstallation"
-
-                Test-ADDSDomainControllerInstallation @Provision
-            }
-
-            If ( $? -eq $True )
-            {
-                Write-Theme -Action "Successful [+]" "$MSG Passed"
-                $Promote = 1
-            }
-                
-            If ( $? -eq $False )
-            {
-                Write-Theme -Action "Exception [!]" "$MSG Failed" 12 4 15
-                Break
-            }
-
-            If ( $Promote -eq 1 )
-            {
-                Switch( $Host.UI.PromptForChoice( "Test Successful" , "Proceed with Domain Controller Promotion?" ,
-                [ System.Management.Automation.Host.ChoiceDescription [] ]@( "&Yes" , "&No" ) , [ Int ] 1 ) )
+                If ( $Command -eq "Install-ADDSDomain" )
                 {
-                    0   {   Write-Theme -Action "Selected [+]" "Promote to Domain Controller"
+                    $EXE = 1
+                    $MSG = "Test-ADDSDomainInstallation"
 
-                            ( "NoRebootOnCompletion" , $False ) , ( "Force" , $True ) | % { $Provision.Add( $_[0] , $_[1] ) }
+                    Test-ADDSDomainInstallation @Provision
+                }
 
-                            If ( $EXE -eq 0 )   { Install-ADDSForest @Provision }
-                            If ( $EXE -eq 1 )   { Install-ADDSDomain @Provision }
-                            If ( $EXE -eq 2 )   { Install-ADDSDomainController @Provision }
+                If ( $Command -eq "Install-ADDSDomainController" )
+                {
+                    $EXE = 2
+                    $MSG = "Test-ADDSDomainControllerInstallation"
 
-                            If ( $? -eq $True ) { Write-Theme -Action "Successful [+]" "Promotion Complete, Rebooting" }
-                        }
+                    Test-ADDSDomainControllerInstallation @Provision
+                }
+
+                If ( $? -eq $True )
+                {
+                    Write-Theme -Action "Successful [+]" "$MSG Passed"
+                    $Promote = 1
+                }
+                
+                If ( $? -eq $False )
+                {
+                    Write-Theme -Action "Exception [!]" "$MSG Failed" 12 4 15
+                    Break
+                }
+
+                If ( $Promote -eq 1 )
+                {
+                    Switch( $Host.UI.PromptForChoice( "Test Successful" , "Proceed with Domain Controller Promotion?" ,
+                    [ System.Management.Automation.Host.ChoiceDescription [] ]@( "&Yes" , "&No" ) , [ Int ] 1 ) )
+                    {
+                        0   {   Write-Theme -Action "Selected [+]" "Promote to Domain Controller"
+
+                                ( "NoRebootOnCompletion" , $False ) , ( "Force" , $True ) | % { $Provision.Add( $_[0] , $_[1] ) }
+
+                                If ( $EXE -eq 0 )   { Install-ADDSForest @Provision }
+                                If ( $EXE -eq 1 )   { Install-ADDSDomain @Provision }
+                                If ( $EXE -eq 2 )   { Install-ADDSDomainController @Provision }
+
+                                If ( $? -eq $True ) { Write-Theme -Action "Successful [+]" "Promotion Complete, Rebooting" }
+                            }
                     
-                    1   {   Write-Theme -Action "Selected [+]" "Do not promote to Domain Controller"   }
+                        1   {   Write-Theme -Action "Selected [+]" "Do not promote to Domain Controller"   }
+                    }
                 }
             }
-        }
 
-        Else { Write-Theme -Action "[!] Exception" "Either the user cancelled, or the dialog failed" 12 4 15 }
+            Else { Write-Theme -Action "[!] Exception" "Either the user cancelled, or the dialog failed" 12 4 15 }
 
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -4991,7 +5014,17 @@
             PreferredLifeTime            = [ TimeSpan ]::MaxValue 
         }
 
-        New-NetIpAddress @IPAddress            $Splat                           = @{                        InterfaceIndex               = $Adapter            ServerAddresses              = "1.1.1.1" , "1.0.0.1"         }        Set-DNSClientServerAddress @Splat            0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
+        New-NetIpAddress @IPAddress
+    
+        $Splat                           = @{    
+        
+            InterfaceIndex               = $Adapter
+            ServerAddresses              = "1.1.1.1" , "1.0.0.1" 
+        }
+
+        Set-DNSClientServerAddress @Splat
+    
+        0..10 | ? { ( Test-Connection -ComputerName "DSC$_" -Count 1 -EA 0 ) -eq $Null } | % { Rename-Computer "DSC$_" ; Restart-Computer }
 
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -5843,19 +5876,59 @@
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
              $X = @(9,7,8,9,9,9,8,8,9;@(10)*4;@(9,9,11,11,10,12,12,9,9,11,11,10,12,12)*2;9,8,8,9;@(10)*4;@(9)*4;@(10)*4;9,9,11,11,11,10,11,10,11,10,11,9,8,8;@(10)*11;
-                    9,10,11,12,14,13,14,15;@(17)*4;14,13,13,15,12,12,16,13,16,12,12,16,13,16,12,12,16,13,16,12,11,10,9,9;@(10;@(15)*4)*10;9,8,8,7,6) | % { $SP[$_] }
+                    9,10,11,12,14,13,14,15;@(17)*4;14,13,13,15,12,12,16,13,16,12,12,16,13,16,12,12,16,13,16,12,11,10,9,9;
+                    
+                    @(10;@(15)*4)*2;
+                    @(7;@(15)*3;10..13;20,20,13,20,12..10);
+                    @(10;@(15)*4);
+                    @(7;@(15)*3;10..13;20,20,13,20,12..10)*2;
+                    @(10;@(15)*4)*4;
+                    
+                    9,8,8,7,6) | % { $SP[$_] }
 
-             $Y = @( " <TabItem Header = 'Service Dialog'>" , "<$G>" , "<$GRD>" ; 60 , 35 , "*" | % { "<$RD $H = '$_'/>" } ; "</$GRD>" , "<$G $GR = '0' >" , "<$GCD>" ; 
-                     1.25 , 1.75 , 0.75 , 0.75 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GB $GC         = '0'" , "  $HD              = 'Selected Profile' " , 
-                     "  $MA              = '5'>" , "<$TBL $Q           = 'CurrentProfile'" , "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , 
-                     "<$GB $GC         = '1' " , "  $HD              = 'Operating System' " , "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentOS'" , 
-                     "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "<$GB $GC         = '2' " , "  $HD              = 'Current Build' " , 
-                     "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentBuild'" , "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , 
-                     "<$GB $GC         = '3' " , "  $HD              = 'Chassis' " , "  $MA              = '5' >" , "<$TBL $Q           = 'CurrentChassis'" , 
-                     "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , "</$GB>" , "</$G>" , "<$G $GR                  = '1'>" , "<$GCD>" ; 
-                     50 , "*" , 150 , 200 | % { "<$CD $W = '$_'/>" } ; "</$GCD>" , "<$TBL $GC = '0' $MA = '5' $( $VAL[1] ) FontSize = '12' >Search:</$TBL>" ; 
-                     ( "$TB " , 1 , "Search' TextWrapping = 'Wrap' /" ) , ( "$CB" , 2 , "Select' $( $VAL[1] )" ) | % {  
-                     "<$( $_[0] )  $GC = '$( $_[1] )' $MA = '5' $H = '22' $Q = 'ServiceDialog$( $_[2] )>" } ; 
+             $Y = @( " <TabItem Header = 'Service Dialog'>" , 
+             "<$G>" , 
+             "<$GRD>" ; 
+             60 , 35 , "*" | % { "<$RD $H = '$_'/>" } ; 
+             "</$GRD>" , 
+             "<$G $GR = '0' >" , 
+             "<$GCD>" ; 
+             1.25 , 1.75 , 0.75 , 0.75 | % { "<$CD $W = '$_*' />" } ; 
+             "</$GCD>" , 
+             "<$GB $GC         = '0'" , 
+             "  $HD              = 'Selected Profile' " , 
+             "  $MA              = '5'>" , 
+             "<$TBL $Q           = 'CurrentProfile'" , 
+             "   TextAlignment  = 'Center'" , 
+             "   $MA         = '5'/>" , 
+             "</$GB>" , 
+             "<$GB $GC         = '1' " , 
+             "  $HD              = 'Operating System' " , 
+             "  $MA              = '5' >" , 
+             "<$TBL $Q           = 'CurrentOS'" , 
+             "   TextAlignment  = 'Center'" , 
+             "   $MA         = '5'/>" , 
+             "</$GB>" , 
+             "<$GB $GC         = '2' " , 
+             "  $HD              = 'Current Build' " , 
+             "  $MA              = '5' >" , 
+             "<$TBL $Q           = 'CurrentBuild'" , 
+             "   TextAlignment  = 'Center'" , 
+             "   $MA         = '5'/>" , 
+             "</$GB>" , 
+             "<$GB $GC         = '3' " , 
+             "  $HD              = 'Chassis' " , 
+             "  $MA              = '5' >" , 
+             "<$TBL $Q           = 'CurrentChassis'" , 
+             "   TextAlignment  = 'Center'" , "   $MA         = '5'/>" , 
+             "</$GB>" , 
+             "</$G>" , 
+             "<$G $GR                  = '1'>" , 
+             "<$GCD>" ; 
+             50 , "*" , 150 , 200 | % { "<$CD $W = '$_'/>" } ; 
+             "</$GCD>" , 
+             "<$TBL $GC = '0' $MA = '5' $( $VAL[1] ) FontSize = '12' >Search:</$TBL>" ; 
+             ( "$TB " , 1 , "Search' TextWrapping = 'Wrap' /" ) , ( "$CB" , 2 , "Select' $( $VAL[1] )" ) | % { "<$( $_[0] )  $GC = '$( $_[1] )' $MA = '5' $H = '22' $Q = 'ServiceDialog$( $_[2] )>" } ; 
                      "$Q' IsSelected = 'True" , "Display$Q" , "Path$Q" , "Description" | % { "<$CBI $CO = '$_'/>" } ; 
                      "</$CB>" , "<$TBL $GC       = '3' " , "   $MA            = '5' " , "   TextAlignment     = 'Center'" , "   $( $VAL[1] )>" ;
                      ( "66FF66" , "Scoped" ) , ( "FFFF66" , "Unspecified" ) , ( "FF6666" , "Non Scoped" ) | % {
@@ -5870,12 +5943,28 @@
                      "<$SE $PR                = 'ToolTipService.ShowDuration'" , "Value                   = '360000000'/>" , "</Trigger>" ; 
                      ( "@" , "66FF66" ) , ( "+" , "FFFF66" ) , ( "-" , "FF6666" ) | % { "<DataTrigger      Binding           = '{Binding Scoped}'" , 
                      "  Value             = '$( $_[0] )'>" ,  "<$SE       $PR          = '$BG'" , "  Value             = '#$( $_[1] )'/>" , "</DataTrigger>" } ;
-                     "</Style.Triggers>" , "</Style>" , "</Data$GR`Style>" , "<Data$GC`s>" ; ( "Index" , 40 ) , ( "Scoped" , 20 ) , ( "Profile" , 75 ) , ( $Q , 150 ) , 
-                     ( "Status" , 75 ) , ( "StartType" , 75 ) , ( "Delay" , 50 ) , ( "Display$Q" , 150 ) , ( "Path$Q" , 150 ) , ( "Description" , 150 ) | % { 
-                        $Z = $( If ( $_[0] -eq "Scoped" ) { "@" } If ( $_[0] -eq "Delay" ) { "DelayedAutoStart" } Else { $_[0] } )
-                        "<Data$G`TextColumn $HD                  = '$Z'" , "$W                   = '$( $_[1] )'" , "Binding                 = '{Binding $( $_[0] )}'" , 
-                        "CanUserSort             = 'True'" , "IsReadOnly              = 'True'/>" } ; "</Data$GC`s>" , "</Data$G>" , 
-                        "<$TBL $GR = '2' $Q = 'ServiceDialogEmpty' $MA = '20' $( $VAL[1] ) $( $HAL[1] ) FontSize = '20'/>" , "</$G>" , "</TabItem>" )
+                     "</Style.Triggers>" , "</Style>" , "</Data$GR`Style>" , "<Data$GC`s>" ; 
+
+                     ( "Index" , 40 ) , ( "Scoped" , 20 ) , ( "Profile" , 75 ) , ( $Q , 150 ) , ( "Status" , 75 ) , ( "StartType" , 75 ) , ( "Delay" , 50 ) , ( "Display$Q" , 150 ) , 
+                     ( "Path$Q" , 150 ) , ( "Description" , 150 ) | % { $Z = $( If ( $_[0] -eq "Scoped" ) { "@" } If ( $_[0] -eq "Delay" ) { "DelayedAutoStart" } Else { $_[0] } )
+                        If ( $_[0] -notin "Profile","Status","StartType" ) { "<Data$G`TextColumn $HD                  = '$Z'" , "$W                   = '$( $_[1] )'" , 
+                        "Binding                 = '{Binding $( $_[0] )}'" , "CanUserSort             = 'True'" , "IsReadOnly              = 'True'/>" } Else {   
+                        "<DataGridTemplateColumn     Header                  = '$( $_[0] )' " ,
+                                                            "Width                   = '$( $_[1] )' " ,
+                                                            "SortMemberPath          = '$( $_[0] )' " ,
+                                                            "CanUserSort             = 'True'>" ,
+                                    "<DataGridTemplateColumn.CellTemplate>" ,
+                                        "<DataTemplate>" ,
+                                             "<ComboBox ItemsSource = '{ Binding $( $_[0] )}' " ,
+                                                    "Text       = '{ Binding Path                = $( $_[0] ), " ,
+                                                                            "Mode                = TwoWay, " ,
+                                                                            "UpdateSourceTrigger = PropertyChanged }' " ,
+                                                      "IsEnabled   = '{ Binding ElementName         = $( $_[0] )Output, " ,
+                                                                            "   Path                = IsChecked }'/>" ,
+                                             "</DataTemplate>" ,
+                                         "</DataGridTemplateColumn.CellTemplate>" ,
+                                     "</DataGridTemplateColumn>" }
+                    } ; "</Data$GC`s>" , "</Data$G>" , "<$TBL $GR = '2' $Q = 'ServiceDialogEmpty' $MA = '20' $( $VAL[1] ) $( $HAL[1] ) FontSize = '20'/>" , "</$G>" , "</TabItem>" )
 
             $XML[5] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
 
@@ -6131,28 +6220,14 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
 
-            [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({
-
-                Test-Path $_ -PathType Container        })][      String ] $Path ,
-            #\________________________________________________________________
-            [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({
-            #/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $_.Split( '.' )[-1] -ne ".ini"          })][      String ] $Name ,
-            #\________________________________________________________________
-            [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({
-            #/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                $_ -ne $Null                            })][   Hashtable ] $Table ,
-            #\________________________________________________________________
-            [ Parameter ( ) ]                              [ ValidateScript ({
-            
-                $_ -in @( 'Unicode' ; 7 , 8 , 32 | % { "UTF$_" } ; 'ASCII' , 'BigEndianUnicode' , 'Default' , 'OEM' )
-                
-                                                        })][      String ] $Encoding = "Unicode" ,
-            #\________________________________________________________________
-            [ Parameter ( ) ]                              [      Switch ] $Force                ,
-            [ Parameter ( ) ]                              [      Switch ] $Append               ,
-            [ Parameter ( ) ]                              [      Switch ] $UTF8NoBOM            ,
-            [ Parameter ( ) ]                              [      Switch ] $Compare              )
+            [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({ Test-Path $_ -PathType Container })][ String ] $Path ,
+            [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({ $_.Split( '.' )[-1] -ne ".ini"   })][ String ] $Name ,
+            [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({ $_ -ne $Null })][ Hashtable ] $Table ,
+            [ Parameter ( ) ][ ValidateScript ({ $_ -in @( 'Unicode' ; 7,8,32 | % { "UTF$_" } ;'ASCII','BigEndianUnicode','Default','OEM')})][ String ] $Encoding = "Unicode" ,
+            [ Parameter ( ) ][ Switch ] $Force     ,
+            [ Parameter ( ) ][ Switch ] $Append    ,
+            [ Parameter ( ) ][ Switch ] $UTF8NoBOM ,
+            [ Parameter ( ) ][ Switch ] $Compare   )
 
         Begin
         {
@@ -6824,35 +6899,30 @@
 
             # Create the PSDrive/MDTPersistent Drive
             
-            $Splat = @{ Name        = $Code.DSDrive.Replace( ':' , '' )
-                        PSProvider  = "MDTProvider"
-                        Root        = $Code.Directory
-                        Description = $Code.Description
-                        NetworkPath = "\\$ENV:ComputerName\$( $Code.Samba )"
-                        Verbose     = $True }
+            $Splat = @{ Name            = $Code.DSDrive.Replace( ':' , '' )
+                        PSProvider      = "MDTProvider"
+                        Root            = $Code.Directory
+                        Description     = $Code.Description
+                        NetworkPath     = "\\$ENV:ComputerName\$( $Code.Samba )"
+                        Verbose         = $True }
 
-            NDR @Splat | Add-MDTPersistentDrive -VB
+            NDR @Splat                  | Add-MDTPersistentDrive -VB
 
             # Scaffold Hybrid-DSC Deployment Share Root Settings, Copy Designated/Default Background & Logo
             
-            $Code | % { 
+            $DSC                        = $Code | % { $_.Directory , $_.Company -join '\' } | % { NI $_ -ItemType Directory } 
 
-                $DSC = $_.Directory , $_.Company -join '\'
+            "0,Resources;1,Tools;2,Images;3,Profiles;4,Certificates;5,Applications".Split(';') | % { NI "$DSC\({0}){1}" -f $_.Split(',') -ItemType Directory }
 
-                NI $DSC -ItemType Directory 
+            $Res                        = GCI $DSC "*0*" | % { $_.FullName }
 
-                ( 0 , "Resources" ) , ( 1 , "Tools" ) , ( 2 , "Images" ) , ( 3 , "Profiles" ) , ( 4 , "Certificates" ) , ( 5 , "Applications" ) | % { 
+            $Code                       | % { 
+            
+                $_.Background , $_.Logo | % { CP $_ $Res }
 
-                    NI ( "$DSC\({0}){1}" -f $_[0] , $_[1] ) -ItemType Directory
-                }
-
-                $RES = ( GCI $DSC *0* ).FullName
-
-                $_.Background , $_.Logo | % { CP $_ $RES }
-
-                $_.Background = "$RES\$( $_.Background.Split('\')[-1] )"
+                $_.Background           = "$Res\$( $_.Background.Split('\')[-1] )"
                 
-                $_.Logo       = "$RES\$( $_.Logo.Split('\')[-1] )"
+                $_.Logo                 = "$Res\$( $_.Logo.Split('\')[-1] )"
             }
 
             If ( $? -eq $True )
@@ -6871,47 +6941,57 @@
     
             # Plant Tree For Deployment Share Root Settings
 
-            $Root = Resolve-HybridDSC -Root | % { $_.Root }
+            $Root                       = Resolve-HybridDSC -Root | % { $_.Root }
 
-            $Tree = "Hybrid-DSC\$( $Code.Company )\$( $Code.DSDrive.Replace( ':' , '' ) )"
+            $Tree                       = "Hybrid-DSC\$( $Code.Company )\$( $Code.DSDrive.Replace( ':' , '' ) )"
 
-            $Rec  = $Tree.Split( '\' )
+            $Rec                        = $Tree.Split( '\' )
 
-            $Path = $Root
+            $Path                       = $Root
 
             ForEach ( $i in 0..2 ) 
             {
-                "$Path\$( $Rec[$I] )" | % {
+                "$Path\$( $Rec[$I] )"   | % {
 
                     If ( ! ( Test-Path $_ ) )
                     {
                         NI $Path -Name $Rec[$I]
                     }
 
-                    $Path = $_
+                    $Path               = $_
                 }
             }
 
             # Place Deployment Share Root Settings in the registry
-            $PSDefaults = "ChildName" , "Drive" , "ParentPath" , "Path" , "Provider" | % { "PS$_" }
 
-            $Names  = $Code  | GM | ? { $_.MemberType -eq "NoteProperty" } | ? { $_.Name -notin $PSDefaults } |% { $_.Name }
-            $Values = $Names | % { $Code.$_ } 
+            $PSDefaults                 = "ChildName,Drive,ParentPath,Path,Provider".Split(',') | % { "PS$_" }
+            $Names                      = $Code  | GM | ? { $_.MemberType -eq "NoteProperty" } | ? { $_.Name -notin $PSDefaults } | % { $_.Name }
+            $Values                     = $Names | % { $Code.$_ } 
             
-            0..( $Names.Count - 1 ) | % { SP -Path $Path -Name $Names[$_] -Value $Values[$_] -Force }
-
-            SP -Path $Path -Name "Server" -Value $ENV:ComputerName
-
-            $Share = Resolve-HybridDSC -Share 
+            0..( $Names.Count - 1 )     | % { 
             
-            $Share | % { SC -Path "$( $_.Directory )\DSC.txt" -Value ( $_ | ConvertTo-JSON ) -Force }
+                $Splat                  = @{
+                
+                    Path                = $Path 
+                    Name                = $Names[$_] 
+                    Value               = $Values[$_] 
+                    Force               = $True 
+                }
+
+                SP @Splat
+
+                SP -Path $Path -Name "Server" -Value $ENV:ComputerName
+                
+                $Share                  = Resolve-HybridDSC -Share 
+                $Share                  | % { SC -Path "$( $_.Directory )\DSC.txt" -Value ( $_ | ConvertTo-JSON ) -Force }
+
 
             If ( $Code.Remaster -eq "Selected" )
             {
                 Write-Theme -Action "Creating" "[+] PowerShell [ Deployment / Development ] Share"
                     
-                $Source   = Resolve-HybridDSC -Root | % { $_.Tree }
-                $Remaster = GCI $Source "*PSD*" -Recurse | % { $_.FullName }
+                $Source                 = Resolve-HybridDSC -Root      | % { $_."Hybrid-DSC" }
+                $Remaster               = GCI $Source "*PSD*" -Recurse | % { $_.FullName     }
 
                 If ( $Remaster -eq $Null )
                 {
@@ -6919,54 +6999,73 @@
                     Break
                 }
 
-                $Manifest = [ PSCustomObject ]@{ 
+                $Manifest               = [ PSCustomObject ]@{ 
 
-                        Scripts   = "Scripts"
-                        Templates = "Templates"
-                        Modules   = "Tools\Modules"
-                        Folders   = "Gather" , "DeploymentShare" , "Utility" , "Wizard" | % { "PSD$_" }
-                        XSD       = "Groups" , "Medias" , "OperatingSystems" , "Packages" , "SelectionProfiles" , "TaskSequences" , 
-                                    "Applications" , "Drivers" , "LinkedDeploymentShares" | % { "$_.xsd" }
-                        PSSnapIn  = @( "dll" , "dll.config" , "dll-help.xml" , "Format.ps1xml" , "Types.ps1xml" | % { 
-                                       "PSSnapIn.$_" } ; "Core.dll" , "Core.dll.config" , "ConfigManager.dll" )
-                        Paths     = @( "Logs" , "Logs\Dyn" ; "Sources" , "Packages" | % { "Driver$_" } )
+                        Scripts         = "Scripts" ; Templates = "Templates" ; Modules   = "Tools\Modules"
+                        Folders         = "Gather,DeploymentShare,Utility,Wizard".Split(',') | % { "PSD$_" }
+                        XSD             = ( "Groups,Medias,OperatingSystems,Packages,SelectionProfiles,TaskSequences," + 
+                                          "Applications,Drivers,LinkedDeploymentShares" ).Split(',') | % { "$_.xsd" } ;
+                        PSSnapIn        = @( "dll,dll.config,dll-help.xml,Format.ps1xml,Types.ps1xml".Split(',') | % { "PSSnapIn.$_" } ;
+                                          "Core.dll" , "Core.dll.config" , "ConfigManager.dll" )
+                        Paths           = "Logs,Logs\Dyn,DriverSources,DriverPackages".Split(',')
                 }
                 
                 Expand-Archive $Remaster -DestinationPath "$Source\Tools"
 
-                $Items = "Scripts" , "Templates" | % { gci "$Source\Tools\PSD-Master\$_" | % { $_.FullName } }
+                $Items                  = "Scripts" , "Templates" | % { GCI "$Source\Tools\PSD-Master\$_" | % { $_.FullName } }
                 
                 0..( $Items.Count - 1 ) | % { 
                 
-                    $X = $Items[$_]
-                    $Y = "$( $Code.Directory )\$( If ( $X -like "*Scripts*" ) { "Scripts" } If ( $X -like "*Templates*" ) { "Templates" } )"
+                    $X                  = $Items[$_] 
+                    $Y                  = "$( $Code.Directory )\$( If ( $X -like "*Scripts*" ) { "Scripts" } If ( $X -like "*Templates*" ) { "Templates" } )"
                     MI $X $Y
                 }
+            }
                 
-                RI "$Source\Tools\PSD-master" -Recurse -Force
+            RI "$Source\Tools\PSD-master" -Recurse -Force
 
-                $M = $Manifest
-                $W = $Code.Directory
-                $X = $W , $M.Modules -join '\'
+            $M                          = $Manifest
+            $W                          = $Code.Directory
+            $X                          = $W , $M.Modules -join '\'
 
-                $M.Folders | % { "$X\$_" } | ? { ! ( Test-Path $_ ) } | % { NI $_ -ItemType Directory -Verbose }
-
-                GCI "$W\Scripts" *.psm1* -Recurse | % { CP $_.FullName "$W\Tools\Modules\$( $_.BaseName )\$( $_.Name )" -Verbose }
-
-                $Snap  = "$W\Tools\Modules\Microsoft.BDD.PSSnapin" 
+            $M.Folders                  | % { "$X\$_" } | ? { 
+            
+                ! ( Test-Path $_ ) }    | % { 
                 
-                $Snap  | ? { ! ( Test-Path $_ ) } | % { NI $_ -ItemType Directory -VB }
+                    NI $_ -ItemType Directory -VB 
+                }
 
-                $MDTDir = GP "HKLM:\Software\Microsoft\Deployment 4" | % { $_.Install_Dir }
+            
+                GCI "$W\Scripts" "*.psm1*" -Recurse | % { 
+            
+                    CP $_.FullName "$W\Tools\Modules\{0}\{1}" -f $_.BaseName , $_.Name -VB 
+                }
+
+                $Snap                   = "$W\Tools\Modules\Microsoft.BDD.PSSnapin" 
                 
-                $M.PSSnapIn | % { GCI "$MDTDir\Bin" *$_* -Recurse } | % { CP $_.FullName "$Snap\$( $_.Name )" -Verbose }
-
-                GCI $MDTDir *Gather.xml* -Recurse | % { CP $_.FullName "$W\Tools\Modules\PSDGather" -Verbose }
-
-                $M.XSD      | % { GCI $MDTDir *$_* -Recurse } | % { CP $_.FullName "$W\Templates" -Verbose }
+                $Snap                   | ? { ! ( Test-Path $_ ) } | % { 
                 
-                $M.Paths    | % { "$W\$_" } | ? { ! ( Test-Path $_ ) } | % { NI $_ -ItemType Directory -Verbose }
+                    NI $_ -ItemType Directory -VB 
+                }
 
+                $MDTDir                 = GP "HKLM:\Software\Microsoft\Deployment 4" | % { $_.Install_Dir }
+                
+                $M.PSSnapIn             | % { GCI "$MDTDir\Bin" *$_* -Recurse } | % { 
+                
+                    CP $_.FullName "$Snap\$( $_.Name )" -VB 
+                }
+
+                GCI $MDTDir "*Gather.xml*" -Recurse | % { CP $_.FullName "$W\Tools\Modules\PSDGather" -VB }
+
+                $M.XSD                  | % { GCI $MDTDir "*$_*" -Recurse } | % {
+                
+                    CP $_.FullName "$W\Templates" -VB
+                }
+                
+                $M.Paths                | % { "$W\$_" } | ? { ! ( Test-Path $_ ) } | % { 
+                
+                    NI $_ -ItemType Directory -Verbose 
+                }
             }
 
             Write-Theme -Action "Reducing [~]" "Permissions Hardening on $( $Code.Samba )"
@@ -6986,16 +7085,8 @@
 
             CP @Control
 
-            If ( $Code.Legacy -eq "Selected" )
-            {
-                Write-Theme -Action "Complete [+]" "Legacy MDT Installed"
-            }
-            
-            If ( $Code.Remaster -eq "Selected" )
-            {
-                Write-Theme -Action "Complete [+]" "Hybrid-DSC/PSD Installed"
-            }
-                  
+            If ( $Code.Legacy      -eq "Selected" ) { Write-Theme -Action "Complete [+]" "Legacy MDT Installed" }
+            If ( $Code.Remaster    -eq "Selected" ) { Write-Theme -Action "Complete [+]" "Hybrid-DSC/PSD Installed" }
             If ( $Code.IIS_Install -eq "Selected" )
             {
                 Initialize-HybridIIS -Features | % { 
@@ -7044,8 +7135,7 @@
         Else
         {
             Write-Theme -Action "Exception [!]" "Either the user cancelled, or the dialog failed" 12 4 15
-        }
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -7099,275 +7189,255 @@
             # ____   _________________________
             #//¯¯\\__[__ Table Definition ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                Resolve-HybridDSC -Share | % { 
 
-            Resolve-HybridDSC -Share | % { 
+                    $Site         = [ PSCustomObject ]@{
 
-                $Site         = [ PSCustomObject ]@{
+                        Name      = $_.IIS_Name
+                        Pool      = $_.IIS_AppPool
+                        Host      = $_.IIS_Proxy
+                        Directory = $_.Directory
 
-                    Name      = $_.IIS_Name
-                    Pool      = $_.IIS_AppPool
-                    Host      = $_.IIS_Proxy
-                    Directory = $_.Directory
+                        System    = "$ENV:SystemDrive"
+                        System32  = "$ENV:SystemRoot\System32"
+                        Server    = "$ENV:ComputerName"
 
-                    System    = "$ENV:SystemDrive"
-                    System32  = "$ENV:SystemRoot\System32"
-                    Server    = "$ENV:ComputerName"
+                        AppHost   = "Machine/Webroot/AppHost"
+                        WebServer = "system.webServer"
+                        SecAuth   = "security/authentication"
+                        AutoStart = "ServerAutoStart"
+                        Static    = "StaticContent"
 
-                    AppHost   = "Machine/Webroot/AppHost"
-                    WebServer = "system.webServer"
-                    SecAuth   = "security/authentication"
-                    AutoStart = "ServerAutoStart"
-                    Static    = "StaticContent"
+                        Date      = Get-Date -UFormat "%m-%d-%Y"
+                        Log       = "$Home\Desktop\ACL"
 
-                    Date      = Get-Date -UFormat "%m-%d-%Y"
-                    Log       = "$Home\Desktop\ACL"
-
-                    Root      = ""
-                    Site      = ""
-                    VHost     = ""
-                    AppData   = ""
-                    URL       = ""
+                        Root      = ""
+                        Site      = ""
+                        VHost     = ""
+                        AppData   = ""
+                        URL       = ""
+                    }
                 }
-            }
 
-            $Site             | % { 
+                $Site             | % { 
             
-                $_.Root       = $_.System , "inetpub" , $_.Name -join '\'
-                $_.Site       = "IIS:\Sites" , $_.Name -join '\'
-                $_.VHost       = $_.Site , $_.Host -join '\'
-                $_.URL        = "$( $_.Name ).$env:USERDNSDOMAIN"
-                $_.AppData    = $_.Root , "AppData" -join '\'
-            }
+                    $_.Root       = $_.System , "inetpub" , $_.Name -join '\'
+                    $_.Site       = "IIS:\Sites" , $_.Name -join '\'
+                    $_.VHost       = $_.Site , $_.Host -join '\'
+                    $_.URL        = "$( $_.Name ).$env:USERDNSDOMAIN"
+                    $_.AppData    = $_.Root , "AppData" -join '\'
+                }
 
-            $Site | % { $_.Root , $_.AppData } | % { 
+                $Site | % { $_.Root , $_.AppData } | % { 
             
-                If ( ! ( Test-Path $_ ) )
-                { 
-                    NI $_ -ItemType Directory 
-                }
+                    If ( ! ( Test-Path $_ ) )
+                    { 
+                        NI $_ -ItemType Directory 
+                    }
 
-                Else
-                {
-                    Write-Theme -Action "Detected [+]" $_
+                    Else
+                    {
+                        Write-Theme -Action "Detected [+]" $_
+                    }
                 }
-            }
-
             # ____   _________________________
             #//¯¯\\__[__ Set Web Services ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                "WebAdministration" | % { 
+
+                    IPMO $_
+                    If (  $? ) { Write-Theme -Action "Loaded [~]" "$_ Module Loaded"     11 11 15 }
+                    If ( !$? ) { Write-Theme -Action "Failed [!]" "$_ Module Not Loaded" 12  4 15 }
+                }
+
+                Get-Website | ? { $_.Name -eq "Default Web Site" } | Stop-Website | SP "IIS:/Sites/$( $_.Name )" ServerAutoStart False
+
+                Write-Theme -Action "Stopped [+]" "Default Web Site"
+
+                ForEach ( $i in "MRxDAV" , "WebClient" , "WAS" , "W3SVC" )
+                {
+                    Get-Service -Name $I | % { 
                 
-            "WebAdministration" | % { 
+                        If ( $_.Status -ne "Running" ) 
+                        { 
 
-                IPMO $_
-                If (  $? ) { Write-Theme -Action "Loaded [~]" "$_ Module Loaded"     11 11 15 }
-                If ( !$? ) { Write-Theme -Action "Failed [!]" "$_ Module Not Loaded" 12  4 15 }
-            }
-
-            Get-Website | ? { $_.Name -eq "Default Web Site" } | Stop-Website | SP "IIS:/Sites/$( $_.Name )" ServerAutoStart False
-
-            Write-Theme -Action "Stopped [+]" "Default Web Site"
-
-            ForEach ( $i in "MRxDAV" , "WebClient" , "WAS" , "W3SVC" )
-            {
-                Get-Service -Name $I | % { 
+                            $Splat = @{ StartupType = "Automatic"
+                                        Status      =   "Running"
+                                        Name        =    $_.Name }
                 
-                    If ( $_.Status -ne "Running" ) 
-                    { 
+                            Set-Service @Splat
 
-                        $Splat = @{ StartupType = "Automatic"
-                                    Status      =   "Running"
-                                    Name        =    $_.Name }
-                
-                        Set-Service @Splat
-
-                        Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Activated"
-                    }
+                            Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Activated"
+                        }
             
-                    Else 
-                    {
-                        Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Already Active"
+                        Else 
+                        {
+                            Write-Theme -Action "Service [+]" "[ $( $_.Name ) ] Already Active"
+                        }
                     }
                 }
-            }
-
             # ____   _________________________
             #//¯¯\\__[__ Generate AppPool ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                If ( ( Get-IISAppPool -Name $Site.Pool ) -ne $Null )
+                { 
+                    Write-Theme -Action "Removing [!]" "Prior Application Pool"
             
-            If ( ( Get-IISAppPool -Name $Site.Pool ) -ne $Null )
-            { 
-                Write-Theme -Action "Removing [!]" "Prior Application Pool"
+                    Remove-WebAppPool -Name $Site.Pool
+                }
+
+                New-WebAppPool -Name $Site.Pool -Force
+
+                Write-Theme -Action "Configuring" "[~] Application Pool Settings"
+
+                ( "Enable32BitAppOnWin64" , "True" ) , ( "ManagedRuntimeVersion" , "v4.0" ) , ( "ManagedPipelineMode" , "Integrated" ) | % { 
             
-                Remove-WebAppPool -Name $Site.Pool
-            }
+                    SP -Path "IIS:\AppPools\$( $Site.Pool )" -Name $_[0] -Value $_[1] -VB
 
-            New-WebAppPool -Name $Site.Pool -Force
+                }
 
-            Write-Theme -Action "Configuring" "[~] Application Pool Settings"
-
-            ( "Enable32BitAppOnWin64" , "True" ) , ( "ManagedRuntimeVersion" , "v4.0" ) , ( "ManagedPipelineMode" , "Integrated" ) | % { 
-            
-                SP -Path "IIS:\AppPools\$( $Site.Pool )" -Name $_[0] -Value $_[1] -VB
-
-            }
-
-            Restart-WebAppPool -Name $Site.Pool
-            
+                Restart-WebAppPool -Name $Site.Pool
             # ____   _________________________
             #//¯¯\\__[__ Generate Website ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                If ( ( Get-WebSite -Name $Site.Name ) -ne $Null )
+                { 
+                    Write-Theme -Action "Removing [!]" "Prior Website"
 
-            If ( ( Get-WebSite -Name $Site.Name ) -ne $Null )
-            { 
-                Write-Theme -Action "Removing [!]" "Prior Website"
-
-                Remove-Website -Name $Site.Name
-            }
+                    Remove-Website -Name $Site.Name
+                }
             
-            $Splat = @{ Name             = $Site.Name
-                        ApplicationPool  = $Site.Pool
-                        PhysicalPath     = $Site.Root 
-                        Force            = $True }
+                $Splat = @{ Name             = $Site.Name
+                            ApplicationPool  = $Site.Pool
+                            PhysicalPath     = $Site.Root 
+                            Force            = $True }
 
-            New-Website @Splat
+                New-Website @Splat
 
-            Write-Theme -Action "Generated [+]" "IIS Web Site $( $Site.Name )"
+                Write-Theme -Action "Generated [+]" "IIS Web Site $( $Site.Name )"
 
-            Start-Website -Name $Site.Name
+                Start-Website -Name $Site.Name
 
-            Write-Theme -Action "Started [+]" "IIS Web Site $( $Site.Name )"
-            
+                Write-Theme -Action "Started [+]" "IIS Web Site $( $Site.Name )"
             # ____   _________________________
             #//¯¯\\__[___ Set Web Binding ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            
-            Write-Theme -Action "Binding [+]" "IIS Web Site $( $Site.Name )"
+                Write-Theme -Action "Binding [+]" "IIS Web Site $( $Site.Name )"
 
-            $Splat = @{ Name             = $Site.Name
-                        HostHeader       = ""
-                        PropertyName     = "HostHeader"
-                        Value            = $Site.URL }
+                $Splat = @{ Name             = $Site.Name
+                            HostHeader       = ""
+                            PropertyName     = "HostHeader"
+                            Value            = $Site.URL }
 
-            Set-WebBinding @Splat
+                Set-WebBinding @Splat
 
-            Write-Theme -Action "Configured [+]" $Site.URL
+                Write-Theme -Action "Configured [+]" $Site.URL
 
-            $Splat = @{ Site             = $Site.Name
-                        Name             = $Site.Host
-                        PhysicalPath     = $Site.Directory
-                        Force            = $True }
+                $Splat = @{ Site             = $Site.Name
+                            Name             = $Site.Host
+                            PhysicalPath     = $Site.Directory
+                            Force            = $True }
 
-            New-WebVirtualDirectory @Splat
+                New-WebVirtualDirectory @Splat
                 
-            Write-Theme -Action "Complete [+]" "http://$( $Site.URL )"
-            
+                Write-Theme -Action "Complete [+]" "http://$( $Site.URL )"
             # ____   _________________________
             #//¯¯\\__[__ WebDAV Authoring ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                Write-Theme -Action "Configuring [~]" "WebDAV Authoring"
             
-            Write-Theme -Action "Configuring [~]" "WebDAV Authoring"
-            
-            $Splat = @{ PSPath           = $Site.AppHost
-                        Location         = $Site.Name
-                        Filter           = "$( $Site.WebServer )/webdav/authoring"
-                        Name             = "Enabled"
-                        Value            = "True" }
-
-            Set-WebConfigurationProperty @Splat
-
-            Write-Theme -Action "Complete [~]" "WebDAV Authoring"
-
-            # ____   _________________________
-            #//¯¯\\__[____ WebDAV Rules _____]
-            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-           
-            Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
-            
-            $Config = $Site | % { $_.Name , $_.Host , $_.WebServer }
-
-            $Splat = @{ FilePath         = GCI "$( $Site.System32 )\inetsrv" "*appcmd.exe" | % { $_.FullName }
-                        ArgumentList     = "Set Config '{0}/{1}' /Section:{2}/webdav/authoringRules /+[Users='*',Path='*',Access='Read,Source'] /Commit:AppHost" -f $Config
-                        NoNewWindow      = $True
-                        PassThru         = $True }
-                    
-            SAPS @Splat | Out-Null
-                
-            # ____   _________________________
-            #//¯¯\\__[____ Add Mime Type ____]
-            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-
-            Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
-
-            $Site | % { 
-
-                $Splat = @{ PSPath = $_.Site
-                            Filter = $_.WebServer , $_.Static -join '/'
-                            Name   = "." }
-            }
-                
-            If ( ".*" -notin ( Get-WebConfigurationProperty @Splat | % { $_.Collection } | % { $_.fileExtension } ) )
-            {
-                $Splat.Add( "Value" , @{ fileExtension = '.*' ; mimeType = 'Text/Plain' } )
-
-                Add-WebConfigurationProperty @Splat
-
-                Write-Theme -Action "Configured [+]" "[ fileExtension: '.*' ] / [ mimeType: 'Text/Plain' ]"
-            }
-
-            # ____   _________________________
-            #//¯¯\\__[__ Directory Browse ___]
-            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            
-            Write-Theme -Action "Enabling [+]" "Directory Browsing"
-
-            $Splat     = @{ Filter = "/$( $Site.WebServer )/DirectoryBrowse"
-                            Name   = "Enabled"
-                            PSPath = $Site.Site
-                            Value  = $True }
-
-            Set-WebConfigurationProperty @Splat -vb
-
-            # ____   _________________________
-            #//¯¯\\__[____ Security/Auth ____]
-            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            
-            $Location = ( $Site | % { $_.Name ; $_.Name , $_.Host -join '/' } )[1,1,0,1,0,1,0,1,0]
-
-            $Filter   = @( @( "anonymous" , "windows" | % { "Authentication/$_`Authentication" } ; 
-                        "FileExtensions"  , "Verbs"   | % { "RequestFiltering/$_" } ) | % { "Security/$_" } ; 
-                        "/Properties"     , "Rules"   | % { "WebDAV/Authoring$_" } )[0,1,5,4,4,2,2,3,3] | % { $Site.WebServer , $_ -join '/' }
-    
-            $Name     = "Enabled,DefaultMimeType,AllowInfinitePropfindDepth,ApplyToWebDAV".Split(',')[0,0,1,2,2,3,3,3,3]
-
-            $Value    = "False,True,Text/XML".Split(',')[0,1,2,1,1,0,0,0,0]
-
-            ForEach ( $I in 0..8 )
-            { 
-                $Splat = @{ PSPath   = "MACHINE/WEBROOT/APPHOST"
-                            Location = $Location[$i]
-                            Filter   = $Filter[$i]
-                            Name     = $Name[$i]
-                            Value    = $Value[$i] }
-                    
-                $Names    = "Location" , "Filter" , "Name" , "Value"
-                $Values   = $Names | % { $Splat.$_ }
-                $Section  = "Setting WebConfiguration #$( $I + 1 )/9"
-
-                $Subtable = New-SubTable -Items $Names -Values $Values
-
-                $Panel    = @{ Title = "WebConfiguration"
-                               Depth = 1
-                               ID    = $Section  | % { "( $_ )" }
-                               Table = $Subtable | % { $_ } }
-        
-                $Table    = New-Table @Panel
-
-                Write-Theme -Table $Table
+                $Splat = @{ PSPath           = $Site.AppHost
+                            Location         = $Site.Name
+                            Filter           = "$( $Site.WebServer )/webdav/authoring"
+                            Name             = "Enabled"
+                            Value            = "True" }
 
                 Set-WebConfigurationProperty @Splat
 
-            }
+                Write-Theme -Action "Complete [~]" "WebDAV Authoring"
+            # ____   _________________________
+            #//¯¯\\__[____ WebDAV Rules _____]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
+            
+                $Config = $Site | % { $_.Name , $_.Host , $_.WebServer }
 
+                $Splat = @{ FilePath         = GCI "$( $Site.System32 )\inetsrv" "*appcmd.exe" | % { $_.FullName }
+                            ArgumentList     = "Set Config '{0}/{1}' /Section:{2}/webdav/authoringRules /+[Users='*',Path='*',Access='Read,Source'] /Commit:AppHost" -f $Config
+                            NoNewWindow      = $True
+                            PassThru         = $True }
+                    
+                SAPS @Splat | Out-Null
+            # ____   _________________________
+            #//¯¯\\__[____ Add Mime Type ____]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                Write-Theme -Action "Generating [~]" "WebDAV Authoring Rules"
+
+                $Site | % { 
+
+                    $Splat = @{ PSPath = $_.Site
+                                Filter = $_.WebServer , $_.Static -join '/'
+                                Name   = "." }
+                }
+                
+                If ( ".*" -notin ( Get-WebConfigurationProperty @Splat | % { $_.Collection } | % { $_.fileExtension } ) )
+                {
+                    $Splat.Add( "Value" , @{ fileExtension = '.*' ; mimeType = 'Text/Plain' } )
+
+                    Add-WebConfigurationProperty @Splat
+
+                    Write-Theme -Action "Configured [+]" "[ fileExtension: '.*' ] / [ mimeType: 'Text/Plain' ]"
+                }
+            # ____   _________________________
+            #//¯¯\\__[__ Directory Browse ___]
+            #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+                Write-Theme -Action "Enabling [+]" "Directory Browsing"
+
+                $Splat     = @{ Filter = "/$( $Site.WebServer )/DirectoryBrowse"
+                                Name   = "Enabled"
+                                PSPath = $Site.Site
+                                Value  = $True }
+
+                Set-WebConfigurationProperty @Splat -vb
+
+            # ____   _________________________
+            #//¯¯\\__[____ Security/Auth ____]
+
+                $Location = ( $Site | % { $_.Name ; $_.Name , $_.Host -join '/' } )[1,1,0,1,0,1,0,1,0]
+
+                $Filter   = @( @( "anonymous" , "windows" | % { "Authentication/$_`Authentication" } ; 
+                            "FileExtensions"  , "Verbs"   | % { "RequestFiltering/$_" } ) | % { "Security/$_" } ; 
+                            "/Properties"     , "Rules"   | % { "WebDAV/Authoring$_" } )[0,1,5,4,4,2,2,3,3] | % { $Site.WebServer , $_ -join '/' }
+    
+                $Name     = "Enabled,DefaultMimeType,AllowInfinitePropfindDepth,ApplyToWebDAV".Split(',')[0,0,1,2,2,3,3,3,3]
+
+                $Value    = "False,True,Text/XML".Split(',')[0,1,2,1,1,0,0,0,0]
+
+                ForEach ( $I in 0..8 )
+                { 
+                    $Splat = @{ PSPath   = "MACHINE/WEBROOT/APPHOST"
+                                Location = $Location[$i]
+                                Filter   = $Filter[$i]
+                                Name     = $Name[$i]
+                                Value    = $Value[$i] }
+                    
+                    $Names    = "Location" , "Filter" , "Name" , "Value"
+                    $Values   = $Names | % { $Splat.$_ }
+                    $Section  = "Setting WebConfiguration #$( $I + 1 )/9"
+
+                    $Subtable = New-SubTable -Items $Names -Values $Values
+
+                    $Panel    = @{ Title = "WebConfiguration"
+                                   Depth = 1
+                                   ID    = $Section  | % { "( $_ )" }
+                                   Table = $Subtable | % { $_ } }
+        
+                    $Table    = New-Table @Panel
+
+                    Write-Theme -Table $Table
+
+                    Set-WebConfigurationProperty @Splat
+                }
             # ____   _________________________
             #//¯¯\\__[___ Hidden Segments ___] # Disabled for now, recurring error "disk changes" ( This is a security issue )
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -7389,81 +7459,75 @@
             # ____   _________________________
             #//¯¯\\__[_____ File System _____]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            
-            Write-Theme -Action "Access Control [~]" "Configuring SAM / Access Control Permissions"
+                Write-Theme -Action "Access Control [~]" "Configuring SAM / Access Control Permissions"
 
-            'IIS_IUSRS', 'IUSR', "IIS APPPOOL\$( $Site.Pool )" | % { 
+                'IIS_IUSRS', 'IUSR', "IIS APPPOOL\$( $Site.Pool )" | % { 
 
-                $Splat = @{ SAM     = $_
-                            Rights  = 'ReadAndExecute'
-                            Inherit = 'ContainerInherit' , 'ObjectInherit' }
+                    $Splat = @{ SAM     = $_
+                                Rights  = 'ReadAndExecute'
+                                Inherit = 'ContainerInherit' , 'ObjectInherit' }
 
-                New-ACLObject @Splat | % { Add-ACL -Path $Site.Root -ACL $_ }
+                    New-ACLObject @Splat | % { Add-ACL -Path $Site.Root -ACL $_ }
 
-            }
+                }
 
-            'IIS_IUSRS', "IIS APPPOOL\$( $Site.Pool )"         | % {
+                'IIS_IUSRS', "IIS APPPOOL\$( $Site.Pool )"         | % {
 
-                $Splat = @{ SAM     = $_
-                            Rights  = 'Modify'
-                            Inherit = 'ContainerInherit' , 'ObjectInherit' }
+                    $Splat = @{ SAM     = $_
+                                Rights  = 'Modify'
+                                Inherit = 'ContainerInherit' , 'ObjectInherit' }
 
-                New-AclObject @Splat | % { Add-Acl -Path "$( $Site.Root )\AppData" -ACL $_ }
-            }
-
+                    New-AclObject @Splat | % { Add-Acl -Path "$( $Site.Root )\AppData" -ACL $_ }
+                }
             # ____   _________________________
             #//¯¯\\__[__ Strictly TLS 1.2 ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                
-            Write-Theme -Action "Configuring [~]" "SCHANNEL [ SSL 2.0 - 3.0 ] & [ TLS 1.0 - 1.2 ]"
+                Write-Theme -Action "Configuring [~]" "SCHANNEL [ SSL 2.0 - 3.0 ] & [ TLS 1.0 - 1.2 ]"
 
-            $SSLTLS    = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
+                $SSLTLS    = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols"
 
-            @( 2..3 | % { "SSL $_.0" } ; 0..2 | % { "TLS 1.$_" } ) | % { 
+                @( 2..3 | % { "SSL $_.0" } ; 0..2 | % { "TLS 1.$_" } ) | % { 
                 
-                If ( ! ( Test-Path "$SSLTLS\$_" ) )
-                { 
-                    NI -Path $SSLTLS -Name $_
-                }
+                    If ( ! ( Test-Path "$SSLTLS\$_" ) )
+                    { 
+                        NI -Path $SSLTLS -Name $_
+                    }
                     
-                ForEach ( $i in "Client" , "Server" )
-                {
-                    If ( ! ( Test-Path "$SSLTLS\$_\$I" ) )
+                    ForEach ( $i in "Client" , "Server" )
                     {
-                        NI -Path "$SSLTLS\$_" -Name $I
-                    }
+                        If ( ! ( Test-Path "$SSLTLS\$_\$I" ) )
+                        {
+                            NI -Path "$SSLTLS\$_" -Name $I
+                        }
 
-                    ForEach ( $j in "DisabledByDefault" , "Enabled" )
-                    {
-                        SP -Path "$SSLTLS\$_\$I" -Name $J -Value 0
-                    }
+                        ForEach ( $j in "DisabledByDefault" , "Enabled" )
+                        {
+                            SP -Path "$SSLTLS\$_\$I" -Name $J -Value 0
+                        }
 
-                    If ( $_ -eq "TLS 1.2" )
-                    {
-                        SP -Path "$SSLTLS\TLS 1.2\$I" -Name "Enabled" 1
+                        If ( $_ -eq "TLS 1.2" )
+                        {
+                            SP -Path "$SSLTLS\TLS 1.2\$I" -Name "Enabled" 1
+                        }
                     }
                 }
-            }
-
             # ____   _________________________
             #//¯¯\\__[___ .Net FW TLS 1.2 ___]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-                
-            Write-Theme -Action "Configuring [~]" ".Net Framework [ v2.0.50727 ] & [ v4.0.30319 ]"
+                Write-Theme -Action "Configuring [~]" ".Net Framework [ v2.0.50727 ] & [ v4.0.30319 ]"
 
-            "" , "\WOW6432NODE" | % { "HKLM:\SOFTWARE$_\Microsoft\.NETFramework" } | % {
+                "" , "\WOW6432NODE" | % { "HKLM:\SOFTWARE$_\Microsoft\.NETFramework" } | % {
                     
-                ForEach ( $i in "v2.0.50727" , "v4.0.30319" )
-                {
-                    If ( ! ( Test-Path "$_\$i" ) )
-                    { 
-                        NI -Path $_ -Name $I
-                    }
+                    ForEach ( $i in "v2.0.50727" , "v4.0.30319" )
+                    {
+                        If ( ! ( Test-Path "$_\$i" ) )
+                        { 
+                            NI -Path $_ -Name $I
+                        }
                         
-                    SP -Path "$_\$I" -Name "SystemDefaultTlsVersions" -Type DWORD -Value 1
+                        SP -Path "$_\$I" -Name "SystemDefaultTlsVersions" -Type DWORD -Value 1
+                    }
                 }
-            }
-
             # ____   _________________________
             #//¯¯\\__[_ Website / DNS Setup _]
             #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -7502,8 +7566,7 @@
                 Write-Theme -Action "Recommendation" "[!] You may want to configure SSL Certificates manually"
 
             }
-        }
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -8036,77 +8099,79 @@
         #//¯¯\\__[___ Provisional Root __]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
             
-        $Provision                   = [ PSCustomObject ]@{ 
+        $Provision                      = [ PSCustomObject ]@{ 
         
-            Return                   = @( )
+            Return                      = @( )
 
-            Output                   = @( )
+            Output                      = @( )
 
-            Titles                   = 'Desired State Controller @ Source' , 
+            Titles                      = 'Desired State Controller @ Source' , 
                                        'Current Machine @ Variables' ,
                                        'Provision Index @ Target Folder Structure'
 
-            Names                    = 'Name,Controller,PSDrive,SMBShare,NetworkPath,HybridRoot' , 
-                                       'ComputerName,Architecture,SystemDrive,SystemRoot,System32,ProgramData,ProgramFiles' ,
-                                       'Resources,Tools,Images,Profiles,Certificates,Applications'
+            Names                       = 'Name,Controller,PSDrive,SMBShare,NetworkPath,HybridRoot' , 
+                                          'ComputerName,Architecture,SystemDrive,SystemRoot,System32,ProgramData,ProgramFiles' ,
+                                          'Resources,Tools,Images,Profiles,Certificates,Applications'
             
-            Root                     = ""
+            Root                        = ""
 
-            Path                     = ""
+            Path                        = ""
         }
 
-            Resolve-HybridDSC -Share | % { 
+            Resolve-HybridDSC -Share    | % { 
 
-                $Provision.Root      = $_
+                $Provision.Root         = $_
 
-                $Provision.Path      = $Env:SystemDrive , $_.Company -join '\'
+                $Provision.Path         = $Env:SystemDrive , $_.Company -join '\'
 
-                $Provision.Return    += [ PSCustomObject ]@{ 
+                $Provision.Return      += [ PSCustomObject ]@{ 
             
-                    Name             = $_.Company
-                    Controller       = $_.Server
-                    PSDrive          = $_.DSDrive.Replace( ':' , '' )
-                    SMBShare         = $_.Samba
-                    NetworkPath      = "\" , $_.Server , $_.Samba -join '\'
-                    HybridRoot       = "\" , $_.Server , $_.Samba , $_.Company -join '\'
+                    Name                = $_.Company
+                    Controller          = $_.Server
+                    PSDrive             = $_.DSDrive.Replace( ':' , '' )
+                    SMBShare            = $_.Samba
+                    NetworkPath         = "\" , $_.Server , $_.Samba -join '\'
+                    HybridRoot          = "\" , $_.Server , $_.Samba , $_.Company -join '\'
                 }
             }
 
-            Resolve-LocalMachine     | % { 
+            Resolve-LocalMachine        | % { 
 
-                $Provision.Return   += $_ 
+                $Provision.Return      += $_ 
             }
 
-            $X = $Provision.Names[2].Split(',')
+            $X                          = $Provision.Names[2].Split(',')
 
-            $Provision.Return   += [ PSCustomObject ]@{ 
+            $Provision.Return          += [ PSCustomObject ]@{ 
 
-                Resources        = $Provision.Path , "\(0)" , $X[0] -join ''
-                Tools            = $Provision.Path , "\(1)" , $X[1] -join ''
-                Images           = $Provision.Path , "\(2)" , $X[2] -join ''
-                Profiles         = $Provision.Path , "\(3)" , $X[3] -join ''
-                Certificates     = $Provision.Path , "\(4)" , $X[4] -join ''
-                Applications     = $Provision.Path , "\(5)" , $X[5] -join ''
+                Resources               = $Provision.Path , "\(0)" , $X[0] -join ''
+                Tools                   = $Provision.Path , "\(1)" , $X[1] -join ''
+                Images                  = $Provision.Path , "\(2)" , $X[2] -join ''
+                Profiles                = $Provision.Path , "\(3)" , $X[3] -join ''
+                Certificates            = $Provision.Path , "\(4)" , $X[4] -join ''
+                Applications            = $Provision.Path , "\(5)" , $X[5] -join ''
             }
 
-            0..2 | % {
+            0..2                        | % {
 
-                $Provision.Output += New-Subtable -Items $Provision.Names[$_] -Values $Provision.Return[$_]
+                $Provision.Output      += New-Subtable -Items $Provision.Names[$_] -Values $Provision.Return[$_]
             }
 
-            $Subtable[0]           = New-Subtable -Items $Names -Values $Values
-            $Subtable[1]           = New-Subtable -Items $Names -Values $Values
-            $Subtable[2]           = New-Subtable -Items $Names -Values $Values
+            $Subtable[0]                = New-Subtable -Items $Names -Values $Values
+            $Subtable[1]                = New-Subtable -Items $Names -Values $Values
+            $Subtable[2]                = New-Subtable -Items $Names -Values $Values
 
         # ____   _________________________
         #//¯¯\\__[____ Display Panel ____]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            $Panel                 = @{ Title = "Provisional Root Index"
-                                        Depth = 3
-                                        ID    = $Section | % { "( $_ )" }
-                                        Table = $Subtable }
+            $Panel                      = @{ 
+            
+                Title                   = "Provisional Root Index"
+                Depth                   = 3
+                ID                      = $Section | % { "( $_ )" }
+                Table                   = $Subtable }
 
-            $Table                 = New-Table @Panel
+            $Table                      = New-Table @Panel
 
             Write-Theme -Table $Table -Prompt "Press Enter to Continue, or CTRL+C to Exit"
         # ____   _________________________
@@ -8116,81 +8181,84 @@
 
             Import-MDTModule
 
-            $X = GDR -PSProvider MDTProvider
+            $X                          = GDR -PSProvider MDTProvider
 
             If ( $X -ne $Null )
             {
-                $X = $X | ? { $_.Name -like "*$( $Root.DSDrive.Split(':')[0] )*" -and $_.Root -eq $Root.Directory }
+                $X                      = $X | ? { $_.Name -like "*$( $Root.DSDrive.Split(':')[0] )*" -and $_.Root -eq $Root.Directory }
             }
                     
             If ( $X -eq $Null )
             {
-                $X = Get-MDTPersistentDrive
+                $X                      = Get-MDTPersistentDrive
                         
                 If ( $X -eq $Null )
                 {
-                    $Root | % { 
+                    $Root               | % { 
 
-                        $Splat = @{ Name        = $_.DSDrive.Split(':')[0]
-                                    PSProvider  = "MDTProvider"
-                                    Root        = $_.Directory
-                                    Description = $_.Description
-                                    NetworkPath = $Provision.NetworkPath }
+                        $Splat          = @{ 
+                            
+                            Name        = $_.DSDrive.Split(':')[0]
+                            PSProvider  = "MDTProvider"
+                            Root        = $_.Directory
+                            Description = $_.Description
+                            NetworkPath = $Provision.NetworkPath }
                     }
 
-                    NDR @Splat -VB | Add-MDTPersistentDrive
+                    NDR @Splat -VB      | Add-MDTPersistentDrive
                 }
 
                 If ( $X -ne $Null )
                 {
-                    GSMBS | ? { $_.Path -eq $X.Path } | % {
+                    GSMBS               | ? { $_.Path -eq $X.Path } | % {
                             
-                        $Splat = @{ Name        = $X.Name
-                                    PSProvider  = "MDTProvider"
-                                    Root        = $_.Path
-                                    Description = $X.Description 
-                                    NetworkPath = "\\$ENV:ComputerName\$( $_.Path )" }
+                        $Splat          = @{ 
+                        
+                            Name        = $X.Name
+                            PSProvider  = "MDTProvider"
+                            Root        = $_.Path
+                            Description = $X.Description 
+                            NetworkPath = "\\$ENV:ComputerName\$( $_.Path )" }
                     }
                             
                     NDR @Splat -VB
                 }
             }
-
         # ____   _________________________
         #//¯¯\\__[_ Shape Variable Tree _]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            $DeployRoot = Resolve-HybridDSC -Share | % { GCI $_.Directory } | % { $_.FullName }
+            $DeployRoot                 = Resolve-HybridDSC -Share | % { GCI $_.Directory } | % { $_.FullName }
                     
-            $HybridRoot = $DeployRoot | ? { $_ -like "*$( $Root.Company )*" } | % { gci $_ } | % { $_.FullName }
+            $HybridRoot                 = $DeployRoot | ? { $_ -like "*$( $Root.Company )*" } | % { gci $_ } | % { $_.FullName }
 
-            $Tag        = @( "DC2016" ; "E" , "H" , "P" | % { "10$_`64" , "10$_`86" } )
+            $Tag                        = @( "DC2016" ; "E" , "H" , "P" | % { "10$_`64" , "10$_`86" } )
 
-            $Names      = @( 'ImageName' , 'Architecture' , 'Version' , 'InstallationType' ; 'Created' , 'Modified' | % { "$_`Time" } )
+            $Names                      = @( 'ImageName' , 'Architecture' , 'Version' , 'InstallationType' ; 'Created' , 'Modified' | % { "$_`Time" } )
         # ____   _________________________
         #//¯¯\\__[__ Get Stored Images __]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-            $Catalog       = @{ 
+            $Catalog                    = @{ 
                     
-                Hybrid     = @{ 
+                Hybrid                  = @{ 
                 
-                    Title  = "Hybrid-DSC Client/Server Windows Image Recycler Panel"
+                    Title               = "Hybrid-DSC Client/Server Windows Image Recycler Panel"
                 
-                    Images = $HybridRoot | ? { $_ -like "*Images*" } | % { GCI $_ "*.wim*" -Recurse } | % { $_.FullName } 
+                    Images              = $HybridRoot | ? { $_ -like "*Images*" } | % { GCI $_ "*.wim*" -Recurse } | % { $_.FullName } 
                 
                 }
 
-                Deploy     = @{ 
+                Deploy                  = @{ 
                 
-                    Title  = "MDT Boot Image Client/Server Windows Image Panel"
-                    Images = $DeployRoot | ? { $_ -like "*Operating System*" } | % { GCI $_ "*.wim*" -Recurse } | % { $_.FullName } 
+                    Title               = "MDT Boot Image Client/Server Windows Image Panel"
+                    Images              = $DeployRoot | ? { $_ -like "*Operating System*" } | % { GCI $_ "*.wim*" -Recurse } | % { $_.FullName } 
                 
                 }
             }
 
-            $Catalog    | % { $_.Deploy , $_.Hybrid } | % { 
+            $Catalog                    | % { $_.Deploy , $_.Hybrid } | % { 
 
-                $Title  = $_.Title 
-                $Images = $_.Images
+                $Title                  = $_.Title 
+                $Images                 = $_.Images
                         
                 If ( $Images -eq $Null )
                 {
@@ -8203,21 +8271,21 @@
                     {
                         Write-Theme -Action "Detected [+]" "( 1 ) Image, obtaining details"
                         
-                        $Count      = 0
+                        $Count          = 0
 
-                        $List       = Get-WindowsImage -ImagePath $Images -Index 1
+                        $List           = Get-WindowsImage -ImagePath $Images -Index 1
                     }
 
                     If ( $Images.Count -gt 1 )
                     { 
                         Write-Theme -Action "Detected [+]" "( $( $Images.Count ) ) Images, obtaining details"
                         
-                        $Count      = 0..( $Images.Count - 1 )
+                        $Count          = 0..( $Images.Count - 1 )
 
-                        $List       = $Count | % { Get-WindowsImage -ImagePath $Images[$_] -Index 1 }
+                        $List           = $Count | % { Get-WindowsImage -ImagePath $Images[$_] -Index 1 }
                     }
 
-                    $Store = $List  | % { 
+                    $Store              = $List  | % { 
                         
                         [ PSCustomObject ]@{ 
                             
@@ -8230,52 +8298,58 @@
                         }
                     }
                     
-                    $Panel = @{ Title = $Title ; Depth = "" ; ID = "" ; Table = "" }
+                    $Panel              = @{ 
+                    
+                        Title           = $Title
+                        Depth           = "" 
+                        ID              = ""
+                        Table           = "" 
+                    }
 
                     If ( $Images.Count -eq 1 )
                     {
-                        $Values      = $Names | % { "$( $Store.$_ )" }
+                        $Values         = $Names | % { "$( $Store.$_ )" }
                       
-                        $Section     = $Store.ImageName
+                        $Section        = $Store.ImageName
 
-                        $Subtable    = New-SubTable -Items $Names -Values $Values
+                        $Subtable       = New-SubTable -Items $Names -Values $Values
 
-                        $Panel       | % { 
+                        $Panel          | % { 
 
-                            $_.Depth = 1
-                            $_.ID    = "( $( $Section ) )"
-                            $_.Table = $Subtable 
+                            $_.Depth    = 1
+                            $_.ID       = "( $( $Section ) )"
+                            $_.Table    = $Subtable 
 
                         }
                     }
 
                     If ( $Images.Count -gt 1 )
                     {
-                        $Count        = 0..( $Store.Count - 1 )
+                        $Count          = 0..( $Store.Count - 1 )
 
-                        $Section      = $Count | % { $_ }
-                        $Subtable     = $Count | % { $_ }
+                        $Section        = $Count | % { $_ }
+                        $Subtable       = $Count | % { $_ }
 
                         ForEach ( $I in $Count )
                         { 
-                            $X            = $Store[$I] 
+                            $X              = $Store[$I] 
 
-                            $Values       = $Names | % { "$( $X.$_ )" }
+                            $Values         = $Names | % { "$( $X.$_ )" }
                       
-                            $Section[$I]  = $X.ImageName
+                            $Section[$I]    = $X.ImageName
                             
-                            $Subtable[$I] = New-SubTable -Items $Names -Values $Values
+                            $Subtable[$I]   = New-SubTable -Items $Names -Values $Values
                         }
 
-                        $Panel        | % { 
+                        $Panel              | % { 
                                         
-                            $_.Depth  = $Store.Count
-                            $_.ID     = $Count | % { "( $( $Section[$_] ) )" }
-                            $_.Table  = $Count | % { $Subtable[$_] }
+                            $_.Depth       = $Store.Count
+                            $_.ID          = $Count | % { "( $( $Section[$_] ) )" }
+                            $_.Table       = $Count | % { $Subtable[$_] }
                         }
                     }
 
-                    $Table = New-Table @Panel
+                    $Table                 = New-Table @Panel
 
                     Write-Theme -Table $Table
 
@@ -8381,7 +8455,6 @@
 
                 Import-MDTOperatingSystem @Splat | Out-Null
             }
-        
         # ____   _________________________
         #//¯¯\\__[____ Task Sequences ___]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -8443,7 +8516,6 @@
             }
 
             Write-Theme -Action "Imported [+]" "Task Sequences" 11 11 15
-
         # ____   _________________________
         #//¯¯\\__[____ Share Settings ___]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -8471,13 +8543,20 @@
                     }
                 }
             }
-        
         # ____   _________________________
         #//¯¯\\__[__ Enable Monitoring __]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
             Write-Theme -Action "Resetting [~]" "MDT Monitor Service"
                     
-            Try { Disable-MDTMonitorService -EA 0 } Catch { $_.Exception }
+            GCIM Win32_Service | ? { $_.Name -eq "MDT_Monitor" } | % {
+            
+                If ( $_.State -eq "Running" )
+                {
+                    Try { Disable-MDTMonitorService }
+
+                    Catch { Set-Service -Name MDT_Monitor -Status Stopped }
+                }
+            }
                 
             $Splat = @{ EventPort = 9800 ; DataPort  = 9801 }
 
@@ -8637,11 +8716,11 @@
 
             $WDSImages = $Boot | % { GCI $_ *.wim* } 
 
-            $WDSBoot = [ PSCustomObject ]@{ 
+            $WDSBoot   = [ PSCustomObject ]@{ 
 
-                Path  = $WDSImages | % { $_.FullName }
-                Arch  = 64 , 86
-                Name  = $WDSImages | % { Get-WindowsImage -ImagePath $_.FullName } | % { $_.ImageName }
+                Path   = $WDSImages | % { $_.FullName }
+                Arch   = 64 , 86
+                Name   = $WDSImages | % { Get-WindowsImage -ImagePath $_.FullName } | % { $_.ImageName }
             }
                     
             ForEach ( $I in 0..1 )
@@ -8677,7 +8756,7 @@
 
             Restart-Service -Name WDSServer
 
-            If ( $? -eq $True ) 
+            If ( $? -eq $True )
             { 
                 Write-Theme -Foot
                 Write-Theme -Action "Successful [+]" "Hybrid-DSC Fully Recycled"
@@ -8686,63 +8765,47 @@
             Else
             { 
                 Write-Theme -Action "Exception [!]" "The WDS Service has experienced an issue" 12 4 15
-            } 
+            }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param (
 
-            [ Parameter ( ParameterSetName = "Theme" ) ] [ Switch ] $Display )
+        $Service        = GCIM Win32_Service | Sort Name
 
-        $CCS                     = "HKLM:\SYSTEM\CurrentControlSet\Services"
+        Write-Theme -Action "Collecting [~]" "Service State Catalog"
 
-        $Return                  = GCIM Win32_Service | % {
+        $Return         = @( )
 
-            [ PSCustomObject ]@{ 
-            
-                Name             = $_.Name 
-                Status           = $_.State
-                StartType        = $_.StartMode
-                DelayedAutoStart = GP "$CCS\$( $_.Name )" | % { $_.DelayedAutoStart }
-                DisplayName      = $_.DisplayName
-                PathName         = $_.PathName
-                Description      = $_.Description
-            
-            }
-        }
+        $X              = "Start" | % { "(Delayed $_);(Trigger $_);(Delayed $_, Trigger $_)".Split(';') }
 
-        If ( $Display )
+        ForEach ( $i in 0..( $SVC.Count - 1 ) )
         {
-            $Range               = 0..( $Return.Count - 1 )
-            $Section             = 0..( $Return.Count - 1 )
-            $Subtable            = 0..( $Return.Count - 1 )
-    
-            $Names               = @( "Status" , "StartType" ; @( "" , "Display" , "Path" | % { "$_`Name" } ) )
+            Write-Progress -Activity "Collecting Service Catalog" -PercentComplete ( ( $I / $SVC.Count ) * 100 )
 
-            ForEach ( $i in 0..( $Return.Count - 1 ) )
-            {
-                $X               = $Return[$I]
-        
-                $Section[$I]     = "( $( $X.DisplayName ) )"
-        
-                $Splat           = @{ 
+            "HKLM:\SYSTEM\CurrentControlSet\Services\$( $SVC[$I].Name )" | % {
 
-                    Items        = 0..4 | % {       $Names[$_]   }
-                    Values       = 0..4 | % { $X.$( $Names[$_] ) }
+                If ( Test-Path $_ )
+                {
+                    $C = If ( GP $_ | % { $_.DelayedAutoStart } ) { $X[0] } Else { $Null }
+                    
+                    If ( GCI $_ -EA 0 | % { $_.Name -like "*Trigger*" } ) { $C = If ( $C -ne $Null ) { $X[2] } Else { $X[1] } }
 
+                    $Return            += [ PSCustomObject ]@{ 
+                            
+                        Name             = $Service[$I].Name
+                        StartMode        = $Service[$I].StartMode | % { If ( $C -ne $Null ) { "$_ $C" } Else { $_ } }
+                        State            = $Service[$I].State
+                        DisplayName      = $Service[$I].DisplayName
+                        PathName         = $Service[$I].PathName
+                        Description      = $Service[$I].Description
+                    }
                 }
-
-                $SubTable[$I]    = New-SubTable @Splat
             }
-
-            $Table = New-Table -Depth $Range.Count -Title "Current Services" -ID $Section -Table $SubTable
-    
-            Write-Theme -Table $Table -Prompt "Press Enter to Continue"
         }
-
+        
         $Return
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -8752,85 +8815,79 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding ( ) ] Param (
 
-            [ Parameter ( ParameterSetName =  "System" ) ] [ Switch ] $System  ,
-            [ Parameter ( ParameterSetName =      "OS" ) ] [ Switch ] $MSInfo  ,
-            [ Parameter ( ParameterSetName = "Edition" ) ] [ Switch ] $Edition ,
-            [ Parameter ( ParameterSetName =     "SKU" ) ] [ Switch ] $SKU     ,
-            [ Parameter ( ParameterSetName =    "Type" ) ] [ Switch ] $Type    )
+            [ Parameter ( ParameterSetName =  "System" ) ] [ Switch ] $System      ,
+            [ Parameter ( ParameterSetName =      "OS" ) ] [ Switch ] $MSInfo      ,
+            [ Parameter ( ParameterSetName = "Edition" ) ] [ Switch ] $Edition     ,
+            [ Parameter ( ParameterSetName =     "SKU" ) ] [ Switch ] $SKU         ,
+            [ Parameter ( ParameterSetName =    "Type" ) ] [ Switch ] $Type        ,
+            [ Parameter ( ParameterSetName =      "PS" ) ] [ Switch ] $PS          ,
+            [ Parameter ( ParameterSetName =     "Env" ) ] [ Switch ] $Environment ,
+            [ Parameter ( ParameterSetName =     "All" ) ] [ Switch ] $All         )
 
-        $OS , $CS           = "Operating" , "Computer" | % { GCIM Win32_$_`System }
+        $Return             = [ PSCustomObject ]@{
 
-        If ( $System )
-        {
-            $CS
-        }
-
-        If ( $MSInfo )
-        {
-            $OS
-        }
-
-        If ( $Edition )
-        {   
-            
-            $X = ( [ PSCustomObject ]@{ 
-            
-                    1507 = "1507,10240,Threshold 1,Release To Manufacturing"
-                    1511 = "1511,10586,Threshold 2,November Update"
-                    1607 = "1607,14393,Redstone 1,Anniversary Update"
-                    1703 = "1703,15063,Redstone 2,Creators Update"
-                    1709 = "1703,16299,Redstone 3,Fall Creators Update"
-                    1803 = "1803,17134,Redstone 4,April 2018 Update"
-                    1809 = "1809,17763,Redstone 5,October 2018 Update"
-                    1903 = "1903,18362,19H1,May 2019 Update"
-                    1909 = "1909,18363,19H2,November 2019 Update"
-                    2004 = "2004,19000,20H1,Unreleased" 
-            
-                } ).( GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID } ).Split( ',' )
-
-            [ PSCustomObject ]@{
-
-                Version  = $X[0]
-                Build    = 10 , 0 , $X[1] -join '.'
-                CodeName = $X[2]
-                Name     = $X[3]
-            }
-        }
-
-        If ( $SKU )
-        {
-            $X = ( "Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter # !,Small Business # !," , 
-            "$ # !,Starter !,Datacenter # Core !,Standard # Core !,$ # Core !,$ # IA64 !,Business N !,Web # !,Cluster # !,Home # !,Storage Express # !," , 
-            "Storage Standard # !,Storage Workgroup # !,Storage $ # !,# For Small Business !,Small Business # Premium !,TBD,@ $,@ Ultimate,Web # Core," ,
-            "-,-,-,# Foundation,@ Home #,-,@ # Standard No Hyper-V Full,@ # Datacenter No Hyper-V Full,@ # $ No Hyper-V Full,@ # Datacenter No Hyper-V Core," ,
-            "@ # Standard No Hyper-V Core,@ # $ No Hyper-V Core,Microsoft Hyper-V #,Storage # Express Core,Storage # Standard Core,# Workgroup Core," , 
-            "Storage # $ Core,Starter N,Professional,Professional N,@ Small Business # 2011 Essentials,-,-,-,-,-,-,-,-,-,-,-,-,Small Business # Premium Core," , 
-            "@ # Hyper Core V,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,@ Thin PC,-,@ Embedded Industry,-,-,-,-,-,-,-,@ RT,-,-,Single Language N,@ Home,-," , 
-            "@ Professional with Media Center,@ Mobile,-,-,-,-,-,-,-,-,-,-,-,-,-,@ Embedded Handheld,-,-,-,-,@ IoT Core" -join '' | % { 
-            
-            $_.Replace( "!" , "Edition" ).Replace( "@" , "Windows" ).Replace( "#" , "Server" ).Replace( "$" , "Enterprise" ) } | % { $_.Split( ',' ) } )
-
-            $OS.OperatingSystemSKU | % { 
-            
-                [ PSCustomObject ]@{
-
-                    ID  = $_
-                    SKU = $X[$_]
-                }
-            }
-        }
-
-        If ( $Type )
-        {
-            $CS.PCSystemType | % { 
+            OS              = GCIM Win32_OperatingSystem
+            CS              = GCIM Win32_ComputerSystem
+            ReleaseID       = GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID }
+            Edition         = @( ( '1507,10240,Threshold 1,Release To Manufacturing;1511,10586,Threshold 2,November UX;1607,14393,RX 1' + 
+                              ',Anniversary UX;1703,15063,RX 2,CX UX;1703,16299,RX 3,Fall CX UX;1803,17134,RX 4,April 2018 UX;1809,177' + 
+                              '63,RX 5,October 2018 UX;1903,18362,19H1,May 2019 UX;1909,18363,19H2,November 2019 UX;2004,19000,20H1,Un' + 
+                              'released' ).Replace('RX','Redstone').Replace('UX' ,'Update').Replace('CX','Creators').Split( ';' )       | ? { 
+                              
+                              $_.Split(',')[0] -eq ( GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID } ) } ) | % { 
                 
-                [ PSCustomObject ]@{
+                                [ PSCustomObject ]@{
+                    
+                                    Version     = $_.Split(',')[0]
+                                    Build       = "10.0.{0}" -f $_.Split(',')[1]
+                                    CodeName    = $_.Split(',')[2]
+                                    Name        = $_.Split(',')[3]
+                                }
+                            }
 
-                    ID      = $_
-                    Chassis = @( "" , "Desktop" , "Mobile/Laptop" , "Workstation" , "Server" , "Server" , "Appliance" , "Server" , "Maximum" )[ $_ ]
-                }
+            SKU             = ('Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter' + 
+                              ' # !,Small Business # !,$ # !,Starter !,Datacenter # Core !,Standard # Core !,$ # Core !,$ # IA64 !,Bus' + 
+                              'iness N !,Web # !,Cluster # !,Home # !,Storage Express # !,Storage Standard # !,Storage Workgroup # !,S' + 
+                              'torage $ # !,# For Small Business !,Small Business # Premium !,TBD,@ $,@ Ultimate,Web # Core,-,-,-,# Fo' + 
+                              'undation,@ Home #,-,@ # Standard No Hyper-V Full,@ # Datacenter No Hyper-V Full,@ # $ No Hyper-V Full,@' + 
+                              ' # Datacenter No Hyper-V Core,@ # Standard No Hyper-V Core,@ # $ No Hyper-V Core,Microsoft Hyper-V #,St' + 
+                              'orage # Express Core,Storage # Standard Core,# Workgroup Core,Storage # $ Core,Starter N,Professional,P' + 
+                              'rofessional N,@ Small Business # 2011 Essentials,-,-,-,-,-,-,-,-,-,-,-,-,Small Business # Premium Core,' + 
+                              '@ # Hyper Core V,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,--,-,-,@ Thin PC,-,@ Embedded Industry,-,-,-,-,-,-' + 
+                              ',-,@ RT,-,-,Single Language N,@ Home,-,@ Professional with Media Center,@ Mobile,-,-,-,-,-,-,-,-,-,-,-,' + 
+                              '-,-,@ Embedded Handheld,-,-,-,-,@ IoT Core'
+                              ).Replace("!","Edition").Replace("@","Windows").Replace("#","Server").Replace('$',"Enterprise").Split(',')
+            
+            Code            = ""
+            Chassis         = ",Desktop,Mobile/Laptop,Workstation,Server,Server,Appliance,Server,Maximum".Split(',')
+            PSVersion       = $PSVersionTable
+            Env             = [ PSCustomObject ]@{ }
+
+        }
+
+        $Return             | % { 
+
+            $_.Code         = $_.OS.OperatingSystemSKU
+            $_.SKU          = $_.SKU[ $_.Code ]
+            $_.Chassis      = $_.Chassis[$_.CS.PCSystemType]
+
+            [ Environment ]::GetEnvironmentVariables() | % { 
+
+                $_.Env      | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
             }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }
+
+        $Return | % { 
+
+            If ( $System  ) { $_.CS        }
+            If ( $MSInfo  ) { $_.OS        }
+            If ( $Edition ) { $_.Edition   }
+            If ( $SKU     ) { $_.SKU       }
+            If ( $Type    ) { $_.Chassis   }
+            If ( $PS      ) { $_.PSVersion }
+            If ( $Environment ) { $_.Env       }
+            If ( $All     ) { $_           }
+        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -8857,7 +8914,7 @@
                 {
                     GP $Query | % { 
 
-                        Return [ PSCustomObject ]@{
+                        [ PSCustomObject ]@{
 
                             Computername      = $_.hostname
                             Domain            = $_.Domain
@@ -8905,7 +8962,7 @@
 
             $Splat    = @{ 
             
-                Path  = "HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\$( $_[0] )"
+                Path  = $Time , $_[0] -join '\'
                 Name  = $_[1]
                 Value = $_[2]
             }
@@ -8955,40 +9012,42 @@
                 Files                   = ""
                 Install                 = "Install-HybridDSCModule"
             }
-        
-            $Package                    | % {
+        }
 
-                $_.Full                 = $_.Root , $_.Name -join '\'
-                $_.Folders              = $_.Full | % { GCI $_ -Directory }
-                $_.Folders.FullName     | % { 
-
-                    $Splat              = @{
-
-                        Path            = "$_"
-                        DestinationPath = "$_.zip"
-                    }
-
-                    $Splat.DestinationPath | ? { Test-Path $_ } | % { RI $_ -Force }
-
-                    Compress-Archive @Splat -VB
-                }
-
-                $_.Files                = GCI $_.Full -File
-                $_.Files.FullName       | % { 
+        $Package | % {
             
-                    $Splat              = @{
-                
-                        Path            = "$_"
-                        DestinationPath = $Package | % { $_.Full.Replace( $_.Name , $_.Install ) }
-                        Update          = $True
-                    }
-                
-                    Compress-Archive @Splat -VB
+            $_.Full                     = $_.Root , $_.Name -join '\'
+            $_.Folders                  = $_.Full | % { GCI $_ -Directory }
+
+            $_.Folders.FullName         | % { 
+
+                $Splat                  = @{
+
+                    Path                = "$_"
+                    DestinationPath     = "$_.zip"
                 }
 
-                $_.Folders.FullName     | % { RI "$_.zip" -Force } 
+                $Splat.DestinationPath | ? { Test-Path $_ } | % { RI $_ -Force }
 
-                $Path                    = $Package | % { $_.Root , $_.Install -join '\' }
+                Compress-Archive @Splat -VB
+            }
+
+            $_.Files                    = GCI $_.Full -File
+            $_.Files.FullName           | % { 
+            
+                $Splat                  = @{
+                
+                    Path                = "$_"
+                    DestinationPath     = $Package | % { $_.Full.Replace( $_.Name , $_.Install ) }
+                    Update              = $True
+                }
+                
+                Compress-Archive @Splat -VB
+            }
+
+            $_.Folders.FullName         | % { RI "$_.zip" -Force } 
+
+            $Path                       = $Package | % { $_.Root , $_.Install -join '\' }
 
                 SC -Path "$Path.ps1" -Value @'
                 Function Get-ScriptDirectory 
@@ -9109,8 +9168,7 @@
                         RI $_ -Force -VB
                     }
                 }
-            }
-        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+            }                                                                        #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
