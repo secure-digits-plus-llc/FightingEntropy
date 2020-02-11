@@ -1076,7 +1076,7 @@
         {
             $Service                         = $Return.CFG[$I]
 
-            $X                               = If ( $Service.Service -notin $Return.Current.Name ) { 0 } Else { 1 }
+            $X                               = If ( $Service.Service -notin $Return.Current.Service.Name ) { 0 } Else { 1 }
 
             $Current                         = @{   0 = [ PSCustomObject ]@{ StartMode = '-' ; State = '-' ; DisplayName = '-' ; PathName = '-' ; Description = '-' } ;
                                                     1 = $Return.Current | ? { $_.Name -eq $Service.Service } }[$X]
