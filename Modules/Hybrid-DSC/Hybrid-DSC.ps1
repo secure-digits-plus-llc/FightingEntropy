@@ -487,47 +487,50 @@
             $Return.Child = GCI $Return.Registry | % { $_.PSChildName }
         }
 
-        $Return | % { # I intend to change all of this below. 
+        If ( $Share )
+        {
+            $Return | % { # I intend to change all of this below. 
             
-            If (   $_.Child.Count -lt 1 ) { & $Install.Share } If (    $_.Child.Count -gt 1 ) { ICM $Install.Select -ArgumentList  "Channels" ,   $_.Child , "Channel" }
+                If (   $_.Child.Count -lt 1 ) { & $Install.Share } If (    $_.Child.Count -gt 1 ) { ICM $Install.Select -ArgumentList  "Channels" ,   $_.Child , "Channel" }
 
-            $_.Company = GCI ( $_.Registry , $_.Child -join '\' ) | % { $_.PSChildName }
+                $_.Company = GCI ( $_.Registry , $_.Child -join '\' ) | % { $_.PSChildName }
 
-            If ( $_.Company.Count -lt 1 ) { & $Install.Share } If (  $_.Company.Count -gt 1 ) { ICM $Install.Select -ArgumentList "Companies" , $_.Company , "Company" }
+                If ( $_.Company.Count -lt 1 ) { & $Install.Share } If (  $_.Company.Count -gt 1 ) { ICM $Install.Select -ArgumentList "Companies" , $_.Company , "Company" }
 
-            $_.Drive = GCI ( $_.Registry , $_.Child , $_.Company -join '\' ) | % { $_.PSChildName }
+                $_.Drive = GCI ( $_.Registry , $_.Child , $_.Company -join '\' ) | % { $_.PSChildName }
 
-            If (   $_.Drive.Count -lt 1 ) { & $Install.Share } If (    $_.Drive.Count -gt 1 ) { ICM $Install.Select -ArgumentList    "Drives" ,   $_.Drive ,   "Drive" }
+                If (   $_.Drive.Count -lt 1 ) { & $Install.Share } If (    $_.Drive.Count -gt 1 ) { ICM $Install.Select -ArgumentList    "Drives" ,   $_.Drive ,   "Drive" }
 
-            $_.Drive = $_.Registry , $_.Child , $_.Company , $_.Drive -join '\'
+                $_.Drive = $_.Registry , $_.Child , $_.Company , $_.Drive -join '\'
 
-            $_.Share = GP $_.Drive | % {
+                $_.Share = GP $_.Drive | % {
             
-                [ PSCustomObject ]@{ 
+                    [ PSCustomObject ]@{ 
 
-                    Background  = $_.Background
-                    Branch      = $_.Branch
-                    Company     = $_.Company
-                    Description = $_.Description
-                    Directory   = $_.Directory
-                    Drive       = $_.Drive
-                    DSDrive     = $_.DSDrive
-                    Hours       = $_.Hours
-                    IIS_AppPool = $_.IIS_AppPool
-                    IIS_Install = $_.IIS_Install
-                    IIS_Name    = $_.IIS_Name
-                    IIS_Proxy   = $_.IIS_Proxy
-                    IIS_Skip    = $_.IIS_Skip
-                    Legacy      = $_.Legacy
-                    LMCred_Pass = $_.LMCred_Pass
-                    LMCred_User = $_.LMCred_User
-                    Logo        = $_.Logo
-                    NetBIOS     = $_.NetBIOS
-                    Phone       = $_.Phone
-                    Remaster    = $_.Remaster
-                    Samba       = $_.Samba
-                    WWW         = $_.WWW
-                    Server      = $_.Server
+                        Background  = $_.Background
+                        Branch      = $_.Branch
+                        Company     = $_.Company
+                        Description = $_.Description
+                        Directory   = $_.Directory
+                        Drive       = $_.Drive
+                        DSDrive     = $_.DSDrive
+                        Hours       = $_.Hours
+                        IIS_AppPool = $_.IIS_AppPool
+                        IIS_Install = $_.IIS_Install
+                        IIS_Name    = $_.IIS_Name
+                        IIS_Proxy   = $_.IIS_Proxy
+                        IIS_Skip    = $_.IIS_Skip
+                        Legacy      = $_.Legacy
+                        LMCred_Pass = $_.LMCred_Pass
+                        LMCred_User = $_.LMCred_User
+                        Logo        = $_.Logo
+                        NetBIOS     = $_.NetBIOS
+                        Phone       = $_.Phone
+                        Remaster    = $_.Remaster
+                        Samba       = $_.Samba
+                        WWW         = $_.WWW
+                        Server      = $_.Server
+                    }
                 }
             }
 
@@ -1038,7 +1041,7 @@
                 }
             }
 
-            Current                          = Get-CurrentServices | Sort Name
+            Current                          = Get-CurrentServices
             Profile                          = [ Ordered ]@{ }
             Master                           = @( )
             Active                           = @( )
@@ -1073,34 +1076,16 @@
         {
             $Service                         = $Return.CFG[$I]
 
-            If ( $Service.Service -in $Return.Current.Name )
-            {
-                $Scoped                      = ("+","-")
-                $CurrentProfile              = @{ 0 = $Service.Profile.Split(',')
-                                                  1 = @( '-' ) * 10
-                $Current                     = $Return.Current | ? { $_.Name -eq $Service.Service }
-            }
+            $X                               = If ( $Service.Service -notin $Return.Current.Name ) { 0 } Else { 1 }
 
-            Else
-            {
-                $Scoped                      = "-"
-                $CurrentProfile              = @( '-' ) * 10
-                $Current                     = [ PSCustomObject ]@{
-
-                    Name                     = $Service.Service
-                    StartMode                = '-'
-                    State                    = '-'
-                    DisplayName              = '-'
-                    PathName                 = '-'
-                    Description              = '-'
-                }
-            }
+            $Current                         = @{   0 = [ PSCustomObject ]@{ StartMode = '-' ; State = '-' ; DisplayName = '-' ; PathName = '-' ; Description = '-' } ;
+                                                    1 = $Return.Current | ? { $_.Name -eq $Service.Service } }[$X]
 
             $Return.Master[$I]               = [ PSCustomObject ]@{
             
                 Index                        = "{0:d3}" -f $I
-                Scoped                       = $Scoped
-                Profile                      = $CurrentProfile
+                Scoped                       = ("-","+")[$X]
+                Profile                      = @{ 0 = @( '-' ) * 10 ; 1 = $Service.Profile.Split(',') }[$X]
                 Name                         = $Service.Service
                 StartMode                    = $Current.StartMode
                 State                        = $Current.State
@@ -1185,18 +1170,14 @@
 
             Else
             {
-                $Splat               = @{ 
+                #$Splat               = @{ 
                 
-                    Name             = "Window"
-                    Namespace        = "Console"
-                    MemberDefinition = ( "Kernel;IntPtr GetConsoleWindow()" , "user;bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)" | % { 
+                #    Name             = "Window"
+                #    Namespace        = "Console"
+                #    MemberDefinition = "[DllImport('Kernel32.dll')] public static extern IntPtr GetConsoleWindow(); [DllImport('user32.dll')] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)"
+                #}
 
-                        '[DllImport("{0}32.dll")] public static extern {1};' -f $_.Split(';')
-                    
-                    }) -join "`n"
-                }
-
-                Add-Type @Splat
+                Add-Type -Name Window -Namespace Console -MemberDefinition "[DllImport('Kernel32.dll')] public static extern IntPtr GetConsoleWindow(); [DllImport('user32.dll')] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)"
             }
         }
 
@@ -1276,32 +1257,14 @@
                         }
                     }
  
-                    Cfg                        = Get-ServiceProfile | % { 
-                    
-                        [ PSCustomObject ]@{ 
+                    Cfg                        = Get-ServiceProfile
 
-                            Master             = $_.Master
-                            DisplayActive      = $_.DisplayActive
-                            DisplayInactive    = $_.DisplayInactive
-                            DisplaySkipped     = $_.DisplaySkipped
-                            MiscXbox           = $_.MiscXbox
-                            Types              = ""
-                            Titles             = ""
-                        }
-                    }
-
-                    WPF                        = [ PSCustomObject ]@{
+                    Wpf                        = [ PSCustomObject ]@{
 
                         XAML                   = Get-XAML -Service
                         Named                  = Resolve-ViperBomb -Names
                         GUI                    = ""
                     }
-                }
-                 
-                Resolve-ViperBomb -Types       | % {
-                    
-                    $Master.Cfg.Types          = $_.Types
-                    $Master.Cfg.Titles         = $_.Titles
                 }
 
                 $Master                        | % {
@@ -1309,11 +1272,13 @@
                     $_.Inf.Control.TermsOfService  = 1
                     $_.WPF                     | % { 
                     
-                        $_.GUI                 = Convert-XAMLToWindow -Xaml $_.XAML -NE $_.Named -Passthru 
+                        $_GUI                   = Convert-XAMLToWindow -Xaml $_.XAML -NE $_.Named -Passthru 
                     }
                 }
 
                 $Service                       = @( )
+
+                $GUI = Convert-XAMLToWindow -Xaml ( Get-Xaml -Service ) -NE ( Resolve-ViperBomb -Names )
             }
 
             Else 
@@ -1346,8 +1311,6 @@
 
                 $Control = $Master.Collect.Control
                 $Types   = $Master.Profile.Types
-
-
         }
 
         Function Filter-DataGrid
@@ -5816,9 +5779,7 @@
                     
                     @(10;@(15)*4)*2;
                     @(7;@(15)*3;10..13;20,20,13,20,12..10);
-                    @(10;@(15)*4);
-                    @(7;@(15)*3;10..13;20,20,13,20,12..10)*2;
-                    @(10;@(15)*4)*4;
+                    @(10;@(15)*4)*7;
                     
                     9,8,8,7,6) | % { $SP[$_] }
 
@@ -5881,25 +5842,37 @@
                      "  Value             = '$( $_[0] )'>" ,  "<$SE       $PR          = '$BG'" , "  Value             = '#$( $_[1] )'/>" , "</DataTrigger>" } ;
                      "</Style.Triggers>" , "</Style>" , "</Data$GR`Style>" , "<Data$GC`s>" ; 
 
-                     ( "Index" , 40 ) , ( "Scoped" , 20 ) , ( "Profile" , 75 ) , ( $Q , 150 ) , ( "Status" , 75 ) , ( "StartType" , 75 ) , ( "Delay" , 50 ) , ( "Display$Q" , 150 ) , 
-                     ( "Path$Q" , 150 ) , ( "Description" , 150 ) | % { $Z = $( If ( $_[0] -eq "Scoped" ) { "@" } If ( $_[0] -eq "Delay" ) { "DelayedAutoStart" } Else { $_[0] } )
-                        If ( $_[0] -notin "Profile","Status","StartType" ) { "<Data$G`TextColumn $HD                  = '$Z'" , "$W                   = '$( $_[1] )'" , 
-                        "Binding                 = '{Binding $( $_[0] )}'" , "CanUserSort             = 'True'" , "IsReadOnly              = 'True'/>" } Else {   
-                        "<DataGridTemplateColumn     Header                  = '$( $_[0] )' " ,
-                                                            "Width                   = '$( $_[1] )' " ,
-                                                            "SortMemberPath          = '$( $_[0] )' " ,
-                                                            "CanUserSort             = 'True'>" ,
-                                    "<DataGridTemplateColumn.CellTemplate>" ,
-                                        "<DataTemplate>" ,
-                                             "<ComboBox ItemsSource = '{ Binding $( $_[0] )}' " ,
-                                                    "Text       = '{ Binding Path                = $( $_[0] ), " ,
-                                                                            "Mode                = TwoWay, " ,
-                                                                            "UpdateSourceTrigger = PropertyChanged }' " ,
-                                                      "IsEnabled   = '{ Binding ElementName         = $( $_[0] )Output, " ,
-                                                                            "   Path                = IsChecked }'/>" ,
-                                             "</DataTemplate>" ,
-                                         "</DataGridTemplateColumn.CellTemplate>" ,
-                                     "</DataGridTemplateColumn>" }
+                        ( "Index" , 40 ) , ( "Scoped" , 20 ) , ( "Profile" , 75 ) , ( $Q , 150 ) , ( "Status" , 75 ) , ( "StartType" , 75 ) , ( "Delay" , 50 ) , ( "Display$Q" , 150 ) , 
+                        ( "Path$Q" , 150 ) , ( "Description" , 150 ) | % { 
+                     
+                        $Z = $( If ( $_[0] -eq "Scoped" ) { "@" } If ( $_[0] -eq "Delay" ) { "DelayedAutoStart" } Else { $_[0] } )
+                        
+                        If ( $_[0] -ne "Profile" ) 
+                        { 
+                            "<Data$G`TextColumn $HD                  = '$Z'" , "$W                   = '$( $_[1] )'" , 
+                                "Binding                 = '{Binding $( $_[0] )}'" , 
+                                "CanUserSort             = 'True'" , 
+                                "IsReadOnly              = 'True'/>"
+                        }
+                        
+                        Else 
+                        {   
+                            "<DataGridTemplateColumn     Header                  = '$( $_[0] )' " ,
+                                                        "Width                   = '$( $_[1] )' " ,
+                                                        "SortMemberPath          = '$( $_[0] )' " ,
+                                                        "CanUserSort             = 'True'>" ,
+                                        "<DataGridTemplateColumn.CellTemplate>" ,
+                                            "<DataTemplate>" ,
+                                                 "<ComboBox ItemsSource = '{ Binding $( $_[0] )}' " ,
+                                                            "Text       = '{ Binding Path                = $( $_[0] ), " ,
+                                                                                    "Mode                = TwoWay, " ,
+                                                                                    "UpdateSourceTrigger = PropertyChanged }' " ,
+                                                           "IsEnabled   = '{ Binding ElementName         = $( $_[0] )Output, " ,
+                                                                                 "   Path                = IsChecked }'/>" ,
+                                                 "</DataTemplate>" ,
+                                             "</DataGridTemplateColumn.CellTemplate>" ,
+                                         "</DataGridTemplateColumn>" 
+                        }
                     } ; "</Data$GC`s>" , "</Data$G>" , "<$TBL $GR = '2' $Q = 'ServiceDialogEmpty' $MA = '20' $( $VAL[1] ) $( $HAL[1] ) FontSize = '20'/>" , "</$G>" , "</TabItem>" )
 
             $XML[5] = 0..( $X.Count - 1 ) | % { $X[$_] + $Y[$_] }
