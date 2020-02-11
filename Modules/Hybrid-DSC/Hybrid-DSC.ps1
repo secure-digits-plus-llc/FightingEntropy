@@ -342,7 +342,7 @@
                         }
                     }
 
-                    $Splat              = @{ 
+                    $Splat                = @{ 
 
                         Title             = "Hybrid-DSC Function Table"
                         Depth             = 7
@@ -487,7 +487,7 @@
             $Return.Child = GCI $Return.Registry | % { $_.PSChildName }
         }
 
-        $Return | % {     
+        $Return | % { # I intend to change all of this below. 
             
             If (   $_.Child.Count -lt 1 ) { & $Install.Share } If (    $_.Child.Count -gt 1 ) { ICM $Install.Select -ArgumentList  "Channels" ,   $_.Child , "Channel" }
 
@@ -956,122 +956,59 @@
 
             [ Parameter ( ) ] [ PSCustomObject ] $Model )
 
+        $System               = Resolve-Windows -All
+        $Viper                = Resolve-ViperBomb -All
+
         $Collect              = [ PSCustomObject ]@{ 
 
-            Section           = @( "Script" , "System" | % { "$_ Information" } ; "Initialization" ; ( "Display,Miscellaneous,Development," +
-                                   "Bypass/Force,Logging,Backup" ).Split(',') | % { "$_ Settings" } ; "Version Control" ) | % { "[ $_ ]" }
+            Title             = @("Script","System"|%{"$_ Information"};"Initialization";("Display,Miscellaneous,Development,Bypass/Force,Logging,B"+
+                                  "ackup").Split(',')|%{"$_ Settings"};"Version Control")|%{"[ $_ ]"}
+
+            Section           = "Script,Sys,Cfg,Display,Miscellaneous,Development,Bypass,Logging,Backup,Version".Split(',')
+
+            Info              = @("Version,Date,Script,Service,Release;";"OS,SKU,Build,Version,Chassis;";"Passed Args,Terms of Service;";"Active,In"+
+                                "active,Skipped;Show {0} SVC";"Simulate Changes,Xbox Services,Change * SVC State,Stop * Disabled SVC;";"Diagnostic "+
+                                "Errors,Devel Log,Enable Console,Report Diagnostic;";"Build Edition,Laptop;Bypass {0}";"Service,Script;Log {0} File";
+                                "Registry,Template;Backup {0}";"Service,Script;{0} Config")
+
+            Item              = @("Version,Date,Script,Service,Release";"OS,SKU,Build,Version,Chassis";"PassedArgs,TermsOfService";"DisplayActive,D"+
+                                "isplayInactive,DisplaySkipped";"MiscSimulate,MiscXbox,MiscChange,MiscStopDisabled";"DevelDiagErrors,DevelLog,Devel"+
+                                "Console,DevelDiagReport";"BypassBuild,BypassEdition,BypassLaptop";"LoggingServiceFile,LoggingScriptFile";"BackupRe"+
+                                "gistryFile,BackupTemplateFile";"ServiceConfig,ScriptConfig")
+
+            Subtable          = 0..9
         
-            Script            = Resolve-ViperBomb -Version
+            Script            = $Viper.Version
             
-            System            = [ PSCustomObject ]@{
+            Sys              = [ PSCustomObject ]@{
     
-                MSInfo        = Resolve-Windows -MSInfo    | % { "$( $_.Caption ) [$( $_.OSArchitecture )]" }
-                SKU           = Resolve-Windows -SKU       | % { $_.SKU }
-                Build         = Resolve-Windows -Edition   | % { $_.Build }
-                Version       = Resolve-Windows -Edition   | % { $_.Version }
-                Chassis       = Resolve-Windows -Type      | % { $_.Chassis }
+                OS            = $System.OS | % { "$( $_.Caption ) [$( $_.OSArchitecture )]" }
+                SKU           = $System.SKU
+                Build         = $System.Edition.Build
+                Version       = $System.Edition.Version
+                Chassis       = $System.Chassis
             }
 
-            Initialization    = $Model | % { If ( $_ -ne $Null ) { $_ } Else { Resolve-ViperBomb -Control } }
+            Cfg               = $Model | % { If ( $_ -eq $Null ) { $Viper.Control } Else { $_ } }
         }
 
-        $Control              = $Collect.Initialization
+        ForEach ( $i in 0..9 )
+        {
+            $X                = $Collect.Info[$I].Split(';')
+            $Collect.Info[$I] = If ( $X[1] -like "{0}" ) { ( $X[0].Split(',') | % { $X[1] -f $_ } ) -join ',' } Else { $X[0] }
 
-        $Diagnostics          = [ PSCustomObject ]@{ 
+            $Items            = $Collect.Item[$I].Split(',')
+            $Values           = $Items | % { If ( $I -eq 0 ) { $Collect.Script.$_ } If ( $I -eq 1 ) { $Collect.Sys.$_ } If ( $I -gt 1 ) { $Collect.Cfg.$_ } }
 
-            Script            = [ PSCustomObject ]@{
-
-                Items         = "Version" , "Date" , "Script" , "Service" , "Release"
-                Values        = $Collect.Script | % { $_.Version , $_.Date , $_.Script , $_.Service , $_.Release }
-                Subtable      = ""
-            }
-
-            System            = [ PSCustomObject ]@{
-
-                Items         = "Operating System" , "Edition / SKU" , "Build" , "Version" , "Chassis Type"
-                Values        = $Collect.System | % { $_.MSInfo  , $_.SKU , $_.Build , $_.Version , $_.Chassis }
-                Subtable      = ""
-            }
-
-            Initialization    = [ PSCustomObject ]@{
-
-                Items         = "Argument List" , "Terms of Service" 
-                Values        = $Collect.Initialization | % { $_.PassedArgs , $_.TermsOfService }
-                Subtable      = ""
-            }
-
-            Display           = [ PSCustomObject ]@{
-
-                Items         = "Active" , "Inactive" , "Skipped" | % { "Show $_ SVC" }
-                Values        = $Control | % { $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped }
-                Subtable      = ""
-            }
-
-            Miscellaneous     = [ PSCustomObject ]@{
-
-                Items         = "Simulate Changes" , "Xbox Services" , "Change * SVC State" , "Stop * Disabled SVC"
-                Values        = $Control | % { $_.MiscSimulate , $_.MiscXbox , $_.MiscChange ,$_.MiscStopDisabled }
-                Subtable      = ""
-            }
-
-            Development       = [ PSCustomObject ]@{
-
-                Items         = "Diagnostic Errors" , "Devel Log" , "Enable Console" , "Report Diagnostic"
-                Values        = $Control | % { $_.DevelDiagErrors , $_.DevelLog , $_.DevelConsole , $_.DevelDiagReport }
-                Subtable      = ""
-            }
-
-            Bypass            = [ PSCustomObject ]@{
-
-                Items         = "Build" , "Edition" , "Laptop" | % { "Bypass $_" }
-                Values        = $Control | % { $_.BypassBuild , $_.BypassEdition , $_.BypassLaptop }
-                Subtable      = ""
-            }
-
-            Logging           = [ PSCustomObject ]@{
-
-                Items         = "Service" , "Script" | % { "Log $_ File" }
-                Values        = $Control | % { $_.LoggingServiceFile , $_.LoggingScriptFile }
-                Subtable      = "" 
-            }
-
-            Backup            = [ PSCustomObject ]@{
-
-                Items         = "Registry" , "Template" | % { "Backup $_" }
-                Values        = $Control | % { $_.BackupRegistryFile , $_.BackupTemplateFile }
-                Subtable      = "" 
-            }
-
-            Version           = [ PSCustomObject ]@{
-
-                Items         = "Service" ,"Script" | % { "$_ Config" }
-                Values        = $Control | % { $_.ServiceConfig , $_.ScriptConfig }
-                Subtable      = ""
-
-            }
-        }
-
-        $Diagnostics          | % { 
-        
-            $_.Script         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.System         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Initialization | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Display        | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Miscellaneous  | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Development    | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Bypass         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Logging        | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Backup         | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
-            $_.Version        | % { $_.Subtable = New-SubTable -Items $_.Items -Values $_.Values }
+            $Collect.Subtable[$I] = New-Subtable -Items $Items -Values $Values
         }
 
         $Splat                = @{ 
 
             Title             = "Diagnostic/Startup Panel"
             Depth             = 10
-            ID                = $Collect.Section
-            Table             = $Diagnostics | % { $_.Script , $_.System , $_.Initialization , $_.Display , $_.Miscellaneous , 
-                                $_.Development , $_.Bypass , $_.Logging , $_.Backup , $_.Version } | % { $_.Subtable }
+            ID                = $Collect.Title
+            Table             = $Collect.Subtable
         }
 
         $Table                = New-Table @Splat
@@ -1124,7 +1061,11 @@
                 $_.Index                     = 0..( $_.Current.Count - 1 )
             }
 
-            $_.Profile                       = 0..9
+            $_.Profile                       = ForEach ( $i in 0..9 )
+            {
+                $_.Index
+            }
+
             $_.Master                        = $_.Index.Clone()
         }
 
@@ -1134,8 +1075,9 @@
 
             If ( $Service.Service -in $Return.Current.Name )
             {
-                $Scoped                      = "+"
-                $CurrentProfile              = $Service.Profile.Split(',')
+                $Scoped                      = ("+","-")
+                $CurrentProfile              = @{ 0 = $Service.Profile.Split(',')
+                                                  1 = @( '-' ) * 10
                 $Current                     = $Return.Current | ? { $_.Name -eq $Service.Service }
             }
 
@@ -1208,10 +1150,12 @@
 
                 If ( $Current.Name -in $_.Filter.Xbox )
                 { 
-                    $_.Xbox           += $New.Name
+                    $_.Xbox           += $Current.Name
                 }
             }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }
+        
+        $ProfileObject                                                              #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -1315,6 +1259,8 @@
                             MSInfo             = $_.OS
                             System             = $_.CS
                             Chassis            = $_.Chassis
+                            Edition            = $_.Edition
+                            Version            = $_.PSVersion.PSVersion
                         }
                     }
 
@@ -1335,16 +1281,6 @@
                         [ PSCustomObject ]@{ 
 
                             Master             = $_.Master
-                            "10H:D+"           = $_."10H:D+"
-                            "10H:D-"           = $_."10H:D-"
-                            "10P:D+"           = $_."10P:D+"
-                            "10P:D-"           = $_."10P:D-"
-                            "DT:S+"            = $_."DT:S+"
-                            "DT:S-"            = $_."DT:S-"
-                            "DT:T+"            = $_."DT:T+"
-                            "DT:T-"            = $_."DT:T-"
-                            "LT:S+"            = $_."LT:S+"
-                            "LT:S-"            = $_."LT:S-"
                             DisplayActive      = $_.DisplayActive
                             DisplayInactive    = $_.DisplayInactive
                             DisplaySkipped     = $_.DisplaySkipped
@@ -1394,14 +1330,14 @@
         
             $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped | % { $_.IsChecked = $True }
             
-            $_.CurrentOS.Text                         = "{0} ({1})" -f $Master.Windows.MSInfo.Caption , $env:PROCESSOR_ARCHITECTURE.Replace( 'AMD' , 'x' )
+            $_.CurrentOS.Text                         = "{0} ({1})" -f $Master.Sys.MSInfo.Caption , $env:PROCESSOR_ARCHITECTURE.Replace( 'AMD' , 'x' )
             $_.CurrentBuild.Text                      = $PSVersionTable.BuildVersion
-            $_.CurrentChassis.Text                    = $Chassis
+            $_.CurrentChassis.Text                    = $Master.Sys.Chassis
 
-            $I.ServiceDialogEmpty.Text                = "Select a profile from the configuration menu to begin"
-            $I.ServiceDialogSearch.IsEnabled          = $False
-            $I.ServiceLabel.Text                      = $I.ServiceProfile.SelectedItem.Content
-            $I.ScriptLabel.Text                       = $I.ScriptProfile.SelectedItem.Content
+            $_.ServiceDialogEmpty.Text                = "Select a profile from the configuration menu to begin"
+            $_.ServiceDialogSearch.IsEnabled          = $False
+            $_.ServiceLabel.Text                      = $_.ServiceProfile.SelectedItem.Content
+            $_.ScriptLabel.Text                       = $_.ScriptProfile.SelectedItem.Content
         }
 
         Function Select-ServiceProfile
@@ -8772,42 +8708,47 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
-        $Service        = GCIM Win32_Service | Sort Name
-
         Write-Theme -Action "Collecting [~]" "Service State Catalog"
 
-        $Return         = @( )
+        $Return         = [ PSCustomObject ]@{ 
+        
+            Service     = GCIM Win32_Service | Sort Name
+            Return      = ""
+        }
 
-        $X              = "Start" | % { "(Delayed $_);(Trigger $_);(Delayed $_, Trigger $_)".Split(';') }
+        $Y              = ( "{0};{1};{0}, {1}" -f "Delayed Start" , "Trigger Start" ).Split( ';' )
 
-        ForEach ( $i in 0..( $SVC.Count - 1 ) )
-        {
-            Write-Progress -Activity "Collecting Service Catalog" -PercentComplete ( ( $I / $SVC.Count ) * 100 )
+        $Return         | % {
+        
+            $_.Return   = ForEach ( $I in 0..( $_.Service.Count - 1 ) )
+            {
+                $X      = $_.Service[$I]
+                
+                Write-Progress -Activity "Collecting Service Catalog" -PercentComplete ( ( $I / $_.Service.Count ) * 100 )
 
-            "HKLM:\SYSTEM\CurrentControlSet\Services\$( $SVC[$I].Name )" | % {
+                "HKLM:\SYSTEM\CurrentControlSet\Services\$( $X.Name )" | % { 
 
-                If ( Test-Path $_ )
-                {
-                    $C = If ( GP $_ | % { $_.DelayedAutoStart } ) { $X[0] } Else { $Null }
+                    $C                   = If ( GP $_ | % { $_.DelayedAutoStart } ) { $Y[0] } Else { $Null }
                     
-                    If ( GCI $_ -EA 0 | % { $_.Name -like "*Trigger*" } ) { $C = If ( $C -ne $Null ) { $X[2] } Else { $X[1] } }
+                    If ( GCI $_ -EA 0 | % { $_.Name -like "*Trigger*" } )
+                    {
+                        $C               = If ( $C -ne $Null ) { $Y[2] } Else { $Y[1] }
+                    }
 
-                    $Return            += [ PSCustomObject ]@{ 
+                    [ PSCustomObject ]@{
                             
-                        Name             = $Service[$I].Name
-                        StartMode        = $Service[$I].StartMode | % { If ( $C -ne $Null ) { "$_ $C" } Else { $_ } }
-                        State            = $Service[$I].State
-                        DisplayName      = $Service[$I].DisplayName
-                        PathName         = $Service[$I].PathName
-                        Description      = $Service[$I].Description
+                        Name             = $X.Name
+                        StartMode        = $X.StartMode | % { If ( $C -ne $Null ) { "$_ ($C)" } Else { $_ } }
+                        State            = $X.State
+                        DisplayName      = $X.DisplayName
+                        PathName         = $X.PathName
+                        Description      = $X.Description
                     }
                 }
             }
         }
         
-        $Return
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -8871,9 +8812,9 @@
             $_.SKU          = $_.SKU[ $_.Code ]
             $_.Chassis      = $_.Chassis[$_.CS.PCSystemType]
 
-            [ Environment ]::GetEnvironmentVariables() | % { 
+            [ Environment ]::GetEnvironmentVariables().GetEnumerator() | % { 
 
-                $_.Env      | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
+                $Return.Env  | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
             }
         }
 
