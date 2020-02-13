@@ -381,8 +381,6 @@
                 Website   = "https://www.securedigitsplus.com"
                 Module    = $ENV:PSModulePath.Split( ';' ) | ? { GCI $_ -Recurse "*Hybrid-DSC*" } | % { "$_\Hybrid-DSC" }
                 Registry  = "HKLM:\Software\Policies\$_"
-                Root      = @( )
-                Child     = @( )
                 Company   = @( )
                 Drive     = @( )
                 Share     = @( )
@@ -452,7 +450,7 @@
                 }
 
                 Until ( $Object.Count -eq 1 )
-            } 
+            }
         }
 
         # Returns the default module path
@@ -466,163 +464,272 @@
             }
         }
 
-        Try { [ void ]( GP $Return.Registry ) }
-        
-        Catch { & $Install.Root } 
-                
-        Finally 
-        { 
-            $Return.Root            = [ PSCustomObject ]@{ 
+        If ( ( $Root ) -or ( $Share ) )
+        {
+            $Return                     | % { 
+
+                If ( ! ( Test-Path $_.Registry ) )
+                {
+                    & $Install.Root
+                }
+
+                Else
+                {
+                    $_.Registry             = [ PSCustomObject ]@{
             
-                Root                = $Return.Registry  
-                "Hybrid-DSC"        = ""
-                "Installation Date" = ""
-            }
-                    
-            ForEach ( $I in "Hybrid-DSC" , "Installation Date" ) 
-            {
-                $Return.Root.$I = GP $Return.Registry | % { $_.$I }
+                        Root                =     $_.Registry  
+                        "Hybrid-DSC"        = GP  $_.Registry | % { $_."Hybrid-DSC"        }
+                        "Installation Date" = GP  $_.Registry | % { $_."Installation Date" }
+                        Child               = GCI $_.Registry | % { $_.PSChildName         }
+                    }
+                }
             }
 
-            $Return.Child = GCI $Return.Registry | % { $_.PSChildName }
+            $Return | % { 
+
+                If ( Test-Path $Return.Registry.Root )
+                {
+                    $Return.Company         = GCI $Return.Registry.Root
+
+                    If ( $Return.Company.Count -lt 1 ) 
+                    { 
+                        & $Install.Share 
+                    }
+
+                    If ( $Return.Company.Count -gt 1 ) 
+                    { 
+                        ICM $Install.Select -ArgumentList  "Channels" ,   $_.Company , "Channel" 
+                    }
+
+                    $Return.Drive           = GCI $Return.Company.PSPath
+
+                    If (   $_.Drive.Count -lt 1 ) 
+                    { 
+                        & $Install.Share 
+                    } 
+                    
+                    If (    $_.Drive.Count -gt 1 ) 
+                    { 
+                        ICM $Install.Select -ArgumentList    "Drives" ,   $_.Drive ,   "Drive" 
+                    }
+
+                    $Return.Share           = GCI $Return.Drive.PSPath | % { GP $_.PSPath } | % {
+            
+                        [ PSCustomObject ]@{ 
+
+                            Background  = $_.Background
+                            Branch      = $_.Branch
+                            Company     = $_.Company
+                            Description = $_.Description
+                            Directory   = $_.Directory
+                            Drive       = $_.Drive
+                            DSDrive     = $_.DSDrive
+                            Hours       = $_.Hours
+                            IIS_AppPool = $_.IIS_AppPool
+                            IIS_Install = $_.IIS_Install
+                            IIS_Name    = $_.IIS_Name
+                            IIS_Proxy   = $_.IIS_Proxy
+                            IIS_Skip    = $_.IIS_Skip
+                            Legacy      = $_.Legacy
+                            LMCred_Pass = $_.LMCred_Pass
+                            LMCred_User = $_.LMCred_User
+                            Logo        = $_.Logo
+                            NetBIOS     = $_.NetBIOS
+                            Phone       = $_.Phone
+                            Remaster    = $_.Remaster
+                            Samba       = $_.Samba
+                            WWW         = $_.WWW
+                            Server      = $_.Server
+                        }
+                    }
+                }
+            }
         }
 
-        If ( $Share )
+        If ( $CS.PartOfDomain -eq $True )
         {
-            $Return | % { # I intend to change all of this below. 
+            $Return.Domain              = [ PSCustomObject ]@{
+                        
+                NetBIOS                 = $ENV:UserDomain
+                Branch                  = $ENV:USERDNSDOMAIN
+                Domain                  = $True
+            }
+        }
+
+        If ( $CS.PartOfDomain -eq $False )
+        {
+            $ID                         = [ PSCustomObject ]@{ Group  = @( ) ; Unique = @( ) }
+
+            nbtstat -n                  | ? { $_ -like "*REGISTERED*" } | % { 
+                    
+            $X                          = @{ 0 = $_[0..18] ; 1 = $_[19..22] ; 2 = $_[24..34] ; 3 = $_[35..50] }
+                    
+            $X                          = 0..3 | % { ( $X[$_] | ? { $_ -ne " " } ) -join '' }
+
+                If ( $X[1] -ne "<00>" )
+                {
+                    [ PSCustomObject ]@{ Name = $X[0] ; ID = $X[1] ; Type = $X[2] ; Status = $X[3] } | % { 
+
+                        If ( $_.Type -eq "Group"  -and $_.Name -notin $ID.Group.Name  ) { $ID.Group   += $_ }
+                        If ( $_.Type -eq "Unique" -and $_.Name -notin $ID.Unique.Name ) { $ID.Unique  += $_ }
+                    }
+                }
+
+                $Return.Domain          = [ PSCustomObject ]@{
+                        
+                    NetBIOS             = $ID.Group.Name
+                    Branch              = $ID.Unique.Name
+                    Domain              = $True
+                }
+            }
+        }
+
+        $GFX                = GCI $_.Module "*Graphics*" -Recurse | % { GCI $_.FullName } | % { $_.FullName }
             
-                If (   $_.Child.Count -lt 1 ) { & $Install.Share } If (    $_.Child.Count -gt 1 ) { ICM $Install.Select -ArgumentList  "Channels" ,   $_.Child , "Channel" }
+        $Return.Graphics    = [ PSCustomObject ]@{ 
 
-                $_.Company = GCI ( $_.Registry , $_.Child -join '\' ) | % { $_.PSChildName }
-
-                If ( $_.Company.Count -lt 1 ) { & $Install.Share } If (  $_.Company.Count -gt 1 ) { ICM $Install.Select -ArgumentList "Companies" , $_.Company , "Company" }
-
-                $_.Drive = GCI ( $_.Registry , $_.Child , $_.Company -join '\' ) | % { $_.PSChildName }
-
-                If (   $_.Drive.Count -lt 1 ) { & $Install.Share } If (    $_.Drive.Count -gt 1 ) { ICM $Install.Select -ArgumentList    "Drives" ,   $_.Drive ,   "Drive" }
-
-                $_.Drive = $_.Registry , $_.Child , $_.Company , $_.Drive -join '\'
-
-                $_.Share = GP $_.Drive | % {
-            
-                    [ PSCustomObject ]@{ 
-
-                        Background  = $_.Background
-                        Branch      = $_.Branch
-                        Company     = $_.Company
-                        Description = $_.Description
-                        Directory   = $_.Directory
-                        Drive       = $_.Drive
-                        DSDrive     = $_.DSDrive
-                        Hours       = $_.Hours
-                        IIS_AppPool = $_.IIS_AppPool
-                        IIS_Install = $_.IIS_Install
-                        IIS_Name    = $_.IIS_Name
-                        IIS_Proxy   = $_.IIS_Proxy
-                        IIS_Skip    = $_.IIS_Skip
-                        Legacy      = $_.Legacy
-                        LMCred_Pass = $_.LMCred_Pass
-                        LMCred_User = $_.LMCred_User
-                        Logo        = $_.Logo
-                        NetBIOS     = $_.NetBIOS
-                        Phone       = $_.Phone
-                        Remaster    = $_.Remaster
-                        Samba       = $_.Samba
-                        WWW         = $_.WWW
-                        Server      = $_.Server
-                    }
-                }
-            }
-
-            If ( $CS.PartOfDomain -eq $True )
-            {
-                $_.Domain = [ PSCustomObject ]@{
-                    
-                    NetBIOS = $ENV:UserDomain
-                    Branch  = $ENV:USERDNSDOMAIN
-                    Domain  = $True
-                }
-            }
-
-            If ( $CS.PartOfDomain -eq $False )
-            {
-                $ID        = [ PSCustomObject ]@{ 
-                
-                    Group  = @( ) 
-                    Unique = @( ) 
-                }
-
-                nbtstat -n | ? { $_ -like "*REGISTERED*" } | % { 
-                    
-                    $X = @{ 
-                    
-                        0      = $_[  0..18 ]
-                        1      = $_[ 19..22 ]
-                        2      = $_[ 24..34 ]
-                        3      = $_[ 35..50 ] 
-                    }
-                    
-                    0..3 | % { 
-                    
-                        $X[$_] = ( $X[$_] | ? { $_ -ne " " } ) -join ''
-                    }
-
-                    $X = [ PSCustomObject ]@{
-                    
-                        Name   = $X[0]
-                        ID     = $X[1]
-                        Type   = $X[2]
-                        Status = $X[3]
-                    }
-
-                    If ( $X.ID -ne "<00>" )
-                    {
-                        If ( $X.Type -eq "GROUP" )
-                        {
-                            If ( $X.Name -notin $ID.Group.Name )
-                            {
-                                $ID.Group  += $X
-                            }
-                        }
-                    
-                        If ( $X.Type -eq "UNIQUE" )
-                        {
-                            If ( $X.Name -notin $ID.Unique.Name )
-                            {
-                                $ID.Unique += $X
-                            }
-                        }
-                    }
-                }
-                
-                $_.Domain = [ PSCustomObject ]@{
-
-                    NetBIOS = $ID.Group.Name
-                    Branch  = $ID.Unique.Name
-                    Domain  = $False 
-                }
-            }
-
-            $GFX = GCI $_.Module "*Graphics*" -Recurse | % { GCI $_.FullName } | % { $_.FullName }
-            
-            $_.Graphics = [ PSCustomObject ]@{ 
-
-                Author     = $_.Author
-                Title      = $_.Author + " | Hybrid-DSC"
-                Background = $GFX[0]
-                Banner     = $GFX[1]
-                Icon       = $GFX[2]
-                Brand      = $GFX[3]
-                Logo       = $GFX[4]
-            }
+            Author          = $Return.Author
+            Title           = $Return.Author + " | Hybrid-DSC"
+            Background      = $GFX[0]
+            Banner          = $GFX[1]
+            Icon            = $GFX[2]
+            Brand           = $GFX[3]
+            Logo            = $GFX[4]
+        }
         
-            If ( $Module   ) { $_.Module   }
-            If ( $Root     ) { $_.Root     }
-            If ( $Share    ) { $_.Share    }
-            If ( $Graphics ) { $_.Graphics }
-            If ( $Domain   ) { $_.Domain   }
-            If ( $All      ) { $_          }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        If ( $Module   ) { $Return.Module   }
+        If ( $Root     ) { $Return.Registry }
+        If ( $Share    ) { $Return.Share    }
+        If ( $Graphics ) { $Return.Graphics }
+        If ( $Domain   ) { $Return.Domain   }
+        If ( $All      ) { $Return          }
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Write-Theme -Action "Collecting [~]" "Service State Catalog"
+
+        $Return         = [ PSCustomObject ]@{ 
+        
+            Service     = GCIM Win32_Service | Sort Name
+            Return      = ""
+        }
+
+        $Y              = ( "{0};{1};{0}, {1}" -f "Delayed Start" , "Trigger Start" ).Split( ';' )
+
+        $Return         | % {
+        
+            $_.Return   = ForEach ( $I in 0..( $_.Service.Count - 1 ) )
+            {
+                $X      = $_.Service[$I]
+                
+                Write-Progress -Activity "Collecting Service Catalog" -PercentComplete ( ( $I / $_.Service.Count ) * 100 )
+
+                "HKLM:\SYSTEM\CurrentControlSet\Services\$( $X.Name )" | % { 
+
+                    $C                   = If ( GP $_ | % { $_.DelayedAutoStart } ) { $Y[0] } Else { $Null }
+                    
+                    If ( GCI $_ -EA 0 | % { $_.Name -like "*Trigger*" } )
+                    {
+                        $C               = If ( $C -ne $Null ) { $Y[2] } Else { $Y[1] }
+                    }
+
+                    [ PSCustomObject ]@{
+                            
+                        Name             = $X.Name
+                        StartMode        = $X.StartMode | % { If ( $C -ne $Null ) { "$_ ($C)" } Else { $_ } }
+                        State            = $X.State
+                        DisplayName      = $X.DisplayName
+                        PathName         = $X.PathName
+                        Description      = $X.Description
+                    }
+                }
+            }
+        }
+        
+        $Return.Return                                                              #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Resolve-Windows # CIM / Edition Collection Table __________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding ( ) ] Param (
+
+            [ Parameter ( ParameterSetName =  "System" ) ] [ Switch ] $System      ,
+            [ Parameter ( ParameterSetName =      "OS" ) ] [ Switch ] $MSInfo      ,
+            [ Parameter ( ParameterSetName = "Edition" ) ] [ Switch ] $Edition     ,
+            [ Parameter ( ParameterSetName =     "SKU" ) ] [ Switch ] $SKU         ,
+            [ Parameter ( ParameterSetName =    "Type" ) ] [ Switch ] $Type        ,
+            [ Parameter ( ParameterSetName =      "PS" ) ] [ Switch ] $PS          ,
+            [ Parameter ( ParameterSetName =     "Env" ) ] [ Switch ] $Environment ,
+            [ Parameter ( ParameterSetName =     "All" ) ] [ Switch ] $All         )
+
+        $Return             = [ PSCustomObject ]@{
+
+            OS              = GCIM Win32_OperatingSystem
+            CS              = GCIM Win32_ComputerSystem
+            ReleaseID       = GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID }
+            Edition         = @( ( '1507,10240,Threshold 1,Release To Manufacturing;1511,10586,Threshold 2,November UX;1607,14393,RX 1' + 
+                              ',Anniversary UX;1703,15063,RX 2,CX UX;1703,16299,RX 3,Fall CX UX;1803,17134,RX 4,April 2018 UX;1809,177' + 
+                              '63,RX 5,October 2018 UX;1903,18362,19H1,May 2019 UX;1909,18363,19H2,November 2019 UX;2004,19000,20H1,Un' + 
+                              'released' ).Replace('RX','Redstone').Replace('UX' ,'Update').Replace('CX','Creators').Split( ';' )       | ? { 
+                              
+                              $_.Split(',')[0] -eq ( GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID } ) } ) | % { 
+                
+                                [ PSCustomObject ]@{
+                    
+                                    Version     = $_.Split(',')[0]
+                                    Build       = "10.0.{0}" -f $_.Split(',')[1]
+                                    CodeName    = $_.Split(',')[2]
+                                    Name        = $_.Split(',')[3]
+                                }
+                            }
+
+            SKU             = ('Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter' + 
+                              ' # !,Small Business # !,$ # !,Starter !,Datacenter # Core !,Standard # Core !,$ # Core !,$ # IA64 !,Bus' + 
+                              'iness N !,Web # !,Cluster # !,Home # !,Storage Express # !,Storage Standard # !,Storage Workgroup # !,S' + 
+                              'torage $ # !,# For Small Business !,Small Business # Premium !,TBD,@ $,@ Ultimate,Web # Core,-,-,-,# Fo' + 
+                              'undation,@ Home #,-,@ # Standard No Hyper-V Full,@ # Datacenter No Hyper-V Full,@ # $ No Hyper-V Full,@' + 
+                              ' # Datacenter No Hyper-V Core,@ # Standard No Hyper-V Core,@ # $ No Hyper-V Core,Microsoft Hyper-V #,St' + 
+                              'orage # Express Core,Storage # Standard Core,# Workgroup Core,Storage # $ Core,Starter N,Professional,P' + 
+                              'rofessional N,@ Small Business # 2011 Essentials,-,-,-,-,-,-,-,-,-,-,-,-,Small Business # Premium Core,' + 
+                              '@ # Hyper Core V,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,--,-,-,@ Thin PC,-,@ Embedded Industry,-,-,-,-,-,-' + 
+                              ',-,@ RT,-,-,Single Language N,@ Home,-,@ Professional with Media Center,@ Mobile,-,-,-,-,-,-,-,-,-,-,-,' + 
+                              '-,-,@ Embedded Handheld,-,-,-,-,@ IoT Core'
+                              ).Replace("!","Edition").Replace("@","Windows").Replace("#","Server").Replace('$',"Enterprise").Split(',')
+            
+            Code            = ""
+            Chassis         = ",Desktop,Mobile/Laptop,Workstation,Server,Server,Appliance,Server,Maximum".Split(',')
+            PSVersion       = $PSVersionTable
+            Env             = [ PSCustomObject ]@{ }
+
+        }
+
+        $Return             | % { 
+
+            $_.Code         = $_.OS.OperatingSystemSKU
+            $_.SKU          = $_.SKU[ $_.Code ]
+            $_.Chassis      = $_.Chassis[$_.CS.PCSystemType]
+
+            [ Environment ]::GetEnvironmentVariables().GetEnumerator() | % { 
+
+                $Return.Env  | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
+            }
+        }
+
+        $Return | % { 
+
+            If ( $System  ) { $_.CS        }
+            If ( $MSInfo  ) { $_.OS        }
+            If ( $Edition ) { $_.Edition   }
+            If ( $SKU     ) { $_.SKU       }
+            If ( $Type    ) { $_.Chassis   }
+            If ( $PS      ) { $_.PSVersion }
+            If ( $Environment ) { $_.Env       }
+            If ( $All     ) { $_           }
+        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\____  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯                                                                    // 
@@ -721,8 +828,8 @@
                                    "GroupProvider;HvHost;icssvc;IKEEXT;InstallService;iphlpsvc;IpxlatCfgSvc;irmon;KeyIso;KtmRm;LanmanServer;LanmanWo" + 
                                    "rkstation;lfsvc;LicenseManager;lltdsvc;lmhosts;LPDSVC;LxssManager;MapsBroker;MessagingService_$QMARK;MSDTC;MSiSC" + 
                                    "SI;MsKeyboardFilter;MSMQ;MSMQTriggers;NaturalAuthentication;NcaSVC;NcbService;NcdAutoSetup;Netlogon;Netman;NetMs" + 
-                                   "mqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator; NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK" + 
-                                   ";p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc; PolicyAgent;Power;PrintN" + 
+                                   "mqActivator;NetPipeActivator;netprofm;NetSetupSvc;NetTcpActivator;NetTcpPortSharing;NlaSvc;nsi;OneSyncSvc_$QMARK" + 
+                                   ";p2pimsvc;p2psvc;PcaSvc;PeerDistSvc;PerfHost;PhoneSvc;pla;PlugPlay;PNRPAutoReg;PNRPsvc;PolicyAgent;Power;PrintN" + 
                                    "otify;PrintWorkflowUserSvc_$QMARK;ProfSvc;PushToInstall;QWAVE;RasAuto;RasMan;RemoteAccess;RemoteRegistry;RetailD" + 
                                    "emo;RmSvc;RpcLocator;SamSs;SCardSvr;ScDeviceEnum;SCPolicySvc;SDRSVC;seclogon;SEMgrSvc;SENS;Sense;SensorDataServi" + 
                                    "ce;SensorService;SensrSvc;SessionEnv;SgrmBroker;SharedAccess;SharedRealitySvc;ShellHWDetection;shpamsvc;smphost;" + 
@@ -1023,79 +1130,115 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-ServiceProfile #_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
         Write-Theme -Action "Collecting [+]" "[ Service Configuration ]: Current Profile"
 
-        $Return                              = [ PSCustomObject ]@{
+        $Get                          = [ PSCustomObject ]@{ 
 
-            Cfg                              = Resolve-ViperBomb -Config
-            Index                            = @( )
-            Filter                           = Resolve-ViperBomb -Services | % {
-    
-                [ PSCustomObject ]@{ 
-                
-                    Skipped                  = $_.Skip 
-                    Xbox                     = $_.Xbox
-                    DataGrid                 = $_.DataGrid
-                    NetTCP                   = $_.NetTCP
-                }
-            }
-
-            Current                          = Get-CurrentServices
-            Profile                          = [ Ordered ]@{ }
-            Master                           = @( )
-            Active                           = @( )
-            Inactive                         = @( )
-            Skipped                          = @( )
-            Xbox                             = @( )
+            Config                    = Resolve-ViperBomb -Config
+            Current                   = Get-CurrentServices
+            Index                     = ""
+            Scoped                    = @( )
+            Profile                   = @( )
+            Name                      = @( )
+            StartMode                 = @( )
+            State                     = @( )
+            DisplayName               = @( )
+            PathName                  = @( )
+            Description               = @( )
+            Upper                     = ""
+            Lower                     = ""
         }
 
-        Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
-        
-        $Return                              | % { 
-        
-            If ( $_.Cfg.Count -gt $_.Current.Count )
+        $Get | % { 
+
+            If ( $_.Config.Count -gt $_.Current.Count )
             {
-                $_.Index                     = 0..( $_.Cfg.Count - 1 )
-            } 
+                $_.Index              = 0..( $_.Config.Count - 1 )
+                $_.Upper              = $_.Config.Service
+                $_.Lower              = $_.Current.Name
+            }
+
+            Else
+            {
+                $_.Index              = 0..( $_.Current.Count - 1 )
+                $_.Upper              = $_.Current.Name
+                $_.Lower              = $_.Config.Service
+            }
+
+            $Get.Index                = $Get.Upper.Count | Measure -Character | % { $_.Characters } | % {
             
-            Else 
-            {  
-                $_.Index                     = 0..( $_.Current.Count - 1 )
+                ForEach ( $I in $Get.Index ) { "{0:d$_}" -f $I }
             }
-
-            $_.Profile                       = ForEach ( $i in 0..9 )
-            {
-                $_.Index
-            }
-
-            $_.Master                        = $_.Index.Clone()
+            
+            $_.Scoped                 = $_.Index | % { "-" }
+            $_.Profile                = $_.Index | % { "-,-,-,-,-,-,-,-,-,-" }
+            $_.Name                   = $_.Index | % { "-" }
+            $_.StartMode              = $_.Index | % { "-" }
+            $_.State                  = $_.Index | % { "-" }
+            $_.DisplayName            = $_.Index | % { "-" }
+            $_.PathName               = $_.Index | % { "-" }
+            $_.Description            = $_.Index | % { "-" }
         }
 
-        ForEach ( $i in $Return.Index )
+        $Master                       = [ PSCustomObject ]@{
+            
+            Config                    = $Get.Upper | ? { ( $_ -in $Get.Config.Service ) -and ( $_    -in $Get.Current.Name ) } 
+            Current                   = $Get.Upper | ? { ( $_ -in $Get.Config.Service ) -and ( $_ -notin $Get.Current.Name ) }
+            Enabled                   = @( )
+            Disabled                  = @( )
+        }
+
+        If ( $Master.Config.Count -gt $Master.Current.Count )
         {
-            $Service                         = $Return.CFG[$I]
+            $Master.Enabled           = $Get.Config | ? { $_.Service -in $Master.Config  }
+            $Master.Disabled          = $Get.Config | ? { $_.Service -in $Master.Current }
+        }
 
-            $X                               = If ( $Service.Service -notin $Return.Current.Service.Name ) { 0 } Else { 1 }
+        Else
+        {
+            $Master.Enabled           = $Get.Config | ? { $_.Service -in $Master.Current }
+            $Master.Disabled          = $Get.Config | ? { $_.Service -in $Master.Config  }  
+        }
 
-            $Current                         = @{   0 = [ PSCustomObject ]@{ StartMode = '-' ; State = '-' ; DisplayName = '-' ; PathName = '-' ; Description = '-' } ;
-                                                    1 = $Return.Current | ? { $_.Name -eq $Service.Service } }[$X]
-
-            $Return.Master[$I]               = [ PSCustomObject ]@{
-            
-                Index                        = "{0:d3}" -f $I
-                Scoped                       = ("-","+")[$X]
-                Profile                      = @{ 0 = @( '-' ) * 10 ; 1 = $Service.Profile.Split(',') }[$X]
-                Name                         = $Service.Service
-                StartMode                    = $Current.StartMode
-                State                        = $Current.State
-                DisplayName                  = $Current.DisplayName
-                PathName                     = $Current.PathName
-                Description                  = $Current.Description
+        ForEach ( $I in $Get.Index )
+        {
+            $Get.Name[$I]            = $Get.Upper[$I]
+                
+            If ( $Get.Upper[$I]      -in $Master.Enabled.Service )
+            {
+                $Get.Scoped[$I]      = "[+]"
+                $Get.Profile[$I]     = $Master.Enabled | ? { $_.Service -eq $Get.Upper[$i] } | % { $_.Profile }
+                $Get.StartMode[$I]   = $Get.Current.StartMode[$I]
+                $Get.State[$I]       = $Get.Current.State[$I]
+                $Get.DisplayName[$I] = $Get.Current.DisplayName[$I]
+                $Get.PathName[$I]    = $Get.Current.PathName[$I]
+                $Get.Description[$I] = $Get.Current.Description[$I]
             }
+
+            Else
+            {
+                $Get.Scoped[$I]   = "[~]"
+            }
+        }   
+
+        $Return                       = [ PSCustomObject ]@{
+
+            Index                     = $Get.Index
+            Scoped                    = $Get.Scoped
+            Profile                   = $Get.Profile
+            Name                      = $Get.Name
+            StartMode                 = $Get.StartMode
+            State                     = $Get.State
+            DisplayName               = $Get.DisplayName
+            PathName                  = $Get.PathName
+            Description               = $Get.Description
         }
 
         $Return
+
+        Write-Theme -Action  "Importing [+]" "[ Service Configuration ]: Target Profile"
+
+
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -1104,38 +1247,32 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
 
-            [ ValidateNotNullOrEmpty () ]
             [ Parameter ( Mandatory ) ] [ PSCustomObject ] $ProfileObject )
 
-        $ProfileObject                | % { 
-        
-            ForEach ( $i in 0..( $_.Master.Count - 1 ) )
-            {
-                $Current              = $_.Master[$I]
+        $ProfileObject          | % { 
+            
+            $X                  = $_.Inf.Control | % { $_.DisplayActive , $_.DisplayInactive , $_.DisplaySkipped , $_.MiscXbox }
 
-                If ( $Current.State -eq "Running" )
-                {
-                    $_.Active        += $Current.Name
-                }
+            $_.Cfg              | % { 
 
-                If ( $Current.State -eq "Stopped" )
-                {
-                    $_.Inactive      += $Current.Name
-                }
-
-                If ( $Current.Scoped -eq "-" ) 
-                {
-                    $_.Skipped       += $Current.Name 
-                }
-                
-                If ( $Current.Name -in $_.Filter.Skipped )
-                {
-                    $_.Skipped       += $Current.Name
-                }
-
-                If ( $Current.Name -in $_.Filter.Xbox )
+                If ( $X[0] -eq 1 )
                 { 
-                    $_.Xbox           += $Current.Name
+                    $_.Active   = $_.Master | ? { $_.State -eq "Running" }                         | % { $_.Name } 
+                }
+
+                If ( $X[1] -eq 1 )
+                { 
+                    $_.Inactive = $_.Master | ? { $_.State -eq "Stopped" }                         | % { $_.Name } 
+                }
+
+                If ( $X[2] -eq 1 )
+                { 
+                    $_.Skipped  = $_.Master | ? { $_.Name -in $ProfileObject.Cfg.Filter.Skipped }  | % { $_.Name } 
+                }
+
+                If ( $X[3] -eq 1 )
+                { 
+                    $_.Xbox     = $_.Master | ? { $_.Name -in $ProfileObject.Cfg.Filter.Xbox }     | % { $_.Name } 
                 }
             }
         }
@@ -1257,7 +1394,7 @@
                         }
                     }
  
-                    Cfg                        = Get-ServiceProfile
+                    Cfg                        = Get-ServiceProfile 
 
                     Wpf                        = [ PSCustomObject ]@{
 
@@ -1267,10 +1404,12 @@
                     }
                 }
 
-                $Master                        | % {
+                $Master                        = Filter-ServiceProfile -ProfileObject $Master
                 
+                $Master                        | % {
+
                     $_.Inf.Control.TermsOfService  = 1
-                    $_.WPF                     | % { 
+                    $_.WPF                     | % {
                     
                         $_GUI                   = Convert-XAMLToWindow -Xaml $_.XAML -NE $_.Named -Passthru 
                     }
@@ -4121,47 +4260,58 @@
             [ Parameter ( Position = 0 , ParameterSetName =    "LocalHost" ) ] [ Switch ] $LocalHost ,
             [ Parameter ( Position = 0 , ParameterSetName = "NetworkHosts" ) ] [ Switch ] $NetworkHosts )
 
-        Get-NetRoute           | ? { $_.DestinationPrefix -eq "0.0.0.0/0" } | % { 
-        
-            $Interface         = $_.InterfaceIndex
-            $Gateway           = $_.NextHop 
-        }
+        $II                    = "InterfaceIndex"
+        $Range                 = @( 0 ; @( 1 ) * 126 ; 2 ; @( 3 ) * 64 ; @( 4 ) * 32 ; @( 5 ) * 16 ; @( 6 ) * 15 ; 7 )
+        $Class                 = "No Network,X A,Localhost,X B,X C,Multicast,R/D,Broadcast".Replace("X","Class").Split(',')[$Range]
 
-        $Gateway               | ? { $_ -eq $Null } | % { 
-        
-            Write-Theme -Action "Exception [!]" "No gateway, set a valid gateway and try again. Aborting" 12 4 15
-            Break 
-        }
-    
-        Get-NetAdapter -InterfaceIndex $Interface | % { 
-        
-            $Mac               = $_.MacAddress.Replace('-','') 
-        }
 
-        Get-NetIPConfiguration | ? { $_.IPV4DefaultGateway } | % { 
-        
-            $DNS               = $_.NetProfile.Name | % { 
-            
-                If ( $_ -ne ( Confirm-DomainName -Domain $_ ) )
-                {
-                    Sync-DNSSuffix -Get | % { $_.Domain }
-                }
+        $Return                = Get-NetRoute | ? { $_.DestinationPrefix -eq "0.0.0.0/0" } | % { 
 
-                Else
-                {
-                    $_
-                }
+            If ( $_ -eq $Null )
+            {
+                Write-Theme -Action "Exception [!]" "No gateway detected, set a valid gateway and try again. Aborting" 12 4 15
+                Break
             }
 
-            $IPV4              = $_.IPV4Address.IPAddress
+            [ PSCustomObject ]@{
+
+                Int            = $_.$II
+                Cfg            = Get-NetIPConfiguration -ifIndex $_.$II
+                IPV4           = Get-NetIPAddress       -ifIndex $_.$II -AddressFamily IPv4
+                IPV6           = Get-NetIPAddress       -ifIndex $_.$II -AddressFamily IPv6
+                GW             = $_.NextHop
+                MAC            = Get-NetAdapter -InterfaceIndex $_.$II | % { $_.MacAddress.Replace('-',':') }
+                DNS            = Get-NetIPConfiguration -InterfaceIndex $_.$II | % { 
+                
+                    [ PSCustomObject ]@{
+                    
+                        IPV4   = ($_.DNSServer | ? { $_.AddressFamily -eq 2  }).ServerAddresses
+                        IPV6   = ($_.DNSServer | ? { $_.AddressFamily -eq 23 }).ServerAddresses
+                    }
+                }
+
+                Domain         = Sync-DNSSuffix -Get | % { $_.Domain }
+
+                ARP            = ARP -A | ? { $_ -match "dynamic" -or $_ -match "static" } | % { 
+
+                    $X         = @{ 0 = $_[0..23] ; 1 = $_[24..41] ; 2 = $_[46..53] }
+
+                    $X         = 0..2 | % { ( $X[$_] | ? { $_ -ne " " } ) -join '' }
+
+                    [ PSCustomObject ]@{
+                    
+                        Host   = $X[0]#( $_[ 0..23] | ? { $_ -ne " " } ) -join ''
+                        MAC    = $X[1]#( $_[24..41] | ? { $_ -ne " " } ) -join ''
+                        Vendor = Resolve-MacAddress 
+                        Type   = $X[2]#( $_[46..53] | ? { $_ -ne " " } ) -join ''
+                        Class  = $Class[$X[0].Split('.')[0]]
+                    
+                    }
+                }
+            }
         }
 
-        $ARP = ARP -A          | ? { $_ -like "*$( $IPV4.Split('.')[0] )*" } | ? { $_ -notlike "*Int*" } | % { 
-        
-            ( $_[ 0..23]       | ? { $_ -ne " " } ) -join '' 
-        }
-
-        $Class                 = "N" , "A" , "B" ,"C" , "M" , "R" , "BR" ,"L"
+        $Class                 = "N,A,L,B,C,M,R,BR".Split(',')
         $Range                 = @( 0 ; @( 1 ) * 126 ; 7 ; @( 2 ) * 64 ; @( 3 ) * 32 ; @( 4 ) * 16 ; @( 5 ) * 15 ; 6 )
 
         $List                  = ForEach ( $I in 0..( $Arp.Count - 1 ) ) 
@@ -8676,132 +8826,6 @@
                 Write-Theme -Action "Exception [!]" "The WDS Service has experienced an issue" 12 4 15
             }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Write-Theme -Action "Collecting [~]" "Service State Catalog"
-
-        $Return         = [ PSCustomObject ]@{ 
-        
-            Service     = GCIM Win32_Service | Sort Name
-            Return      = ""
-        }
-
-        $Y              = ( "{0};{1};{0}, {1}" -f "Delayed Start" , "Trigger Start" ).Split( ';' )
-
-        $Return         | % {
-        
-            $_.Return   = ForEach ( $I in 0..( $_.Service.Count - 1 ) )
-            {
-                $X      = $_.Service[$I]
-                
-                Write-Progress -Activity "Collecting Service Catalog" -PercentComplete ( ( $I / $_.Service.Count ) * 100 )
-
-                "HKLM:\SYSTEM\CurrentControlSet\Services\$( $X.Name )" | % { 
-
-                    $C                   = If ( GP $_ | % { $_.DelayedAutoStart } ) { $Y[0] } Else { $Null }
-                    
-                    If ( GCI $_ -EA 0 | % { $_.Name -like "*Trigger*" } )
-                    {
-                        $C               = If ( $C -ne $Null ) { $Y[2] } Else { $Y[1] }
-                    }
-
-                    [ PSCustomObject ]@{
-                            
-                        Name             = $X.Name
-                        StartMode        = $X.StartMode | % { If ( $C -ne $Null ) { "$_ ($C)" } Else { $_ } }
-                        State            = $X.State
-                        DisplayName      = $X.DisplayName
-                        PathName         = $X.PathName
-                        Description      = $X.Description
-                    }
-                }
-            }
-        }
-        
-        $Return                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Resolve-Windows # CIM / Edition Collection Table __________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding ( ) ] Param (
-
-            [ Parameter ( ParameterSetName =  "System" ) ] [ Switch ] $System      ,
-            [ Parameter ( ParameterSetName =      "OS" ) ] [ Switch ] $MSInfo      ,
-            [ Parameter ( ParameterSetName = "Edition" ) ] [ Switch ] $Edition     ,
-            [ Parameter ( ParameterSetName =     "SKU" ) ] [ Switch ] $SKU         ,
-            [ Parameter ( ParameterSetName =    "Type" ) ] [ Switch ] $Type        ,
-            [ Parameter ( ParameterSetName =      "PS" ) ] [ Switch ] $PS          ,
-            [ Parameter ( ParameterSetName =     "Env" ) ] [ Switch ] $Environment ,
-            [ Parameter ( ParameterSetName =     "All" ) ] [ Switch ] $All         )
-
-        $Return             = [ PSCustomObject ]@{
-
-            OS              = GCIM Win32_OperatingSystem
-            CS              = GCIM Win32_ComputerSystem
-            ReleaseID       = GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID }
-            Edition         = @( ( '1507,10240,Threshold 1,Release To Manufacturing;1511,10586,Threshold 2,November UX;1607,14393,RX 1' + 
-                              ',Anniversary UX;1703,15063,RX 2,CX UX;1703,16299,RX 3,Fall CX UX;1803,17134,RX 4,April 2018 UX;1809,177' + 
-                              '63,RX 5,October 2018 UX;1903,18362,19H1,May 2019 UX;1909,18363,19H2,November 2019 UX;2004,19000,20H1,Un' + 
-                              'released' ).Replace('RX','Redstone').Replace('UX' ,'Update').Replace('CX','Creators').Split( ';' )       | ? { 
-                              
-                              $_.Split(',')[0] -eq ( GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID } ) } ) | % { 
-                
-                                [ PSCustomObject ]@{
-                    
-                                    Version     = $_.Split(',')[0]
-                                    Build       = "10.0.{0}" -f $_.Split(',')[1]
-                                    CodeName    = $_.Split(',')[2]
-                                    Name        = $_.Split(',')[3]
-                                }
-                            }
-
-            SKU             = ('Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter' + 
-                              ' # !,Small Business # !,$ # !,Starter !,Datacenter # Core !,Standard # Core !,$ # Core !,$ # IA64 !,Bus' + 
-                              'iness N !,Web # !,Cluster # !,Home # !,Storage Express # !,Storage Standard # !,Storage Workgroup # !,S' + 
-                              'torage $ # !,# For Small Business !,Small Business # Premium !,TBD,@ $,@ Ultimate,Web # Core,-,-,-,# Fo' + 
-                              'undation,@ Home #,-,@ # Standard No Hyper-V Full,@ # Datacenter No Hyper-V Full,@ # $ No Hyper-V Full,@' + 
-                              ' # Datacenter No Hyper-V Core,@ # Standard No Hyper-V Core,@ # $ No Hyper-V Core,Microsoft Hyper-V #,St' + 
-                              'orage # Express Core,Storage # Standard Core,# Workgroup Core,Storage # $ Core,Starter N,Professional,P' + 
-                              'rofessional N,@ Small Business # 2011 Essentials,-,-,-,-,-,-,-,-,-,-,-,-,Small Business # Premium Core,' + 
-                              '@ # Hyper Core V,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,--,-,-,@ Thin PC,-,@ Embedded Industry,-,-,-,-,-,-' + 
-                              ',-,@ RT,-,-,Single Language N,@ Home,-,@ Professional with Media Center,@ Mobile,-,-,-,-,-,-,-,-,-,-,-,' + 
-                              '-,-,@ Embedded Handheld,-,-,-,-,@ IoT Core'
-                              ).Replace("!","Edition").Replace("@","Windows").Replace("#","Server").Replace('$',"Enterprise").Split(',')
-            
-            Code            = ""
-            Chassis         = ",Desktop,Mobile/Laptop,Workstation,Server,Server,Appliance,Server,Maximum".Split(',')
-            PSVersion       = $PSVersionTable
-            Env             = [ PSCustomObject ]@{ }
-
-        }
-
-        $Return             | % { 
-
-            $_.Code         = $_.OS.OperatingSystemSKU
-            $_.SKU          = $_.SKU[ $_.Code ]
-            $_.Chassis      = $_.Chassis[$_.CS.PCSystemType]
-
-            [ Environment ]::GetEnvironmentVariables().GetEnumerator() | % { 
-
-                $Return.Env  | Add-Member -MemberType NoteProperty -Name $_.Name -Value $_.Value
-            }
-        }
-
-        $Return | % { 
-
-            If ( $System  ) { $_.CS        }
-            If ( $MSInfo  ) { $_.OS        }
-            If ( $Edition ) { $_.Edition   }
-            If ( $SKU     ) { $_.SKU       }
-            If ( $Type    ) { $_.Chassis   }
-            If ( $PS      ) { $_.PSVersion }
-            If ( $Environment ) { $_.Env       }
-            If ( $All     ) { $_           }
-        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
