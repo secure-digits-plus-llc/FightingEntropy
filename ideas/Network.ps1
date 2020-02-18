@@ -1,4 +1,5 @@
 
+
 $ClassID = @( 1..126 | % { "A" } ; 128..191 | % { "B" } ; 192..223 | % { "C" } )
 
 # Declare Table
@@ -44,9 +45,9 @@ $Table     = @{
         SNNetwork = ""
         SNHost    = ""
 
-        Range     = @{ 0 = 0 ; 1 = 0 ; 2 = 0 }
-        Division  = 0
-        Output    = @( )
+        Range     = @{ 0 = 1 ; 1 = 1 ; 2 = 1 }
+        Divide    = @{ 0 = 1 ; 1 = 1 ; 2 = 1 }
+        Output    = @{ }
     }
 
     # Determine class
@@ -58,46 +59,69 @@ $Table     = @{
     $ID.SNHost    = $ID.SNMask[1..3]
     $ID.Class     = $ClassID[$ID.IPNetwork]
 
+    If ( $ID.Class -eq "A" )
+    {
+        If ( $ID.SNHost[0] -ne 0 ) 
+        {
+            $Step         = 256 - $ID.SNHost[0]
 
-If ( $ID.Class -in "A" , "B" , "C" )
-{
-    If ( $ID.SNHost[0] -ne 0 ) 
-    { 
-        $ID.Range[0] = 0..255 | % { $_ % $ID.SNHost[0] }
-        $ID.Division = 256 / $ID.SNHost[0]
-    } 
+            $Divide       = 256 / $Step
+
+            $Output       = @{ }
+
+            0..( $Divide - 1 ) | % { 
+
+                $Output.Add( $_ , @( ) )
+            }
+
+            $I            = -1
+
+            0..255 | % { 
+
+                If ( $_ % $ID.SNHost[0] -eq 0 )
+                {
+                    $I ++
+                }
+
+                $Output[$I] += $_
+            }
+        }
     
-    Else 
-    { 
-        $ID.Range[0] = 0..255
-        $ID.Division = 1
+        Else 
+        {
+            $ID.Range[2]  = 0..255 
+            $ID.Divide[2] = 1
+        }
     }
-}
 
-If ( $ID.Class -in "A" , "B" )
-{
-    $ID.Range[1]  = If ( $ID.SNHost[1] -ne 0 ) 
-    { 
-        0..255    | % { $_ % $ID.SNHost[1] } 
-    } 
+    If ( $ID.Class -in "A" , "B" )
+    {
+        If ( $ID.SNHost[1] -ne 0 ) 
+        { 
+            $ID.Range[1]  = 0..255 | % { $_ % $ID.SNHost[1] }
+            $ID.Divide[1] = 256 / $ID.SNHost[1] 
+        }
     
-    Else 
-    { 
-        0..255 
+        Else
+        {
+            $ID.Range[1]  = 0..255 
+            $ID.Divide[1] = 1
+        }
     }
-}
 
-If ( $ID.Class -eq "A" )
-{
-    $ID.Range[2]  = If ( $ID.SNHost[2] -ne 0 ) 
-    { 
-        0..255    | % { $_ % $ID.SNHost[2] } 
-    } 
+    If ( $ID.Class -in "A" , "B" , "C" )
+    {
+        If ( $ID.SNHost[0] -ne 0 )
+        {
+            $ID.Range[0]  = 0..255 | % { $_ % $ID.SNHost[0] }
+            $ID.Divide[0] = 256 / $ID.SNHost[0]
+        }
     
-    Else 
-    { 
-        0..255 
+        Else
+        { 
+            $ID.Range[0]  = 0..255
+            $ID.Divide[0] = 1
+        }
     }
-}
 
-    $ID.Range
+    
