@@ -4325,13 +4325,12 @@
 
                 $ID           = [ PSCustomObject ]@{
 
-                    IPAddress = ( [ IPAddress ] "10.10.0.1" ).GetAddressBytes()
-                    Mask      = ( [ IPAddress ] "255.128.0.0" ).GetAddressBytes()
+                    IPAddress = ( [ IPAddress ] $Address ).GetAddressBytes()
+                    Mask      = ( [ IPAddress ] $Mask    ).GetAddressBytes()
                     Build     = 0..3
                     Range     = 0..3
                     Count     = @( )
                 }
-
 
                 $ClassID      = & $Script.Class $Address
 
@@ -4393,7 +4392,7 @@
 
         GCI $Resource.Path "*zip*"                     | % { 
         
-            Write-Progress -Activity "Loading $( $_.BaseName ).zip" -PercentComplete ( ( $C / 3 ) * 100 )
+            Write-Progress -Activity "Loading $( $_.BaseName )" -PercentComplete ( ( $C / 3 ) * 100 )
 
             Expand-Archive -Path $_.FullName -DestinationPath $_.DirectoryName -Force ; $C ++
         }
@@ -4407,27 +4406,30 @@
             $Resource.$( $_.Basename )                = GC $_.FullName ; $C ++ ; RI $_.FullName -VB 
         }
 
-        $C = 0
-
         $Return                                   = [ PSCustomObject ]@{
         
-            ARPInterface                          = @( )
+            ARP                                   = [ PSCustomObject ]@{ 
+            
+                Interface                         = $Root.Arp | ? { $_ -match "Interface" } | % { $_.Replace('Interface: ','').Split(' ')[0] }
+                Table                             = @( )
+            }
+
             Adapter                               = @( )
             Interface                             = @( )
-            ARPTable                              = @( )
-            Action                                = @( )
             Current                               = @( )
             Switch                                = 0
         }
 
-        $Root.Arp | ? { $_ -match "Interface" }   | % { $Return.ARPInterface += $_.Replace('Interface: ','').Split(' ')[0] ; $C ++ }
-
-        If ( $Return.ARPInterface -eq 1 ) { $Return.Current = $Root.ARP }
+        If ( $Return.ARP.Interface.Count -eq 1 )
+        { 
+            $Return.Current = $Root.ARP 
+        }
         
-        If ( $Return.ARPInterface -gt 1 )
+        If ( $Return.ARP.Interface.Count -gt 1 )
         {
             $Return.Switch                        = 1
             $Y                                    = 0
+            $C                                    = $Return.ARP.Interface.Count
 
             $Item                                 = [ PSCustomObject ]@{
                 
@@ -4445,7 +4447,7 @@
                     $Item.Line = 0 
                 }
                 
-                $Item.Current[ $Item.Rank ] += $Root.Arp[ $Item.Line ]
+                $Item.Current[ $Item.Rank ]      += $Root.Arp[ $Item.Line ]
                 $Item.Line ++
                     
                 If ( $Item.Line % 14 -eq     0 ) 
@@ -4467,19 +4469,19 @@
                 $Return.Current = $Item.Current[$Y]
             }
 
-            $Current | % { 
+            $Return.Current | % { 
     
                 ForEach ( $i in "dynamic" , "static" )
                 {
                     If ( $_ -match $I )
                     {
-                        $X = @{ 0 = ($_[0..23]) ; 1 = ($_[24..41]) }
+                        $X = @{ 0 = ( $_[0..23] ) ; 1 = ( $_[24..41] ) }
                         
                         0..1 | % { $X[$_] = "$( $X[$_] )".Replace(' ','') }
                             
                         If ( $X[0] -notin $Return.Adapter.IPV4 )
                         {
-                            $Return.Adapter += [ PSCustomObject ]@{
+                            $Return.Arp.Table += [ PSCustomObject ]@{
 
                                 Hostname              = "-"
                                 IPV4                  = ($X[0])
@@ -4498,78 +4500,45 @@
         
         Until ( $Return.Switch -eq 0 )
 
-        $C = 0
-
-        ForEach ( $C in 0..( $Return.Adapter.Count - 1 ) ) 
+        If ( $Return.Arp.Table.Count -eq 0 )
         {
-            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $C / $Return.Adapter.Count ) * 100 )
-
-            If ( $Return.Adapter[$C].Vendor | % { ( $_ -eq "ffffff" ) -or ( $_ -eq "01005e" ) } )
-            {
-                $Return.Adapter[$C].HostName = "(N/A)"
-                $Return.Adapter[$C].Vendor   = "(N/A)"
-            }
+            Write-Theme -Action "Exception [!]" "Functional Adapter(s) Not Detected" 12 4 15
+            Break
         }
-            
-        0..( $Return.Adapter.Count - 1 ) | % { 
 
-            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $_ / $Return.Adapter.Count ) * 100 )
+        $Return.Arp.Table | ? { $_.Vendor -eq "ffffff" -or $_.Vendor -eq "01005e" } | % { $_.HostName = "N/A" ; $_.Vendor = "Multicast" }
 
-            $Return.Adapter[$_] | % {
+        $Object           = $Return.Arp.Table | ? { $_.HostName -eq "-" }
 
-                If ( $_.Vendor | % { ( $_ -eq "ffffff" ) -or ( $_ -eq "01005e" ) } )
-                {
-                    $_.HostName = "(N/A)"
-                    $_.Vendor   = "(N/A)"
-                }
+        ForEach ( $I in 0..( $Object.Count - 1 ) )
+        {
+            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $I / $Object.Count ) * 100 )
 
-                Else
-                {
-                    #$_.HostName = Try { Resolve-DNSName $_.IPV4 -EA 0 | % { $_.NameHost } } Catch { "Unknown" }
+            $Object[$I].HostName = Try { Resolve-DNSName $Object[$I].IPV4 -EA 0 | % { $_.NameHost } } Catch { "Unknown" }
                 
-                    $Z = [ Convert ]::ToInt64( $_.Vendor , 16 )   
-
-                    $X = 0
+            $Convert = [ Convert ]::ToInt64( $Object[$I].Vendor , 16 ) ; 
+            $Rank    = 0 
                                     
-                    ForEach ( $I in 1..( $Resource.Count.Count ) )
-                    {
-                        $X = $X + $Resource.Count[$I] 
+            ForEach ( $J in 1..( $Resource.Count.Count ) )
+            {
+                $Rank = $Rank + $Resource.Count[$J]
 
-                        If ( $X -eq $Z )
-                        { 
-                            $_.Vendor = $Resource.Vendor[ ( $Resource.Index[ $I + 1 ] ) ]
-                        }
-                    }
+                If ( $Rank -eq $Convert )
+                { 
+                    $Object[$I].Vendor = $Resource.Vendor[ ( $Resource.Index[ $J + 1 ] ) ]
                 }
-            }
+            }<# Return Edit #>
         }
 
-        Get-NetRoute                              | ? { $_.DestinationPrefix -eq "0.0.0.0/0" } | % { 
+        $Return.Interface += Get-NetRoute         | ? { $_.DestinationPrefix -eq "0.0.0.0/0" }
 
-            If ( $_ -eq $Null )
-            {
-                Write-Theme -Action "Exception [!]" "No Gateway detected, set outbound gateway and try again. Aborting" 12 4 15
-                Break
-            }
-
-            Write-Theme -Action "Found [+]" "Network Interface" 11 11 15
-
-            $Get                                  = [ PSCustomObject ]@{
-                
-                GW                                = $_.NextHop
-                IfIndex                           = $_.InterfaceIndex
-                IfAlias                           = $_.InterfaceAlias
-                Inf                               = Get-NetIPConfiguration -ifIndex $_.InterfaceIndex -Detailed
-                IPV4                              = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv4
-                IPV6                              = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv6
-                ARP                               = $Return.Adapter | ? { $_.Mac.Replace('-','') | % { ( $_ -notmatch "ffffff" ) -and ( $_ -notmatch "01005e" ) } }
-            }
-
-            If ( $Get -ne $Null )
-            {
-                Continue
-            }
+        If ( $Return.Interface -eq $Null )
+        {
+            Write-Theme -Action "Exception [!]" "Gateway not detected. Aborting" 12 4 15
+            Break
         }
+
+        Write-Theme -Action "Found [+]" "($( $Return.Interface.Count )) Network Interface(s)" 11 11 15
 
             $Control                              = [ PSCustomObject ]@{ 
 
