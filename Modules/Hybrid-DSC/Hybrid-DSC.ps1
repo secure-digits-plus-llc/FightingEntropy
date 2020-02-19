@@ -200,7 +200,22 @@
         ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
             
             [ PSCustomObject ]@{ Parent = Split-Path $_ -Parent ; Leaf = Split-Path $_ -Leaf }
+        }   
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-IPV4Class # Returns the IPV4 Address Class ____________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
 
+            [ ValidateNotNullOrEmpty () ]
+            [ Parameter ( Mandatory ) ] [ String ] $Address )
+
+        $Address.Split('.')[0] | % { 
+
+            "No Network,Class A,Localhost,Class B,Class C,Multicast,R/D,Broadcast".Split(',')[@(0;@(1)*126;2;@(3)*64;@(4)*32;@(5)*16;@(6)*15;7)][$_]
+        
         }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -1768,8 +1783,13 @@
         {
             If ( $Items.Count -gt 1 ) 
             { 
+                $X     = $Items.Count | Measure -Character | % { $_.Characters }
+
                 $Count = 0..( $Items.Count - 1 )
-                $Count | % { $Table | Add-Member -MemberType NoteProperty -Name "Item:$_" -Value @{ ID = "$( $Items[$_] )" ; Value = "$( $Values[$_] )" } }
+
+                $Name  = $Count | % { "{0:d$X}" -f $_ }
+
+                $Count | % { $Table | Add-Member -MemberType NoteProperty -Name "Item:$( $Name[$_] )" -Value @{ ID = "$( $Items[$_] )" ; Value = "$( $Values[$_] )" } }
             }
             
             If ( $Items.Count -eq 1 )
@@ -3200,13 +3220,36 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param ( [ Parameter () ][ Switch ] $All )
 
-        $Services = Get-DSCFeatureList ; $GWF = Get-WindowsFeature ; $Array = @( ) ; $Table = [ Ordered ]@{ Installed = @( ) ; Available = @( ) }
+        $Services = Get-DSCFeatureList
+        
+        $GWF      = Get-WindowsFeature
 
-        ForEach ( $I in $Services ) { $X = $GWF | ? { $_.Name -eq $I } | % { 
-            If ( $_.InstallState -ne "Installed" ) { $Array += "$I [_]" ; $Table.Available += "$I [_]" }
-            If ( $_.InstallState -eq "Installed" ) { $Array += "$I [X]" ; $Table.Installed += "$I [X]" } } }
+        $Array    = @( ) 
+        
+        $Table    = [ Ordered ]@{ Installed = @( ) ; Available = @( ) }
 
-        Return $( If ( !$All ) { $Table } If ( $All ) { $Array } )                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+
+
+        ForEach ( $I in $Services ) 
+        { 
+            $X = $GWF | ? { $_.Name -eq $I } | % { 
+            
+            If ( $_.InstallState -ne "Installed" ) 
+            { 
+                $Array           += "$I [_]" 
+                $Table.Available += "$I [_]" 
+            }
+
+            If ( $_.InstallState -eq "Installed" ) 
+            { 
+                $Array           += "$I [X]"
+                $Table.Installed += "$I [X]" 
+            } 
+        } 
+    }
+
+    Return $( If ( !$All ) { $Table } If ( $All ) { $Array } )     
+                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                              __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\____________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -4241,181 +4284,455 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Resolve-NetworkMap # Obtains Extensive Network Information _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     
+        
         Write-Theme -Action "Loading [~]" "Network Mapping Components"
 
-        "C:\Users\Administrator\Documents\WindowsPowerShell\Modules\Hybrid-DSC\Map" | % {  
+        $Resource                                  = [ PSCustomObject ]@{
 
-            "$_\Count" , "$_\Index" , "$_\Vendor" | % { Expand-Archive -Path "$_.zip" -DestinationPath $_ -Force } 
+            Path                                   = Get-ScriptRoot | % { "{0}\Map" -f $_.Parent }
+            Count                                  = ""
+            Index                                  = ""
+            Vendor                                 = ""
+        }
 
-            $Root                                 = [ PSCustomObject ]@{ 
-        
-                Map                               = $_
-                Count                             = "$_\Count\Count.txt"   | % { GC $_ ; RI $_ ; RI ( Split-Path -Parent $_ ) }
-                Index                             = "$_\Index\Index.txt"   | % { GC $_ ; RI $_ ; RI ( Split-Path -Parent $_ ) }
-                Vendor                            = "$_\Vendor\Vendor.txt" | % { GC $_ ; RI $_ ; RI ( Split-Path -Parent $_ ) }
+        $Script                                    = [ PSCustomObject ]@{
+
+            Class                                  = {
+                
+                Param( $Address )("No Network,X A,Localhost,X B,X C,Multicast,R/D,Broadcast"
+                ).Replace("X","Class").Split(',')[@(0;@(1)*126;2;@(3)*64;@(4)*32;@(5)*16;@(6)*15;7)][$Address.Split('.')[0]]
+            }
+
+            Netmask                                = {
+            
+                Param( $Mask )
+
+                $Mask | % { 
+                
+                    $X = @{ 0 = 255 ; 1 = 0 ; 2 = 0 ; 3 = 0 }
+                    $Y = $_ % 8 ; $Z = ( $_ - ( $Y ) ) / 8
+                    If ( $_ -in 16..30 ) { $X[1] = 255 } 
+                    If ( $_ -in 24..30 ) { $X[2] = 255 }
+
+                    $X[$Z] = "0,128,192,224,240,248,252,254,255".Split(',')[$Y]
+                    $X[0..3] -join '.'
+                }
+            }
+
+            Range                                  = {
+
+                Param( $Address , $Mask )
+
+                $ID           = [ PSCustomObject ]@{
+
+                    IPAddress = ( [ IPAddress ] "10.10.0.1" ).GetAddressBytes()
+                    Mask      = ( [ IPAddress ] "255.128.0.0" ).GetAddressBytes()
+                    Build     = 0..3
+                    Range     = 0..3
+                    Count     = @( )
+                }
+
+
+                $ClassID      = & $Script.Class $Address
+
+                If ( $ID.IPAddress[0] -in @( 0 , 127 ; 224..255 ) )
+                {
+                    Write-Theme -Action "Exception [!]" "$( $ClassID[$ID.IPAddress[0]] ) Address Detected" 12 4 15
+                    Break
+                }
+
+                If ( ( $ID.IPAddress[0..1] -join '.' ) -eq "169.254" )
+                {
+                    Write-Theme -Action "Exception [!] " "Automatic Private IP Address Detected" 12 4 15
+                    Break
+                }
+
+                ForEach ( $I in 0..3 )
+                {
+                    $ID.Build[$I] = 256 - $ID.Mask[$I]
+
+                    If ( $ID.Build[$I] -eq 1 )
+                    {
+                        $ID.Range[$I] = $ID.IPAddress[$I]
+                    }
+
+                    If ( $ID.Build[$I] -in 2..255 )
+                    {
+                        $Z = $ID.Build[$I]
+
+                        ForEach ( $Y in 0..( ( 256 / $Z ) - 1 ) )
+                        { 
+                            $X = $Z * $Y | % { $_..( $_ + ( $Z - 1 ) ) }
+
+                            If ( $ID.IPAddress[$I] -in $X )
+                            {
+                                $ID.Range[$I] = "$( $X[0] )..$( $X[$Z - 1] )"
+                            }
+                        }
+                    }
+
+                    If ( $ID.Build[$I] -eq    256 ) { $ID.Range[$I]  = "*" }
+                }
+
+                $ID.Count = ( IEX ( ( 0..3 | % { $ID.Build[$_] } ) -join "*" ) ) - 2
+
+                $ID
             }
         }
+
+        $Root                                      = [ PSCustomObject ]@{ 
+        
+            Domain                                 = GP "HKLM:\System\CurrentControlSet\Services\TCPIP\Parameters" | % { $_.Domain.ToUpper() }
+            Hostname                               = GP "HKLM:\System\CurrentControlSet\Services\TCPIP\Parameters" | % { $_.Hostname.ToUpper() }
+            ARP                                    = @( ARP -A )
+            NetStat                                = @( netstat -ant )
+            Computer                               = GCIM Win32_ComputerSystem
+        }
+        
+        $C = 0
+
+        GCI $Resource.Path "*zip*"                     | % { 
+        
+            Write-Progress -Activity "Loading $( $_.BaseName ).zip" -PercentComplete ( ( $C / 3 ) * 100 )
+
+            Expand-Archive -Path $_.FullName -DestinationPath $_.DirectoryName -Force ; $C ++
+        }
+
+        $C = 0
+
+        GCI $Resource.Path "*txt*"                     | % { 
+
+            Write-Progress -Activity "Loading $( $_.BaseName ).txt" -PercentComplete ( ( $C / 3 ) * 100 )
+        
+            $Resource.$( $_.Basename )                = GC $_.FullName ; $C ++ ; RI $_.FullName -VB 
+        }
+
+        $C = 0
 
         $Return                                   = [ PSCustomObject ]@{
-
-            Class                                 = "No Network,X A,Localhost,X B,X C,Multicast,R/D,Broadcast".Replace("X","Clas" + 
-                                                    "s").Split(',')[@(0;@(1)*126;2;@(3)*64;@(4)*32;@(5)*16;@(6)*15;7)]
-
-            ARP                                   = [ PSCustomObject ]@{ Static = @( ) ; Dynamic = @( ) ; Object = ARP -A ; Collect = @( ) }
-
-            MAC                                   = [ PSCustomObject ]@{ 
-            
-            Addresses                             = @( )
-            Count                                 = $Root.Count
-            Index                                 = $Root.Index
-            Vendor                                = $Root.Vendor
-
-            Frame                                 = @( )
-            Hex                                   = @( )
-
-            Stack                                 = 0
-
-            Return                                = @( )
-            
-            }
-
-            Full                                  = @( )
+        
+            ARPInterface                          = @( )
+            Adapter                               = @( )
+            Interface                             = @( )
+            ARPTable                              = @( )
+            Action                                = @( )
+            Current                               = @( )
+            Switch                                = 0
         }
 
-        ForEach ( $I in 0..( $Return.Arp.Object.Count - 1 ) ) 
-        { 
-            $Return.Arp.Object[$I]                | % { 
-            
-                If ( $_ -match "dynamic" ) 
+        $Root.Arp | ? { $_ -match "Interface" }   | % { $Return.ARPInterface += $_.Replace('Interface: ','').Split(' ')[0] ; $C ++ }
+
+        If ( $Return.ARPInterface -eq 1 ) { $Return.Current = $Root.ARP }
+        
+        If ( $Return.ARPInterface -gt 1 )
+        {
+            $Return.Switch                        = 1
+            $Y                                    = 0
+
+            $Item                                 = [ PSCustomObject ]@{
+                
+                Count                             = ( $Root.ARP.Count / $C )
+                Rank                              = 0
+                Line                              = $Null
+                Current                           = @{ }
+            }
+
+            0..( $Root.Arp.Count - 1 )            | % { 
+                
+                If ( $Item.Line      -eq $Null ) 
                 { 
-                    If ( $_ -notin $Return.ARP.Dynamic ) { $Return.ARP.Dynamic += $_ }
+                    $Item.Current.Add( $Item.Rank , @( ) )
+                    $Item.Line = 0 
                 }
                 
-                If ( $_ -match "static"  ) 
+                $Item.Current[ $Item.Rank ] += $Root.Arp[ $Item.Line ]
+                $Item.Line ++
+                    
+                If ( $Item.Line % 14 -eq     0 ) 
                 { 
-                    If ( $_ -notin $Return.ARP.Static  ) { $Return.ARP.Static  += $_ }
-                }
-            }
-        }
+                    $Item.Rank ++ 
 
-        $Return.Arp                               | % { 
-        
-            $_.Collect                            = @( )
-
-            $_.Dynamic , $_.Static                | % { $Return.Arp.Collect += $_ } 
-        }
-
-        ForEach ( $I in 0..( $Return.Arp.Collect.Count - 1 ) )
-        {
-            $Return.Arp.Collect[$I]               | % { $X     = @{ 0 = $_[  0..23 ] ; 1 = $_[ 24..41 ] ; 2 = $_[ 46..53 ] }
-
-                                             0..2 | % { $X[$_] =  "$( $X[$_] )".Replace( " " , "" ) } 
-        
-                    $Return.Arp.Collect[$I]       = [ PSCustomObject ]@{ 
-            
-                        Host                      = $X[0]
-                        Class                     = $Return.Class[ ( $X[0] ).Split( '.' )[0] ]
-                        MAC                       = $X[1]
-                        Type                      = $X[2]
+                    If ( $Item.Current.Count -ne $C ) 
+                    { 
+                        $Item.Current.Add( $Item.Rank , @( ) ) 
                     }
+                }
             }
         }
-
-        $Range                                    = @( )
-
-        $Return.MAC.Addresses                     = $Return.Arp.Collect.Mac
-
-        $Return.MAC.Hex                           = $Return.Arp.Collect.Mac | % { (  $_.Replace('-','') )[ 0..5 ] -join '' }
-
-        $Return.MAC.Frame                         = $Return.MAC.Hex         | % { [ Convert ]::ToInt64( $_ , 16 ) }
             
-        $Return.MAC.Return                        = $Return.MAC.Hex
-
-        ForEach ( $I in 0..( $Return.MAC.Hex.Count - 1 ) )
+        Do
         {
-            If ( $Return.MAC.Hex[$I] | % { $_ -eq "ffffff" -or $_ -eq "01005e" } ) { "([Unknown/Multicast])" } 
-            
-            Else { $Range += $I }
-        }
-
-        If ( $Range -gt 1 ) { $Range = 0..( $Range.Count - 1 ) }
-
-        ForEach ( $I in $Range )
-        {
-            Write-Progress -Activity "Collecting [~]" -PercentComplete ( ( $I / $Range.Count ) * 100 )
-                
-            $Return.MAC.Stack                     = 0
-                
-            ForEach ( $X in 1..( $Return.MAC.Count.Count ) )
+            If ( $Return.Switch -eq 1 )
             {
-                $Return.MAC.Stack                 = $Return.MAC.Stack + $Return.MAC.Count[$X] 
+                $Return.Current = $Item.Current[$Y]
+            }
 
-                If ( $Return.MAC.Stack -eq $Return.MAC.Frame[$I] ) 
-                { 
-                    $Return.MAC.Return[$I] = $Return.MAC.Vendor[ ( $Return.MAC.Index[ $X + 1 ] ) ] 
+            $Current | % { 
+    
+                ForEach ( $i in "dynamic" , "static" )
+                {
+                    If ( $_ -match $I )
+                    {
+                        $X = @{ 0 = ($_[0..23]) ; 1 = ($_[24..41]) }
+                        
+                        0..1 | % { $X[$_] = "$( $X[$_] )".Replace(' ','') }
+                            
+                        If ( $X[0] -notin $Return.Adapter.IPV4 )
+                        {
+                            $Return.Adapter += [ PSCustomObject ]@{
+
+                                Hostname              = "-"
+                                IPV4                  = ($X[0])
+                                Class                 = & $Script.Class $X[0]
+                                Mac                   = ($X[1])
+                                Vendor                = ($X[1])[0,1,3,4,6,7] -join ''
+                                    
+                            }
+                        }
+                    }
+                }
+            }
+
+            If ( $Return.Switch -eq 1 ) { If ( $Y -eq $Item.Range.Count - 1 ) { $Y ++ } Else { $Return.Switch = 0 } } 
+        }
+        
+        Until ( $Return.Switch -eq 0 )
+
+        $C = 0
+
+        ForEach ( $C in 0..( $Return.Adapter.Count - 1 ) ) 
+        {
+            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $C / $Return.Adapter.Count ) * 100 )
+
+            If ( $Return.Adapter[$C].Vendor | % { ( $_ -eq "ffffff" ) -or ( $_ -eq "01005e" ) } )
+            {
+                $Return.Adapter[$C].HostName = "(N/A)"
+                $Return.Adapter[$C].Vendor   = "(N/A)"
+            }
+        }
+            
+        0..( $Return.Adapter.Count - 1 ) | % { 
+
+            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $_ / $Return.Adapter.Count ) * 100 )
+
+            $Return.Adapter[$_] | % {
+
+                If ( $_.Vendor | % { ( $_ -eq "ffffff" ) -or ( $_ -eq "01005e" ) } )
+                {
+                    $_.HostName = "(N/A)"
+                    $_.Vendor   = "(N/A)"
+                }
+
+                Else
+                {
+                    #$_.HostName = Try { Resolve-DNSName $_.IPV4 -EA 0 | % { $_.NameHost } } Catch { "Unknown" }
+                
+                    $Z = [ Convert ]::ToInt64( $_.Vendor , 16 )   
+
+                    $X = 0
+                                    
+                    ForEach ( $I in 1..( $Resource.Count.Count ) )
+                    {
+                        $X = $X + $Resource.Count[$I] 
+
+                        If ( $X -eq $Z )
+                        { 
+                            $_.Vendor = $Resource.Vendor[ ( $Resource.Index[ $I + 1 ] ) ]
+                        }
+                    }
                 }
             }
         }
 
-        $Return.Full                              = 0..( $Return.MAC.Return.Count - 1 ) | % { 
+        Get-NetRoute                              | ? { $_.DestinationPrefix -eq "0.0.0.0/0" } | % { 
 
-            [ PSCustomObject ]@{ 
+            If ( $_ -eq $Null )
+            {
+                Write-Theme -Action "Exception [!]" "No Gateway detected, set outbound gateway and try again. Aborting" 12 4 15
+                Break
+            }
 
-                Host                              = $Return.Arp.Collect.Host[$_]
-                Class                             = $Return.Arp.Collect.Class[$_]
-                MAC                               = $Return.Arp.Collect.Mac[$_]
-                Vendor                            = $Return.Mac.Return[$_]
-                Type                              = $Return.Arp.Collect.Type[$_]
+            Write-Theme -Action "Found [+]" "Network Interface" 11 11 15
+
+            $Get                                  = [ PSCustomObject ]@{
+                
+                GW                                = $_.NextHop
+                IfIndex                           = $_.InterfaceIndex
+                IfAlias                           = $_.InterfaceAlias
+                Inf                               = Get-NetIPConfiguration -ifIndex $_.InterfaceIndex -Detailed
+                IPV4                              = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv4
+                IPV6                              = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv6
+                ARP                               = $Return.Adapter | ? { $_.Mac.Replace('-','') | % { ( $_ -notmatch "ffffff" ) -and ( $_ -notmatch "01005e" ) } }
+            }
+
+            If ( $Get -ne $Null )
+            {
+                Continue
             }
         }
 
-    $Return.Full
+            $Control                              = [ PSCustomObject ]@{ 
+
+                HostName                          = $Root.HostName
+                Domain                            = $Root.Domain
+                Gateway                           = $Get.GW
+                IfIndex                           = $Get.IfIndex
+                IfAlias                           = $Get.IfAlias
+                Details                           = $Get.INF
+
+                IPV4                              = [ PSCustomObject ]@{ 
+
+                        Class                     = $Root.Class[(($Get.IPV4.IPAddress).Split('.')[0])]
+                        Address                   = $Get.IPV4.IPAddress
+                        CIDR                      = $Get.IPV4.PrefixLength
+                        Netmask                   = & $Root.Netmask $Get.IPV4.PrefixLength
+                        Range                     = ""
+                        DNS                       = $Get.INF.DNSServer | ? { $_.AddressFamily -eq 2   } | % { $_.ServerAddresses }
+                        ARP                       = $Get.ARP
+
+                    }
+                }
+                    
+                IPV6                              = $Get.IPV6 | % { 
+
+                    [ PSCustomObject ]@{
+
+                        Address                   = $_.IPAddress
+                        PrefixLength              = $_.PrefixLength 
+                    }
+                }
+
+                MACAddress                        = $Get.INF.NetAdapter.LinkLayerAddress
+                Vendor                            = "$($Get.INF.NetAdapter.LinkLayerAddress)".Replace('-','') | % { 
+                    
+                        $Z = [ Convert ]::ToInt64( $_[0..5] -join '' , 16 )
+                        $X = 0
+                                    
+                        ForEach ( $I in 1..( $Root.Count.Count ) )
+                        {
+                            $X = $X + $Root.Count[$I] 
+
+                            If ( $X -eq $Z ) 
+                            { 
+                                $Root.Vendor[ ( $Root.Index[ $I + 1 ] ) ] 
+                            }
+                        }
+                    }
+
+                    IPV4                              = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv4 | % { 
+                    
+                        [ PSCustomObject ]@{
+
+                            Gateway                       = ""
+                            Address                       = ""
+                            Class                         = ""
+                            CIDR                          = ""
+                            Prefix                        = ""
+                            MAC                           = ""
+                            ARP                           = ""
+                            DNS                           = Get-NetIPConfiguration -ifIndex $_.InterfaceIndex | % { 
+                    
+                                ( $_.DNSServer  | ? { $_.AddressFamily -eq 2  } ).ServerAddresses
+                            }
+
+                        Subnet                        = ""
+                        Netmask                       = ""
+                        Start                         = ""
+                        End                           = ""
+                        Broadcast                     = ""
+                    }
+
+                    IPV6                              = [ PSCustomObject ]@{
+                
+                        Gateway                       = ""
+                        Address                       = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv6 | % { $_.IPAddress }
+                        CIDR                          = ""
+                        Prefix                        = ""
+                        Subnet                        = ""
+                        NDP                           = ""
+                        DNS                           = Get-NetIPConfiguration -ifIndex $_.InterfaceIndex | % { 
+                    
+                            ( $_.DNSServer  | ? { $_.AddressFamily -eq 23 } ).ServerAddresses 
+                        }
+                    }
+                }
+            }
+        }
+
+        ########
+
+        $Root.Netstat                 = @( netstat -ant | ? { $_ -match "TCP" -or $_ -match "UDP" } )
+
+            $Return.NetStat           = ForEach ( $X in "TCP" , "UDP" )
+            { 
+                ForEach ( $i in 0..( $OP.Count - 1 ) )
+                {
+                    $Z = ( $OP[$I] | ? { $_ -match "TCP" } ).Split(' ') | ? { $_.Length -gt 0 }
+
+                    [ PSCustomObject ]@{
+
+                        Protocol      = $Z[0]
+                        LocalAddress  = $Z[1] 
+                        RemoteAddress = $Z[2]
+                        Activity      = $Z[3]
+                        Purpose       = $Z[4]
+                    }
+                }
+            }
+
+
+        # Draw Adapter/Network Information
+
+        $Count            = ForEach ( $I in 0..( $Return.Adapter.Count - 1 ) )
+        {
+            $Splat        = @{ 
+
+                Items     = "Hostname,IPV4,Class,Mac,Vendor".Split(',')
+                Values    = $Return.Adapter[$I] | % { $_.Hostname , $_.IPV4 , $_.Class , $_.Mac , $_.Vendor }
+            }
+
+            New-SubTable @Splat
+        }
+
+        $Splat            = @{ 
+
+            Title         = "Address Resolution & Network Host Map"
+            Depth         = $Count.Count
+            ID            = 0..( $Count.Count - 1 ) | % { "([ Host # $_ ])" }
+            Table         = $Count
+        }
+
+        Write-Theme -Table ( New-Table @Splat )
+
+        $Count            = ForEach ( $I in 0..( $Return.Interface.Count - 1 ) )
+        { 
+            $Splat        = @{ 
+
+                Items     = "Configuration,Hostname,Domain,InterfaceIndex,InterfaceAlias,Gateway,IPV4Address,IPV4DNS,IPV6Address,IPV6DNS".Split(',')
+                Values    = $Return.Interface[$I] | % { $_.Configuration , $_.Hostname , $_.Domain , $_.InterfaceIndex , $_.InterfaceAlias , 
+                            $_.Gateway , $_.IPV4Address , $_.IPV4DNS , $_.IPV6Address , $_.IPV6DNS }
+            }
+
+            New-SubTable @Splat
+        }
+        
+        $Splat            = @{ 
+
+            Title         = "Network Interface Controller List"
+            Depth         = $Count.Count
+            ID            = 0..( $Count.Count - 1 ) | % { "([ Interface # $_ ])" }
+            Table         = $Count
+        }
+
+        Write-Theme -Table ( New-Table @Splat )
+
+                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-NetworkInfo # Obtains Extensive Network Information ____________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     
-        [ CmdLetBinding () ] Param (
-            
-            [ Parameter ( Position = 0 , ParameterSetName =    "LocalHost" ) ] [ Switch ] $LocalHost ,
-            [ Parameter ( Position = 0 , ParameterSetName = "NetworkHosts" ) ] [ Switch ] $NetworkHosts )
 
-        $Range                 = @( 0 ; @( 1 ) * 126 ; 2 ; @( 3 ) * 64 ; @( 4 ) * 32 ; @( 5 ) * 16 ; @( 6 ) * 15 ; 7 )
-        $Class                 = "No Network,X A,Localhost,X B,X C,Multicast,R/D,Broadcast".Replace("X","Class").Split(',')
-        $II                    = "InterfaceIndex"
-
-        $Return                = Get-NetRoute | ? { $_.DestinationPrefix -eq "0.0.0.0/0" } | % { 
-
-            If ( $_ -eq $Null )
-            {
-                Write-Theme -Action "Exception [!]" "No gateway detected, set a valid gateway and try again. Aborting" 12 4 15
-                Break
-            }
-
-            [ PSCustomObject ]@{
-
-                ifID           = $_.$II
-                Cfg            = Get-NetIPConfiguration -ifIndex $_.$II
-                IPV4           = Get-NetIPAddress       -ifIndex $_.$II -AddressFamily IPv4
-                IPV6           = Get-NetIPAddress       -ifIndex $_.$II -AddressFamily IPv6
-                GW             = $_.NextHop
-                MAC            = Get-NetAdapter         -ifIndex $_.$II | % { $_.MacAddress.Replace('-',':') }
-                DNS            = Get-NetIPConfiguration -ifIndex $_.$II | % {
-                
-                    [ PSCustomObject ]@{
-                    
-                        IPV4   = ( $_.DNSServer | ? { $_.AddressFamily -eq 2  } ).ServerAddresses
-                        IPV6   = ( $_.DNSServer | ? { $_.AddressFamily -eq 23 } ).ServerAddresses
-                    }
-                }
-
-                Domain         = Sync-DNSSuffix -Get | % { $_.Domain }
-
-                ARP            = 
-                
-
-            }
-        }
 
         $Return | % { 
 
@@ -4703,125 +5020,6 @@
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-NetworkHosts # Gets actual used network host addresses _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
-        Resolve-MacAddress | % { 
-
-            $Code   = $_.Count
-            $Index  = $_.Index
-            $Vendor = $_.Vendor
-        }
-
-        Function Return-Vendor
-        {
-            [ CmdLetBinding () ] Param ( [ Parameter ( Position = 0 , Mandatory = $True ) ] [ String ] $MacAddress )
-
-            $Item                       = ( $MacAddress[ 0..5 ] -join '' )
-
-            $Count                      = 0
-
-            $Item                       = $Item | % { [ Convert ]::ToInt64( $_ , 16 ) }
-
-            ForEach ( $i in 1..( $Code.Count ) )
-            {
-                $Count                  = $Count + $Code[$I]
-                
-                If ( $Count -eq $Item ) 
-                { 
-                    Return $Vendor[ ( $Index[ $I + 1 ] ) ] 
-                }
-            }
-        }
-
-        Function Return-Class
-        {
-            [ CmdLetBinding () ] Param (
-
-                [ Parameter ( Position = 0 , Mandatory = $True ) ] [ String ] $IPAddress )
-
-            $Class                       = "N" , "A" , "B" ,"C" , "MC" , "R" , "BR" ,"L"
-            $Range                       = @( 0 ; @( 1 ) * 126 ; 7 ; @( 2 ) * 64 ; @( 3 ) * 32 ; @( 4 ) * 16 ; @( 5 ) * 15 ; 6 )
-
-            Return $( $Class[ ( $Range[ ( $IPAddress.Split('.')[ 0 ] ) ] ) ] | % {
-
-                If ( $_ -in ( "A" , "B" , "C" ) ) { Return "Class $_" }
-                If ( $_ -eq "MC" ) { "Multicast" }
-                If ( $_ -eq "R"  ) { "Reserved"  }
-                If ( $_ -eq "BR" ) { "Broadcast" }
-                If ( $_ -eq "L"  ) { "Localhost" }
-                If ( $_ -eq "N"  ) { "Invalid"   }
-            })
-        }
-
-        $List                            = @( )
-
-        ForEach ( $i in "dynamic" , "static" )
-        { 
-            $List                       += arp -a | ? { $_ -like "*$I*" }
-        }
-
-        $Parse                           = @( )
-
-        Get-NetworkInfo -LocalHost       | % { 
-        
-            $Parse                      += [ PSCustomObject ]@{ 
-            
-                IPAddress                = $_.IPV4
-                MacAddress               = $_.MAC
-                LeaseType                = "localhost" 
-            } 
-        }
-
-        ForEach ( $i in 0..( $List.Count - 1 ) )
-        {
-            $X , $Y , $Z                 = $List[$I] | % { 
-            
-                $_[0..23] , $_[24..40] , $_[41..55] | % { $_ -join ""  } 
-            }
-
-            $X , $Y , $Z                 = $X , $Y , $Z | % { $_.Replace( " " , '' ) } | % { $_.Replace( "-" , '' ) }
-
-            $Parse                      += [ PSCustomObject ]@{ 
-            
-                IPAddress                = $X
-                MacAddress               = $Y 
-                LeaseType                = $Z
-            }
-        }
-
-        $Reparse                         = @( )
-
-        ForEach ( $i in 0..( $Parse.Count - 1 ) )
-        {
-            $Parse[$I]                   | % { 
-            
-                $X                       = $Parse[$I]
-                $MACV                    = $( $X.MacAddress | % { 
-            
-                    If ( $_.StartsWith( "01005e" ) -or $_.StartsWith( "ffffff" ) )
-                    { 
-                        "-" 
-                    }
-
-                    Else 
-                    { 
-                        Return-Vendor -MacAddress ( $X.MacAddress ) 
-                    } 
-                })
-
-                Return [ PSCustomObject ]@{ 
-
-                    IPV4Address          = $_.IPAddress
-                    IPV4Class            = Return-Class -IPAddress $_.IPAddress
-                    MACAddress           = $_.MacAddress
-                    MACVendor            = $MACV
-                }
-            }
-       }                                                                             #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-TelemetryData # Accesses Internet API's to recover Settings ____________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
             Test-Connection 1.1.1.1 -Count 1 | ? { $_ -eq $Null } | % { 
@@ -4924,41 +5122,6 @@
 
                 Return $Info
             }                                                                        #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Resolve-MacAddress # Obtains the MAC Address Resolution Lists ______________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-
-        $X  = Resolve-HybridDSC -Module
-
-        $Return                          = [ PSCustomObject ]@{ 
-        
-            Count                        = ""
-            Index                        = ""
-            Vendor                       = "" 
-        }
-        
-        ForEach ( $i in "Count" , "Index" , "Vendor" ) 
-        {     
-            $Archive                     = @{ 
-            
-                Path                     = "$x\Map\$I.zip"
-                DestinationPath          = $X
-                Force                    = $True 
-            }
-
-            Expand-Archive @Archive
-
-            "$x\$I.txt"                  | % { 
-            
-                $Return.$I               = GC $_
-
-                RI $_ 
-            }
-        }
-
-        Return $Return                                                               #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
