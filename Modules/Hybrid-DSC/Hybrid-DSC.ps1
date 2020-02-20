@@ -4285,7 +4285,11 @@
     Function Resolve-NetworkMap # Obtains Extensive Network Information _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     
         
-        Write-Theme -Action "Loading [~]" "Network Mapping Components"
+         Write-Theme -Action "Loading [~]" "Network Mapping Components"
+
+             #_    ____________________________
+             #\\__//¯¯[___ Resolve Vendors ___]
+             # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
         $Resource                                  = [ PSCustomObject ]@{
 
@@ -4294,18 +4298,21 @@
             Index                                  = ""
             Vendor                                 = ""
         }
+             #_    ____________________________
+             #\\__//¯¯[___ Overload Scripts __]
+             # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
         $Script                                    = [ PSCustomObject ]@{
 
             Class                                  = {
                 
-                Param( $Address )("No Network,X A,Localhost,X B,X C,Multicast,R/D,Broadcast"
+                Param ( $Address )("No Network,X A,Localhost,X B,X C,Multicast,R/D,Broadcast"
                 ).Replace("X","Class").Split(',')[@(0;@(1)*126;2;@(3)*64;@(4)*32;@(5)*16;@(6)*15;7)][$Address.Split('.')[0]]
             }
 
             Netmask                                = {
             
-                Param( $Mask )
+                Param ( $Mask )
 
                 $Mask | % { 
                 
@@ -4319,9 +4326,28 @@
                 }
             }
 
+            Vendor                                 = {
+
+                Param ( $Vendor )
+                
+                $Convert    = [ Convert ]::ToInt64( $Vendor , 16 )
+
+                $Rank       = 0 
+                                    
+                ForEach ( $J in 1..( $Resource.Count.Count ) )
+                {
+                    $Rank   = $Rank + $Resource.Count[$J]
+
+                    If ( $Rank -eq $Convert )
+                    { 
+                        $Resource.Vendor[ ( $Resource.Index[ $J + 1 ] ) ]
+                    }
+                }
+            }
+
             Range                                  = {
 
-                Param( $Address , $Mask )
+                Param ( $Address , $Mask )
 
                 $ID           = [ PSCustomObject ]@{
 
@@ -4379,6 +4405,10 @@
             }
         }
 
+             #_    ____________________________
+             #\\__//¯¯[_____ Gather Info _____]
+             # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
         $Root                                      = [ PSCustomObject ]@{ 
         
             Domain                                 = GP "HKLM:\System\CurrentControlSet\Services\TCPIP\Parameters" | % { $_.Domain.ToUpper() }
@@ -4390,7 +4420,7 @@
         
         $C = 0
 
-        GCI $Resource.Path "*zip*"                     | % { 
+        GCI $Resource.Path "*zip*"                 | % { 
         
             Write-Progress -Activity "Loading $( $_.BaseName )" -PercentComplete ( ( $C / 3 ) * 100 )
 
@@ -4399,12 +4429,16 @@
 
         $C = 0
 
-        GCI $Resource.Path "*txt*"                     | % { 
+        GCI $Resource.Path "*txt*"                 | % { 
 
             Write-Progress -Activity "Loading $( $_.BaseName ).txt" -PercentComplete ( ( $C / 3 ) * 100 )
         
-            $Resource.$( $_.Basename )                = GC $_.FullName ; $C ++ ; RI $_.FullName -VB 
+            $Resource.$( $_.Basename )             = GC $_.FullName ; $C ++ ; RI $_.FullName -VB 
         }
+
+             #_    ____________________________
+             #\\__//¯¯[___ Parse ARP Table ___]
+             # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
         $Return                                   = [ PSCustomObject ]@{
         
@@ -4495,42 +4529,80 @@
                 }
             }
 
-            If ( $Return.Switch -eq 1 ) { If ( $Y -eq $Item.Range.Count - 1 ) { $Y ++ } Else { $Return.Switch = 0 } } 
+            If ( $Return.Switch -eq 1 )
+            {
+                If ( $Y -eq $Item.Range.Count - 1 ) 
+                {
+                    $Y ++ 
+                }
+                
+                Else 
+                {
+                    $Return.Switch = 0 
+                }
+            }
         }
         
         Until ( $Return.Switch -eq 0 )
+
+             #_    ____________________________
+             #\\__//¯¯[__ Format ARP Tables __]
+             # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
         If ( $Return.Arp.Table.Count -eq 0 )
         {
             Write-Theme -Action "Exception [!]" "Functional Adapter(s) Not Detected" 12 4 15
             Break
         }
+        
+        $C = 0
 
-        $Return.Arp.Table | ? { $_.Vendor -eq "ffffff" -or $_.Vendor -eq "01005e" } | % { $_.HostName = "N/A" ; $_.Vendor = "Multicast" }
+        $Return.Arp.Table | ? { 
 
-        $Object           = $Return.Arp.Table | ? { $_.HostName -eq "-" }
+            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $C / $Return.Arp.Table.Count ) * 100 )
 
-        ForEach ( $I in 0..( $Object.Count - 1 ) )
-        {
-            Write-Progress -Activity "Collecting Interface Information" -PercentComplete ( ( $I / $Object.Count ) * 100 )
-
-            $Object[$I].HostName = Try { Resolve-DNSName $Object[$I].IPV4 -EA 0 | % { $_.NameHost } } Catch { "Unknown" }
-                
-            $Convert = [ Convert ]::ToInt64( $Object[$I].Vendor , 16 ) ; 
-            $Rank    = 0 
-                                    
-            ForEach ( $J in 1..( $Resource.Count.Count ) )
+            If ( $_.Vendor -in "ffffff","01005e" )
             {
-                $Rank = $Rank + $Resource.Count[$J]
+                $_.Hostname = "-----------------"
+                $_.Vendor   = "-----------------"
+            }
+            
+            If ( $_.Vendor -notin "ffffff","01005e","-----------------" )
+            {
+                $_.HostName = Try { Resolve-DNSName $_.IPV4 -EA 0 | % { $_.NameHost } } Catch { "Unknown" }
+                $_.Vendor   = ( & $Script.Vendor $_.Vendor )
+            }
 
-                If ( $Rank -eq $Convert )
-                { 
-                    $Object[$I].Vendor = $Resource.Vendor[ ( $Resource.Index[ $J + 1 ] ) ]
-                }
-            }<# Return Edit #>
+            $C ++
         }
+             #_    ____________________________
+             #\\__//¯¯[__ Collect Interface __]
+             # ¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-        $Return.Interface += Get-NetRoute         | ? { $_.DestinationPrefix -eq "0.0.0.0/0" }
+        $Return.Interface = @( Get-NetRoute | ? { $_.DestinationPrefix -eq "0.0.0.0/0" }  | % { 
+        
+            Get-NetIPConfiguration -InterfaceIndex $_.InterfaceIndex -Detailed | % { 
+
+                [ PSCustomObject ]@{ 
+
+                    ComputerName   = $_.ComputerName
+                    Alias          = $_.InterfaceAlias
+                    Index          = $_.InterfaceIndex
+                    Description    = $_.InterfaceDescription
+                    MacAddress     = $_.NetAdapter.LinkLayerAddress
+                    Vendor         = & $Script.Vendor ( ( $_.NetAdapter.LinkLayerAddress)[0,1,3,4,6,7] -join '' )
+                    Domain         = $_.NetProfile.Name.ToUpper() | % { If ( $_ -ne $Root.Domain ) { "$_ [$( $Root.Domain)]" } Else { $Root.Domain } }
+                    IPV4Address    = $_.IPV4Address.IPAddress
+                    IPV4Prefix     = Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex | ? { $_.IPV4Address } | % { & $Script.Netmask $_.PrefixLength }
+                    IPV4Gateway    = $_.IPv4DefaultGateway | % { $_.NextHop }
+                    IPV4DNS        = $_.DNSServer | ? { $_.AddressFamily -eq  2 } | % { $_.ServerAddresses }
+                    IPV6Address    = $_.IPV6Address
+                    IPV6Prefix     = Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex | ? { $_.IPV6Address } | % { $_.PrefixLength }
+                    IPV6Gateway    = $_.IPV6DefaultGateway | % { $_.NextHop }
+                    IPV6DNS        = $_.DNSServer | ? { $_.AddressFamily -eq 23 } | % { $_.ServerAddresses }
+                }
+            }                   
+        })
 
         If ( $Return.Interface -eq $Null )
         {
@@ -4539,95 +4611,6 @@
         }
 
         Write-Theme -Action "Found [+]" "($( $Return.Interface.Count )) Network Interface(s)" 11 11 15
-
-            $Control                              = [ PSCustomObject ]@{ 
-
-                HostName                          = $Root.HostName
-                Domain                            = $Root.Domain
-                Gateway                           = $Get.GW
-                IfIndex                           = $Get.IfIndex
-                IfAlias                           = $Get.IfAlias
-                Details                           = $Get.INF
-
-                IPV4                              = [ PSCustomObject ]@{ 
-
-                        Class                     = $Root.Class[(($Get.IPV4.IPAddress).Split('.')[0])]
-                        Address                   = $Get.IPV4.IPAddress
-                        CIDR                      = $Get.IPV4.PrefixLength
-                        Netmask                   = & $Root.Netmask $Get.IPV4.PrefixLength
-                        Range                     = ""
-                        DNS                       = $Get.INF.DNSServer | ? { $_.AddressFamily -eq 2   } | % { $_.ServerAddresses }
-                        ARP                       = $Get.ARP
-
-                    }
-                }
-                    
-                IPV6                              = $Get.IPV6 | % { 
-
-                    [ PSCustomObject ]@{
-
-                        Address                   = $_.IPAddress
-                        PrefixLength              = $_.PrefixLength 
-                    }
-                }
-
-                MACAddress                        = $Get.INF.NetAdapter.LinkLayerAddress
-                Vendor                            = "$($Get.INF.NetAdapter.LinkLayerAddress)".Replace('-','') | % { 
-                    
-                        $Z = [ Convert ]::ToInt64( $_[0..5] -join '' , 16 )
-                        $X = 0
-                                    
-                        ForEach ( $I in 1..( $Root.Count.Count ) )
-                        {
-                            $X = $X + $Root.Count[$I] 
-
-                            If ( $X -eq $Z ) 
-                            { 
-                                $Root.Vendor[ ( $Root.Index[ $I + 1 ] ) ] 
-                            }
-                        }
-                    }
-
-                    IPV4                              = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv4 | % { 
-                    
-                        [ PSCustomObject ]@{
-
-                            Gateway                       = ""
-                            Address                       = ""
-                            Class                         = ""
-                            CIDR                          = ""
-                            Prefix                        = ""
-                            MAC                           = ""
-                            ARP                           = ""
-                            DNS                           = Get-NetIPConfiguration -ifIndex $_.InterfaceIndex | % { 
-                    
-                                ( $_.DNSServer  | ? { $_.AddressFamily -eq 2  } ).ServerAddresses
-                            }
-
-                        Subnet                        = ""
-                        Netmask                       = ""
-                        Start                         = ""
-                        End                           = ""
-                        Broadcast                     = ""
-                    }
-
-                    IPV6                              = [ PSCustomObject ]@{
-                
-                        Gateway                       = ""
-                        Address                       = Get-NetIPAddress       -ifIndex $_.InterfaceIndex -AddressFamily IPv6 | % { $_.IPAddress }
-                        CIDR                          = ""
-                        Prefix                        = ""
-                        Subnet                        = ""
-                        NDP                           = ""
-                        DNS                           = Get-NetIPConfiguration -ifIndex $_.InterfaceIndex | % { 
-                    
-                            ( $_.DNSServer  | ? { $_.AddressFamily -eq 23 } ).ServerAddresses 
-                        }
-                    }
-                }
-            }
-        }
-
         ########
 
         $Root.Netstat                 = @( netstat -ant | ? { $_ -match "TCP" -or $_ -match "UDP" } )
