@@ -4596,6 +4596,9 @@
                     IPV4Prefix     = Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex | ? { $_.IPV4Address } | % { & $Script.Netmask $_.PrefixLength }
                     IPV4Gateway    = $_.IPv4DefaultGateway | % { $_.NextHop }
                     IPV4DNS        = $_.DNSServer | ? { $_.AddressFamily -eq  2 } | % { $_.ServerAddresses }
+		    IPV4ARP        = @( )
+		    IPV4NET        = @( )
+		    IPV4NBT        = @( )
                     IPV6Address    = $_.IPV6Address
                     IPV6Prefix     = Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex | ? { $_.IPV6Address } | % { $_.PrefixLength }
                     IPV6Gateway    = $_.IPV6DefaultGateway | % { $_.NextHop }
@@ -4611,7 +4614,69 @@
         }
 
         Write-Theme -Action "Found [+]" "($( $Return.Interface.Count )) Network Interface(s)" 11 11 15
-        ########
+
+        $Return.Interface         | % {
+            
+            $_.IPV4ARP            = $Return.Arp | % { 
+            
+                If ( $_.Interface.Count -eq 1 )
+                {
+                    $_.Table
+                }
+                Else
+                {
+                    ForEach ( $I in 0..( $_.Interface.Count - 1 ) )
+                    { 
+                        $_.Table[$I]
+                    }
+                }
+            }
+
+            $_.IPV4NET            = & $Script.Range $_.IPV4Address $_.IPV4Prefix | % {
+                    
+                [ PSCustomObject ]@{
+
+                    Count         = $_.Count + 2
+                    Range         = ( $_.Range -join '/' ).Replace( "*" , "0..255" )
+                    Collect       = @( )
+                
+                }
+            }
+        }
+            
+        $Return.Interface.IPV4Net | % { 
+        
+            $Obj = $_
+            
+            ForEach ( $I in 3..0 )
+            {
+                $Current = IEX $Obj.Range.Split('/')[$I]
+                
+                If ( $_.Collect.Count -eq 0 ) 
+                { 
+                    $Current | % { $Obj.Collect += $_ } 
+                }
+
+                Else
+                {
+                    $Expand  = $Obj.Collect.Clone()
+                    $Obj.Collect = @( )
+                    
+                    ForEach ( $J in $Current ) 
+                    {
+                        $Expand | % { $Obj.Collect += $J , $_ -join '.' }
+                    }
+                }
+            }
+
+            [ PSCustomObject ]@{
+
+                Range     = $Obj.Collect
+                Count     = $Obj.Collect.Count - 2
+                Network   = $Obj.Collect[0]
+                Broadcast = $Obj.Collect[-1]
+            }
+        }
 
         $Root.Netstat                 = @( netstat -ant | ? { $_ -match "TCP" -or $_ -match "UDP" } )
 
