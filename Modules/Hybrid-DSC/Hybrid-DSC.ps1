@@ -4431,6 +4431,23 @@
 
                 $ID
             }
+
+            NBTScan                                = {
+
+                [ PSCustomObject ]@{
+
+                    ID                             = ("00,01,01,03,06,1F,20,21,22,23,24,30,31,43,44,45,46,4C,42,52,87,6A,BE,BF,03,00,1B,1C,1D,1E,2B,2F,33,20,"+
+                                                     "01").Split(',') | % { "<$_>" }
+                    Type                           = "UNIQUE,GROUP".Split(',')[@(0,0,1;@(0)*22;@(1,0)*3;@(1)*4)]
+                    Service                        = ("Workstation !,# !,* (,# !,RAS ? !,NetDDE !,File ? !,RAS Client !,@ ) Interchange[MSMail Connector],@ ) Store,@ )"+
+                                                     " Directory,% ?,% Client,^ Control,SMS Administrators Remote Control Tool !,^ Chat,^ Transfer,DEC TCPIP ! on Windo"+
+                                                     "ws NT,McAfee Anti-Virus,DEC TCPIP ! on Windows NT,@ ) MTA,@ ) IMC,Network Monitor Agent,Network Monitor Applicati"+
+                                                     "on,# !,& Name,& * (,& Controller,* (,( ! Elections,$ ?,$,$,DCA IrmaLan Gateway ?,MS NetBIOS Browse !").Replace("!",
+                                                     "Service").Replace("@","Microsoft").Replace("#","Messenger").Replace("$","Lotus Notes").Replace("%", "Modem Sharin"+
+                                                     "g").Replace("^","SMS Clients Remote").Replace("&","Domain").Replace("*","Master").Replace("(","Browser").Replace(
+                                                     ")","Exchange").Replace("?","Server").Split(',')
+                }
+            }
         }
 
              #_    ____________________________
@@ -4478,7 +4495,6 @@
 
             Interface                             = @( )
             Current                               = @( )
-            Range                                 = @( )
             NBT                                   = @( )
             Report                                = @( )
             Switch                                = 0
@@ -4541,8 +4557,8 @@
                     {
                         $X                        = @{ 
                         
-                            0                     = ( $_[0..23] )
-                            1                     = ( $_[24..41] ) 
+                            0                     = ( $_[  0..23 ] )
+                            1                     = ( $_[ 24..41 ] ) 
                         }
                         
                         0..1                      | % { 
@@ -4658,14 +4674,15 @@
                     IPV4Mask                      = & $Script.Netmask $IPV4.PrefixLength
                     IPV4Gateway                   = $_.IPv4DefaultGateway | % { $_.NextHop }
                     IPV4DNS                       = $_.DNSServer | ? { $_.AddressFamily -eq  2 } | % { $_.ServerAddresses }
-                    IPV4ARP                       = @( )
-                    IPV4NET                       = @( )
-                    IPV4Sweep                     = [ PSCustomObject ]@{
 
-                        Success                   = @( )
-                        Failure                   = @( )
-                    }
+                    IPV4ARP                       = @( )
+
+                    IPV4NET                       = @( )
+
+                    IPV4Sweep                     = @( )
+
                     IPV4NBT                       = @( )
+
                     IPV6Address                   = $_.IPV6Address
                     IPV6Prefix                    = Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex | ? { $_.IPV6Address } | % { $_.PrefixLength }
                     IPV6Gateway                   = $_.IPV6DefaultGateway | % { $_.NextHop }
@@ -4767,6 +4784,67 @@
                     Status                        = $Object.Status[$I].Result.Status
                 }
             }
+
+            $Obj                                  = & $Script.NBTScan
+
+            $Object                               = @( )
+            
+            $_.IPV4Sweep                          | ? { $_.Status -eq "Success" } | % { $_.Address } | % {
+
+                $IP                               = $_
+                
+                Write-Theme -Function "Host # $IP"
+
+                $DNS                              = Try 
+                                                    { 
+                                                        Resolve-DnsName -Name $_ -EA 0 | % { $_.Namehost } 
+                                                    } 
+                                                    
+                                                    Catch 
+                                                    { 
+                                                        "*No Hostname*" 
+                                                    }
+
+                $X                                = @( )
+
+                If ( $_ -in $Return.Arp.Interface ) { NBTSTAT -n    | ? { $_ -like "*Registered*" -and $_ -notin $X } | % { $X += $_ } }
+                Else                                { NBTSTAT -A $_ | ? { $_ -like "*Registered*" -and $_ -notin $X } | % { $X += $_ } }
+
+                ForEach ( $Y in 0..( $X.Count - 1 ) ) 
+                { 
+                    If ( $X[$Y] -match "__MSBROWSE__" ) 
+                    { 
+                        $X[$Y]                    = "    MSBROWSE       <01>  GROUP       Registered " 
+                    } 
+                }
+
+                $X                                | % { 
+
+                    $Z                            = @{ 
+                        
+                        0                         = ( $_[  0..18 ] )
+                        1                         = ( $_[ 19..23 ] )
+                        2                         = ( $_[ 24..32 ] ) 
+                    }
+                        
+                    0..2                          | % { $Z[$_] = "$( $Z[$_] )".Replace(' ','') } 
+                
+                    0..34                         | ? { $Z[1] -eq $Obj.ID[$_] -and $Z[2] -eq $Obj.Type[$_] } | % { 
+                
+                        $Object                   += [ PSCustomObject ]@{ 
+    
+                            IP                    = $IP
+                            Host                  = $DNS
+                            Name                  = $Z[0]
+                            ID                    = $Z[1]
+                            Type                  = $Z[2]
+                            Service               = $Obj.Service[$_]
+                        }
+                    }
+                }
+            }
+
+            $_.IPV4NBT                            = $Object
         }
         
         $Return                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
