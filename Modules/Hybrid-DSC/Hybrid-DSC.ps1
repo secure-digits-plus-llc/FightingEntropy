@@ -87,6 +87,7 @@
  \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
   ¯¯¯\\ [ Network Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
       ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Resolve-NetworkMap          - The Kitchen Sink of Network Mapping
         Get-NetworkInfo             - Collects various network information
         Start-PingSweep             - Scans everything on the local network address
         Get-NBTSCAN                 - This parses out NBTStat to return NBTScan
@@ -97,8 +98,8 @@
         Get-NetworkStatistics       - Comprehensive netstat reparsed correctly
         Initialize-PortScan         - Scans some ports                                  #>
 
-    Export-ModuleMember -Function Get-NetworkInfo , Start-PingSweep , Get-NBTSCAN , Get-NetworkHosts , Get-TelemetryData , Resolve-MacAddress, 
-    Start-NetworkInfo , Get-NetworkStatistics , Initialize-PortScan
+    Export-ModuleMember -Function Resolve-NetworkMap, Get-NetworkInfo, Start-PingSweep, Get-NBTSCAN, Get-NetworkHosts, Get-TelemetryData, 
+    Resolve-MacAddress, Start-NetworkInfo, Get-NetworkStatistics, Initialize-PortScan
 
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -582,7 +583,7 @@
             }
         }
 
-        $GFX                = GCI $_.Module "*Graphics*" -Recurse | % { GCI $_.FullName } | % { $_.FullName }
+        $GFX                = GCI $Return.Module "*Graphics*" -Recurse | % { GCI $_.FullName } | % { $_.FullName }
             
         $Return.Graphics    = [ PSCustomObject ]@{ 
 
@@ -3477,7 +3478,7 @@
         
         Write-Theme -Action "Searching [~]" "For Valid Domain Controllers"
         
-        $Report                            = Start-NetworkInfo -All
+        $Report                            = Resolve-NetworkMap -Info
 
         $ST                                = Get-DSCFeatureState -All
 
@@ -3614,7 +3615,7 @@
 
             If ( $Report -ne $Null )
             {
-                $PDC                              = $Report.NetBIOS | ? { $_.ID -eq "<1C>" }
+                $PDC                              = $Report.Scan | ? { $_.ID -eq "<1B>" }
 
                 If ( $PDC.Count -gt 1 )
                 {
@@ -3623,14 +3624,14 @@
 
                 If ( $PDC -ne $Null )
                 {
-                    $DC                           = $PDC.Host.Split( '.' )[0]
-                    $Domain                       = $PDC.Host.Replace( "$DC." , "" )
+                    $DC                           = $PDC.HostName.Split( '.' )[0]
+                    $Domain                       = $PDC.HostName.Replace( "$DC." , "" )
                     $NetBIOS                      = $PDC.Name
                 }
 
                 If ( $PDC -eq $Null )
                 {
-                    $BDC                          = $Report.NetBIOS | ? { $_.Service -eq "Domain Controller" }
+                    $BDC                          = $Report.Scan | ? { $_.ID -eq "<1C>" }
 
                     If ( $BDC.Count -gt 1 )
                     {
@@ -3639,8 +3640,8 @@
 
                     If ( $BDC -ne $Null )
                     {
-                        $DC                       = $BDC.Host.Split( '.' )[0]
-                        $Domain                   = $BDC.Host.Replace( "$DC." , "" )
+                        $DC                       = $BDC.HostName.Split( '.' )[0]
+                        $Domain                   = $BDC.HostName.Replace( "$DC." , "" )
                         $NetBIOS                  = $BDC.Name
                     }
                 }
@@ -4289,8 +4290,12 @@
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Resolve-NetworkMap                                                         #//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    { <#                                                                                      ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     
-        .Synopsis
+    {#                                                                                        ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( ) ] [ Switch ] $Info )
+
+       <# .Synopsis
             Self Explanatory
 
         .DESCRIPTION
@@ -5044,7 +5049,13 @@
 
         $Table                                     = New-Table @Splat
 
-        Write-Theme -Table $Table                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        Write-Theme -Table $Table
+        
+        If ( $Info )
+        {
+            $Root
+        }
+                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
