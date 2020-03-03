@@ -61,7 +61,8 @@
   ¯¯¯\\ [ Script Functions ]____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
       ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯    
         Get-HybridDSC               - Gets a description of this table/Help
-        Get-ScriptRoot              - Gets the current script path            
+        Get-ScriptRoot              - Gets the current script path
+        Process-ISETheme            - Generates ISE XML Theme File for Export/Import/Migration
         Resolve-HybridDSC           - Collects Necessary Script Information            
         Publish-HybridDSC           - Creates a distributable package for Hybrid-DSC   
         New-Subtable                - Converts Key/Value Subtable for Write-Theme      
@@ -606,23 +607,159 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Process-ISETheme #_ Processes a Color theme for ISE _______________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param (
+
+            [ Parameter ( Mandatory ) ] [ String ] $Name =       "BossMode" ,
+            [ Parameter ( Mandatory ) ] [ String ] $Font = "Lucida Console" ,
+            [ Parameter ( Mandatory ) ] [    Int ] $Size =               9  )
+
+        $X            = [ PSCustomObject ]@{
+            
+            Header    = @( '<?xml version="1.0" encoding="utf-16"?>' ; '<StorableColorTheme xmlns:xsd="{0}" xmlns:xsi="{0}-instance">' -f "http://www.w3.org/2001/XMLSchema" )
+
+            Footer    = @( "  <Name>$Name</Name>" , "  <FontFamily>$Font</FontFamily>" , "  <FontSize>$Size</FontSize>" , "</StorableColorTheme>" )
+
+            Pane      = @( 'Error,Warning,Verbose,Debug'.Split(',') | % { "$_`ForegroundColor" , "$_`BackgroundColor" } 
+                               'Back,TextBack,Fore'.Split(',') | % { "ConsolePane$_`groundColor" } ; 'Back,Fore'.Split(',') | % { "ScriptPane$_`groundColor"  } )
+
+            Console   = @( 'Attribute' ; '' , 'Argument' , 'Parameter' | % { "Command$_" } ; 'Comment' ; 'End' , 'Start' | % { "Group$_" } ;
+                               'Keyword,LineContinuation,LoopLabel,Member,NewLine,Number,Operator,Position,StatementSeparator,String,Type,Unknown,Variable'.Split(',') )
+                 
+            XML       = @( "CharacterData,QuotedString,Comment,CommentDelimiter,15,13,12,14,18,MarkupExtension,Quote,17,ElementName,11,19,16,Attribute,10,Tag,Text" ).Split(',')
+
+            Colors    = @(  "255.000,255.000,000.000,000.000,001.000,001.000,000.000,000.000",
+                            "000.000,255.000,255.000,255.000,000.000,001.000,001.000,001.000",
+                            "255.000,255.000,140.000,000.000,001.000,001.000,000.263,000.000",
+                            "000.000,255.000,255.000,255.000,000.000,001.000,001.000,001.000",
+                            "255.000,000.000,255.000,255.000,001.000,000.000,001.000,001.000",
+                            "000.000,255.000,255.000,255.000,000.000,001.000,001.000,001.000",
+                            "255.000,000.000,255.000,255.000,001.000,000.000,001.000,001.000",
+                            "000.000,255.000,255.000,255.000,000.000,001.000,001.000,001.000",
+                            "255.000,001.000,036.000,086.000,001.000,000.001,000.018,000.093",
+                            "255.000,001.000,036.000,086.000,001.000,000.001,000.018,000.093",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,024.000,032.000,024.000,001.000,000.009,000.014,000.009",
+                            "255.000,212.000,212.000,212.000,001.000,000.658,000.658,000.658",
+                            "255.000,036.000,229.000,124.000,001.000,000.018,000.784,000.202",
+                            "255.000,240.000,255.000,255.000,001.000,000.871,001.000,001.000",
+                            "255.000,095.000,158.000,160.000,001.000,000.114,000.342,000.352",
+                            "255.000,240.000,248.000,255.000,001.000,000.871,000.939,001.000",
+                            "255.000,000.000,223.000,000.000,001.000,000.000,000.738,000.000",
+                            "255.000,212.000,212.000,212.000,001.000,000.658,000.658,000.658",
+                            "255.000,212.000,212.000,212.000,001.000,000.658,000.658,000.658",
+                            "255.000,000.000,135.000,255.000,001.000,000.000,000.242,001.000",
+                            "255.000,212.000,212.000,212.000,001.000,000.658,000.658,000.658",
+                            "255.000,212.000,255.000,212.000,001.000,000.658,001.000,000.658",
+                            "255.000,212.000,255.000,212.000,001.000,000.658,001.000,000.658",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,255.000,215.000,000.000,001.000,001.000,000.680,000.000",
+                            "255.000,030.000,144.000,255.000,001.000,000.013,000.279,001.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,212.000,212.000,212.000,001.000,000.658,000.658,000.658",
+                            "255.000,255.000,140.000,000.000,001.000,001.000,000.262,000.000",
+                            "255.000,240.000,255.000,255.000,001.000,000.871,001.000,001.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,250.000,000.000,000.000,001.000,000.956,000.000,000.000",
+                            "255.000,176.000,196.000,222.000,001.000,000.434,000.552,000.730",
+                            "255.000,224.000,255.000,255.000,001.000,000.745,001.000,001.000",
+                            "255.000,238.000,130.000,238.000,001.000,000.855,000.223,000.855",
+                            "255.000,255.000,228.000,181.000,001.000,001.000,000.776,000.462",
+                            "255.000,152.000,251.000,152.000,001.000,000.314,000.965,000.314",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,224.000,255.000,255.000,001.000,000.745,001.000,001.000",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,224.000,255.000,255.000,001.000,000.745,001.000,001.000",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,255.000,228.000,196.000,001.000,001.000,000.776,000.552",
+                            "255.000,211.000,211.000,211.000,001.000,000.651,000.651,000.651",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,219.000,112.000,147.000,001.000,000.708,000.162,000.292",
+                            "255.000,143.000,188.000,143.000,001.000,000.275,000.503,000.275",
+                            "255.000,245.000,245.000,245.000,001.000,000.913,000.913,000.913",
+                            "255.000,255.000,069.000,000.000,001.000,001.000,000.059,000.000",
+                            "255.000,123.000,123.000,123.000,001.000,000.198,000.198,000.198",
+                            "255.000,206.000,145.000,120.000,001.000,000.617,000.283,000.188",
+                            "255.000,096.000,139.000,078.000,001.000,000.117,000.258,000.076",
+                            "255.000,096.000,139.000,078.000,001.000,000.117,000.258,000.076",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,206.000,145.000,120.000,001.000,000.617,000.283,000.188",
+                            "255.000,206.000,145.000,120.000,001.000,000.617,000.283,000.188",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,086.000,156.000,214.000,001.000,000.093,000.332,000.672",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,156.000,220.000,254.000,001.000,000.332,000.716,000.991",
+                            "255.000,000.000,000.000,000.000,001.000,000.000,000.000,000.000",
+                            "255.000,086.000,156.000,214.000,001.000,000.093,000.332,000.672",
+                            "255.000,212.000,212.000,212.000,001.000,000.658,000.658,000.658")
+
+            Keys      = @( )
+
+            Values    = @( )
+        }
+        
+        $X.Keys       = ForEach ( $I in 0..3 )
+        {
+            @{  
+                    
+                0     = $X.Pane
+                1     = $X.Console | % { "TokenColors\$_" }
+                2     = $X.Console | % { "ConsoleTokenColors\$_" }
+                3     = $X.XML     | % { "XmlTokenColors\$_" }
+                
+            }[ $I ]   | % { "    <string>$_</string>"  }
+        }
+
+        $X.Values     = ForEach ( $I in 0..72 )
+        {
+            $Z        = $X.Colors[$I].Split(',')
+        
+            "    <Color>",
+            "      <A>$($Z[0])</A>",
+            "      <R>$($Z[1])</R>",
+            "      <G>$($Z[2])</G>",
+            "      <B>$($Z[3])</B>",
+            "      <ScA>$($Z[4])</ScA>",
+            "      <ScR>$($Z[5])</ScR>",
+            "      <ScG>$($Z[6])</ScG>",
+            "      <ScB>$($Z[7])</ScB>",
+            "    </Color>"
+        }
+
+        
+        @( $X.Header ; "Keys" , "Values" | % { "  <$_>" ; $X.$_ ; "  </$_>" } ; $X.Footer ) -join "`n"
+
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Get-CurrentServices # Retrieves/Displays Current Services _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         Write-Theme -Action "Collecting [~]" "Service State Catalog"
 
-        $Return         = [ PSCustomObject ]@{ 
+        $Return                          = [ PSCustomObject ]@{ 
         
-            Service     = GCIM Win32_Service | Sort Name
-            Return      = ""
+            Service                      = GCIM Win32_Service | Sort Name
+            Return                       = ""
         }
 
-        $Y              = ( "{0};{1};{0}, {1}" -f "Delayed Start" , "Trigger Start" ).Split( ';' )
+        $Y                               = ( "{0};{1};{0}, {1}" -f "Delayed Start" , "Trigger Start" ).Split( ';' )
 
-        $Return         | % {
+        $Return                          | % {
         
-            $_.Return   = ForEach ( $I in 0..( $_.Service.Count - 1 ) )
+            $_.Return                    = ForEach ( $I in 0..( $_.Service.Count - 1 ) )
             {
-                $X      = $_.Service[$I]
+                $X                       = $_.Service[$I]
                 
                 Write-Progress -Activity "Collecting Service Catalog" -PercentComplete ( ( $I / $_.Service.Count ) * 100 )
 
@@ -665,12 +802,12 @@
             [ Parameter ( ParameterSetName =     "Env" ) ] [ Switch ] $Environment ,
             [ Parameter ( ParameterSetName =     "All" ) ] [ Switch ] $All         )
 
-        $Return             = [ PSCustomObject ]@{
+        $Return              = [ PSCustomObject ]@{
 
-            OS              = GCIM Win32_OperatingSystem
-            CS              = GCIM Win32_ComputerSystem
-            ReleaseID       = GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID }
-            Edition         = @( ( '1507,10240,Threshold 1,Release To Manufacturing;1511,10586,Threshold 2,November UX;1607,14393,RX 1' + 
+            OS               = GCIM Win32_OperatingSystem
+            CS               = GCIM Win32_ComputerSystem
+            ReleaseID        = GP 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | % { $_.ReleaseID }
+            Edition          = @( ( '1507,10240,Threshold 1,Release To Manufacturing;1511,10586,Threshold 2,November UX;1607,14393,RX 1' + 
                               ',Anniversary UX;1703,15063,RX 2,CX UX;1703,16299,RX 3,Fall CX UX;1803,17134,RX 4,April 2018 UX;1809,177' + 
                               '63,RX 5,October 2018 UX;1903,18362,19H1,May 2019 UX;1909,18363,19H2,November 2019 UX;2004,19000,20H1,Un' + 
                               'released' ).Replace('RX','Redstone').Replace('UX' ,'Update').Replace('CX','Creators').Split( ';' )       | ? { 
@@ -686,7 +823,7 @@
                                 }
                             }
 
-            SKU             = ('Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter' + 
+            SKU              = ('Undefined,Ultimate !,Home Basic !,Home Premium !,$ !,Home Basic N !,Business !,Standard # !,Datacenter' + 
                               ' # !,Small Business # !,$ # !,Starter !,Datacenter # Core !,Standard # Core !,$ # Core !,$ # IA64 !,Bus' + 
                               'iness N !,Web # !,Cluster # !,Home # !,Storage Express # !,Storage Standard # !,Storage Workgroup # !,S' + 
                               'torage $ # !,# For Small Business !,Small Business # Premium !,TBD,@ $,@ Ultimate,Web # Core,-,-,-,# Fo' + 
@@ -699,18 +836,18 @@
                               '-,-,@ Embedded Handheld,-,-,-,-,@ IoT Core'
                               ).Replace("!","Edition").Replace("@","Windows").Replace("#","Server").Replace('$',"Enterprise").Split(',')
             
-            Code            = ""
-            Chassis         = ",Desktop,Mobile/Laptop,Workstation,Server,Server,Appliance,Server,Maximum".Split(',')
-            PSVersion       = $PSVersionTable.BuildVersion
-            Env             = [ PSCustomObject ]@{ }
+            Code             = ""
+            Chassis          = ",Desktop,Mobile/Laptop,Workstation,Server,Server,Appliance,Server,Maximum".Split(',')
+            PSVersion        = $PSVersionTable.BuildVersion
+            Env              = [ PSCustomObject ]@{ }
 
         }
 
-        $Return             | % { 
+        $Return              | % { 
 
-            $_.Code         = $_.OS.OperatingSystemSKU
-            $_.SKU          = $_.SKU[ $_.Code ]
-            $_.Chassis      = $_.Chassis[$_.CS.PCSystemType]
+            $_.Code          = $_.OS.OperatingSystemSKU
+            $_.SKU           = $_.SKU[ $_.Code ]
+            $_.Chassis       = $_.Chassis[$_.CS.PCSystemType]
 
             [ Environment ]::GetEnvironmentVariables().GetEnumerator() | % { 
 
@@ -720,15 +857,15 @@
 
         $Return | % { 
 
-            If ( $System  ) { $_.CS        }
-            If ( $MSInfo  ) { $_.OS        }
-            If ( $Edition ) { $_.Edition   }
-            If ( $SKU     ) { $_.SKU       }
-            If ( $Type    ) { $_.Chassis   }
-            If ( $PS      ) { $_.PSVersion }
+            If ( $System      ) { $_.CS        }
+            If ( $MSInfo      ) { $_.OS        }
+            If ( $Edition     ) { $_.Edition   }
+            If ( $SKU         ) { $_.SKU       }
+            If ( $Type        ) { $_.Chassis   }
+            If ( $PS          ) { $_.PSVersion }
             If ( $Environment ) { $_.Env       }
-            If ( $All     ) { $_           }
-        }                                                                            #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+            If ( $All         ) { $_           }
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\____  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯                                                                    // 
@@ -1071,7 +1208,7 @@
         $Collect              = [ PSCustomObject ]@{ 
 
             Title             = @("Script","System"|%{"$_ Information"};"Initialization";("Display,Miscellaneous,Development,Bypass/Force,Logging,B"+
-                                  "ackup").Split(',')|%{"$_ Settings"};"Version Control")|%{"[ $_ ]"}
+                                  "ackup").Split(',')|%{"$_ Settings"};"Version Control")|%{"( $_ )"}
 
             Section           = "Script,Sys,Cfg,Display,Miscellaneous,Development,Bypass,Logging,Backup,Version".Split(',')
 
@@ -1089,7 +1226,7 @@
         
             Script            = $Viper.Version
             
-            Sys              = [ PSCustomObject ]@{
+            Sys               = [ PSCustomObject ]@{
     
                 OS            = $System.OS | % { "$( $_.Caption ) [$( $_.OSArchitecture )]" }
                 SKU           = $System.SKU
@@ -1104,10 +1241,36 @@
         ForEach ( $i in 0..9 )
         {
             $X                = $Collect.Info[$I].Split(';')
-            $Collect.Info[$I] = If ( $X[1] -like "{0}" ) { ( $X[0].Split(',') | % { $X[1] -f $_ } ) -join ',' } Else { $X[0] }
+
+            $Collect.Info[$I] = If ( $X[1] -like "{0}" ) 
+            { 
+                ( $X[0].Split(',') | % { $X[1] -f $_ } ) -join ',' 
+            } 
+            
+            Else 
+            { 
+                $X[0] 
+            }
 
             $Items            = $Collect.Item[$I].Split(',')
-            $Values           = $Items | % { If ( $I -eq 0 ) { $Collect.Script.$_ } If ( $I -eq 1 ) { $Collect.Sys.$_ } If ( $I -gt 1 ) { $Collect.Cfg.$_ } }
+
+            $Values           = $Items | % { 
+            
+                If ( $I -eq 0 ) 
+                { 
+                    $Collect.Script.$_ 
+                } 
+                
+                If ( $I -eq 1 ) 
+                { 
+                    $Collect.Sys.$_ 
+                } 
+                
+                If ( $I -gt 1 ) 
+                { 
+                    $Collect.Cfg.$_ 
+                } 
+            }
 
             $Collect.Subtable[$I] = New-Subtable -Items $Items -Values $Values
         }
@@ -1123,6 +1286,7 @@
         $Table                = New-Table @Splat
         
         Write-Theme -Table $Table -Prompt "Press Enter to Continue, CTRL+C to Exit"
+
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -1148,17 +1312,17 @@
 
                 Current               = [ PSCustomObject ]@{
 
-                    Include           = ""
-                    Exclude           = ""
-                    Count             = ""
+                    Inc               = ""
+                    Exc               = ""
+                    Ct                = ""
                 }
 
                 Config                = [ PSCustomObject ]@{ 
                     
-                    Include           = ""
-                    Exclude           = ""
+                    Inc               = ""
+                    Exc               = ""
                     Profile           = ""
-                    Count             = ""
+                    Ct                = ""
                 }
             }
         }
@@ -1167,17 +1331,17 @@
         
             $_.Current                | % { 
         
-                $_.Include            = $Get.Current     | ? { $_.Name    -in $Get.Config.Service } | % { $_.Name }
-                $_.Exclude            = $Get.Current     | ? { $_.Name -notin $Get.Config.Service } | % { $_.Name }
-                $_.Count              = $_.Include.Count + $_.Exclude.Count
+                $_.Inc                = $Get.Current     | ? { $_.Name    -in $Get.Config.Service } | % { $_.Name }
+                $_.Exc                = $Get.Current     | ? { $_.Name -notin $Get.Config.Service } | % { $_.Name }
+                $_.Ct                 = $_.Inc.Count + $_.Exc.Count
             }
 
             $_.Config                 | % { 
 
-                $_.Include            = $Get.Config      | ? { $_.Service    -in $Get.Current.Name   } | % { $_.Service }
-                $_.Exclude            = $Get.Config      | ? { $_.Service -notin $Get.Current.Name   } | % { $_.Service }
+                $_.Inc                = $Get.Config      | ? { $_.Service    -in $Get.Current.Name   } | % { $_.Service }
+                $_.Exc                = $Get.Config      | ? { $_.Service -notin $Get.Current.Name   } | % { $_.Service }
                 $_.Profile            = $Get.Config      | ? { $_.Service    -in $Get.Current.Name   }
-                $_.Count              = $_.Include.Count + $_.Exclude.Count
+                $_.Ct                 = $_.Inc.Count + $_.Exc.Count
             }
         }
 
@@ -1185,7 +1349,10 @@
 
         $Get.Index                    = $Get.Index.Count | Measure -Character | % { $_.Characters } | % {
             
-            ForEach ( $I in $Get.Index ) { "{0:d$_}" -f $I }
+            ForEach ( $I in $Get.Index ) 
+            { 
+                "{0:d$_}" -f $I 
+            }
         }
         
         $Get | % { 
@@ -1206,10 +1373,10 @@
         {
             $Get.Name[$I]             = $Get.Current.Name[$I]
                 
-            If ( $Get.Name[$I]     -in $Get.Track.Current.Include )
+            If ( $Get.Name[$I]     -in $Get.Track.Current.Inc )
             {
                 $Get.Scoped[$I]       = "[+]"
-                $Get.Profile[$I]      = $Get.Track.Config.Profile | ? { $_.Service -eq $Get.Name[$i] } | % { $_.Profile }
+                $Get.Profile[$I]      = $Get.Track.Config.Profile | ? { $_.Service -eq $Get.Name[$I] } | % { $_.Profile }
                 $Get.StartMode[$I]    = $Get.Current.StartMode[$I]
                 $Get.State[$I]        = $Get.Current.State[$I]
                 $Get.DisplayName[$I]  = $Get.Current.DisplayName[$I]
@@ -1217,7 +1384,7 @@
                 $Get.Description[$I]  = $Get.Current.Description[$I]
             }
 
-            If ( ( $Get.Name[$I] -in $Get.Current.Name ) -and ( $Get.Name[$I] -in $Get.Track.Current.Exclude ) )
+            If ( ( $Get.Name[$I] -in $Get.Current.Name ) -and ( $Get.Name[$I] -in $Get.Track.Current.Exc ) )
             {
                 $Get.Scoped[$I]       = "[_]"
                 $Get.Profile[$I]      = "-,-,-,-,-,-,-,-,-,-"
@@ -1266,28 +1433,38 @@
 
             [ Parameter ( Mandatory ) ] [ PSCustomObject ] $ProfileObject )
 
-        $ProfileObject | % {
+            
+            $Return    = [ PSCustomObject ]@{
 
-            $_.Inf.Control.DisplayActive , $_.Inf.Control.DisplayInactive , $_.Inf.Control.DisplaySkipped , $_.Inf.Control.MiscXbox }
+                Select = "!Active,!Inactive,!Skipped,MiscXbox".Replace('!',"Display").Split(',') 
+            }
 
-            $_.Cfg         | % { 
 
-                If ( $_.Inf.Control.DisplayActive -eq 1 )
+
+            $Return    | ? { $ProfileObject.Info.Control.$_ -eq 1 }
+
+
+
+            $_.Info.Control | % { $_.DisplayActive , $_.Info.Control.DisplayInactive , $_.Info.Control.DisplaySkipped , $_.Info.Control.MiscXbox }
+
+            $_.Config  | % { 
+
+                If ( $_.Info.Control.DisplayActive -eq 1 )
                 { 
                     $_.Cfg.Active   = $_.Cfg.Master | ? { $_.State -eq "Running" }                     | % { $_.Name } 
                 }
 
-                If ( $_.Inf.Control.DisplayInactive -eq 1 )
+                If ( $_.Info.Control.DisplayInactive -eq 1 )
                 { 
                     $_.Cfg.Inactive = $_.Cfg.Master | ? { $_.State -eq "Stopped" }                     | % { $_.Name } 
                 }
 
-                If ( $_.Inf.Control.DisplaySkipped -eq 1 )
+                If ( $_.Info.Control.DisplaySkipped -eq 1 )
                 { 
                     $_.Cfg.Skipped  = $_.Cfg.Master | ? { $_.Name -in $ProfileObject.Cfg.Filter.Skip } | % { $_.Name } 
                 }
 
-                If ( $_.Inf.Control.MiscXbox -eq 1 )
+                If ( $_.Info.Control.MiscXbox -eq 1 )
                 { 
                     $_.Cfg.Xbox     = $_.Cfg.Master | ? { $_.Name -in $ProfileObject.Cfg.Filter.Xbox } | % { $_.Name } 
                 }
@@ -1330,7 +1507,7 @@
                 #    MemberDefinition = "[DllImport('Kernel32.dll')] public static extern IntPtr GetConsoleWindow(); [DllImport('user32.dll')] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)"
                 #}
 
-                Add-Type -Name Window -Namespace Console -MemberDefinition "[DllImport('Kernel32.dll')] public static extern IntPtr GetConsoleWindow(); [DllImport('user32.dll')] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)"
+                Add-Type -Name Window -Namespace Console -MemberDefinition '[DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow();[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow)'
             }
         }
 
@@ -1387,33 +1564,33 @@
 
                 $Master                        = [ PSCustomObject ]@{ 
 
-                    Sys                        = Resolve-Windows -All
-                    Inf                        = Resolve-ViperBomb -All
-                    Cfg                        = Get-ServiceProfile
+                    System                     = Resolve-Windows -All
+                    Info                       = Resolve-ViperBomb -All
+                    Config                     = Get-ServiceProfile
 
 
-                    #Wpf                        = [ PSCustomObject ]@{
+                    WPF                        = [ PSCustomObject ]@{
 
-                        #XAML                   = Get-XAML -Service
-                        #Named                  = Resolve-ViperBomb -Names
-                        #GUI                    = ""
-                    #}
+                        XAML                   = Get-XAML -Service
+                        Named                  = Resolve-ViperBomb -Names
+                        GUI                    = ""
+                    }
                 }
 
                 $Master                        = Filter-ServiceProfile -ProfileObject $Master
                 
                 $Master                        | % {
 
-                    $_.Inf.Control.TermsOfService  = 1
+                    $_.Info.Control.TermsOfService  = 1
                     $_.WPF                     | % {
                     
-                        $_.GUI                   = Convert-XAMLToWindow -Xaml $_.XAML -NE $_.Named -Passthru 
+                        $_.GUI                 = Convert-XAMLToWindow -Xaml $_.XAML -NE $_.Named -Passthru 
                     }
                 }
 
                 $Service                       = @( )
 
-                $GUI = Convert-XAMLToWindow -Xaml ( Get-Xaml -Service ) -NE ( Resolve-ViperBomb -Names )
+                $GUI                           = Convert-XAMLToWindow -Xaml ( Get-Xaml -Service ) -NE ( Resolve-ViperBomb -Names )
             }
 
             Else 
@@ -5237,7 +5414,7 @@
                 Break
             }
 
-            "SecurityProtocol"           | % { IEX "[ Net.ServicePointManager ]::$_ = [ Net.$_`Type ]::TLS12" }
+            [ Net.ServicePointManager ]::SecurityProtocol = 3072
 
             $X                           = IRM -URI "http://ipinfo.io/$( ( IWR -URI 'http://ifconfig.me/ip' | % { $_.Content } ) )"
 
@@ -6762,7 +6939,7 @@
             [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({ Test-Path $_ -PathType Container })][ String ] $Path ,
             [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({ $_.Split( '.' )[-1] -ne ".ini"   })][ String ] $Name ,
             [ Parameter ( Mandatory , ValueFromPipeline ) ][ ValidateScript ({ $_ -ne $Null })][ Hashtable ] $Table ,
-            [ Parameter ( ) ][ ValidateScript ({ $_ -in @( 'Unicode' ; 7,8,32 | % { "UTF$_" } ;'ASCII','BigEndianUnicode','Default','OEM')})][ String ] $Encoding = "Unicode" ,
+            [ Parameter ( ) ][ ValidateScript ({ $_ -in @( 'Unicode,ASCII,BigEndianUnicode,Default,OEM'.Split(',') ; "7,8,32".Split(',') | % { "UTF{0}" -f $_ })})][ String ] $Encoding = "Unicode" ,
             [ Parameter ( ) ][ Switch ] $Force     ,
             [ Parameter ( ) ][ Switch ] $Append    ,
             [ Parameter ( ) ][ Switch ] $UTF8NoBOM ,
