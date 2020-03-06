@@ -1,56 +1,56 @@
 # Description/Foreword: Making something trivial sound a *hell of a lot more interesting*...
 
-     The "Deployment Imaging and Servicing Module"
+The "Deployment Imaging and Servicing Module"
 
-     The official name is "Deployment Image Servicing and Management Tool" 
+The official name is "Deployment Image Servicing and Management Tool" 
 				
-					... but that is a longer way to say "servicing module"
+... but that is a longer way to say "servicing module"
 					
-						Because when you add the word "Module"..?
+Because when you add the word "Module"..?
 						
-						Well you're talking about some business. 
+Well you're talking about some business. 
       
-						Business that only gets talked about when you happen to wear big boy pants on a daily occasion...
+Business that only gets talked about when you happen to wear big boy pants on a daily occasion...
 					
-						In other words, it is ... the end-all, be-all, of Servicing Modules...
+In other words, it is ... the end-all, be-all, of Servicing Modules...
 				
-						Let's put it this way... 
+Let's put it this way... 
       
-      You could spend months making something awesome as hell. Maybe even years. Or decades. Doesn't matter.
+You could spend months making something awesome as hell. Maybe even years. Or decades. Doesn't matter.
 				
-						You could even have a whole entire roster of the smartest bastards that have ever laid a smack-down...
+You could even have a whole entire roster of the smartest bastards that have ever laid a smack-down...
 
-						... on anybody's candy ass (like the Rock does/did) ... 
+... on anybody's candy ass (like the Rock does/did) ... 
 						
-						... at least in terms of being a smart bastard ...
+... at least in terms of being a smart bastard ...
 				
-						You could have a whole team of guys like that. 
+You could have a whole team of guys like that. 
 				
-						Then, out of that group of people of smartest bastards there...
+Then, out of that group of people of smartest bastards there...
 
-						... they all had a list of the top 10 best ideas they ever had.
+... they all had a list of the top 10 best ideas they ever had.
 				
-						Out of that group of people, you might be the lucky bastard that gets to hand pick the one ...
+Out of that group of people, you might be the lucky bastard that gets to hand pick the one ...
 						
-						The one that is *THE* most bonified, top-notch, high quality idea that *ANY* of them ever had..?
+The one that is *THE* most bonified, top-notch, high quality idea that *ANY* of them ever had..?
 				
-						You could try to call it "Deployment Image Servicing and Management Tool" ... 
+You could try to call it "Deployment Image Servicing and Management Tool" ... 
 						
-						but ... The real, actual, already made version of that tool ... it already exists. 
+but ... The real, actual, already made version of that tool ... it already exists. 
 						
-						It's called the "Deployment Image Servicing and Management Tool"
+It's called the "Deployment Image Servicing and Management Tool"
 
-						However ... that is the 'on-paper', project name for it.
+However ... that is the 'on-paper', project name for it.
 						
-						It's actually called "The god damn Deployment Imaging and Servicing Module AKA, it's Batman"
+It's actually called "The god damn Deployment Imaging and Servicing Module AKA, it's Batman"
 						
-						It is the best tool, hands down, you couldn't even cheat and build a quantum computer to compete with this.
+It is the best tool, hands down, you couldn't even cheat and build a quantum computer to compete with this.
 						
-						Google has tried, over and over again... They just cannot do it.
+Google has tried, over and over again... They just cannot do it.
+
+That is how god damn smart these bastards over at Microsoft actually are.
 						
-						That is how god damn smart these bastards over at Microsoft actually are.
-						
-						They don't even use the real name for the program or software... they have to keep the cooler names to themselves.
+They don't even use the real name for the program or software... they have to keep the cooler names to themselves.
 
 # Summary
 Using a combination of tools that are authored within this module, this project includes a command line interface as well as many WPF/XAML based GUI elements that are all 100% strictly within this module.
