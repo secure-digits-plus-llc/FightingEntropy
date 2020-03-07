@@ -21,15 +21,17 @@
 \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\__    ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
 //¯¯\\__[  Declare Namespaces & Load Modules ]___________________________________________//¯\\__//¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
 ¯    ¯¯¯¯                                    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
-        
-        $ENV:PSModulePath.Split( ';' ) | % { GCI $_ -Recurse "*Hybrid-DSC.ps1*" } | % { IPMO $_.FullName -Force }
-
+        "HKLM:\SOFTWARE\Policies\Secure Digits Plus LLC\HybridDSC\Module" | % { 
+          
+          If ( Test-Path $_ ) { GP $_ | % { GCI $_.Path *ps1* | % { IPMO $_.FullName -Force } } }
+          Else { Write-Host "Exception [!] Module failed to load" -F 12 }
+        }
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___  
  //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯\\ 
  \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____    ____    ____    ____    ____    ____    ___// 
 #//¯¯\\__[ Module Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-¯¯    ¯¯¯¯                  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    
+¯¯    ¯¯¯¯                  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯      
         Get-HybridDSCRoot           - Gets the current module location
         Get-HybridDSC               - Gets a description of this table/Help
         Get-ScriptRoot              - Gets the current script path
@@ -47,11 +49,12 @@
         Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
         Get-LineDepth               - Gets the spacing for clean formatting            
         Confirm-DomainName          - Confirms whether a supplied domain name is valid 
-        Show-ToastNotification      - Prepares and sends a Windows toast notification #>
+        Show-ToastNotification      - Prepares and sends a Windows toast notification 
+        Export-ModuleManifest       - Executes an update to the associated PSM1 (File/Manifest) #>
 
     Export-ModuleMember -Function Get-HybridDSC, Get-ScriptRoot, Export-ISETheme, Resolve-HybridDSC, Publish-HybridDSC, New-Subtable, 
     New-Table, Convert-HashToArray, Write-Theme, Show-Message, Convert-XAMLToWindow, Show-WPFWindow, Get-XAML, Find-XAMLNamedElements,
-    Get-LineDepth, Confirm-DomainName, Show-ToastNotification
+    Get-LineDepth, Confirm-DomainName, Show-ToastNotification, Export-ModuleManifest
 
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
