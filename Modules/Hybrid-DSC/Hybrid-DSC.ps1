@@ -14,197 +14,103 @@
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//   ____    ____    ____    ____    ____    ____    ____    ____    ____   \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__/====\__/----\__/====\__/----\__/====\__/----\__/====\__/----\__/====\__/----\__/====\__/----\__/====\__/----\__/====\__/----\__/====\__/----\__// 
 //¯¯    
-\\  [ Hybrid-DSC ] @: Contains All Resources/Scripts/Modules/Functions
+\\  [ HybridDSC ] @: Contains All Resources/Scripts/Modules/Functions 
 //   ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____      
-\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/---\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\___  
-//¯¯\\___________________________________________________________________________________¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯\\ 
-\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___ __ ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
- ¯¯¯\\__[ Declares Namespaces, Loads Modules, then says peace out. ]____________________//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
-     ¯¯¯¯                     ( it doesn't actually say peace out, but it could... )¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯      
-#>  
-    ( "{0}.AccessControl,{0}.Principal,Management.Automation,DirectoryServices" -f "Security" ).Split(',') | % { IEX "Using Namespace System.$_" }
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___  
+//¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯\\ 
+\\___   [ Declares Namespaces, Loads Modules, then says peace out ]                      ____    ____    ____    ____    ____    ____    ____    ___// 
+ ¯¯¯\\_____________________ ( Note: Doesn't actually say 'peace out' ) _________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+     ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
     
-    $Hybrid   = @{ # This updates the associated PSM1 File whenever the script is imported, or used.
-        
-        Path  = $ENV:PSModulePath.Split( ';' ) | % { GCI $_ "*Hybrid-DSC*" -Directory } | % { "$( $_.FullName )\Hybrid-DSC.psm1" } 
-        Value = @'
-<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//  [ Secure Digits Plus LLC | Hybrid | Desired State Controller ]  \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯       _____________________________________________________        ¯¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯        __/¯¯\__[ Dynamically Engineered Digital Security ]__/¯¯\__         ¯¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\  _________________________ ________________ ___________________________________  //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__// | Application Development | Virtualization | Network and Hardware Magistration | \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯  //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__//   https://www.securedigitsplus.com | Server-Client | Seedling-Spawning Script    \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ ___//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   [ Provisional Author : Michael C Cook Sr. | "The Buck Stops Here" ]    //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//   ____    ____    ____    ____    ____    ____    ____    ____    ____   \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
-\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
-//¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯  
-\\  [ Hybrid-DSC ] @: Loads the ( Hybrid - Desired State Controller ) Module
-//   ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____      
-\\__//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__//¯¯\\__//==\\__/----\__//==\\__/---\\__//¯¯\\__/----\__//==\\__/----\__//==\\__/----\__//==\\___  
-//¯¯\\__________________________________________//¯¯\\__//¯¯\\___________________________¯¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯\\ 
-\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___    ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
- ¯¯¯¯   [ Declare Namespaces & Load Modules ] __________________________________________//¯¯\\__//¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
-                                              ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
-        
-        $ENV:PSModulePath.Split( ';' ) | % { GCI $_ -Recurse "*Hybrid-DSC.ps1*" } | % { IPMO $_.FullName -Force }
+     ( "{0}.AccessControl,{0}.Principal,Management.Automation,DirectoryServices" -f "Security" ).Split(',') | % { IEX "Using Namespace System.$_" }
 
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ Script Functions ]____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯    
-        Get-HybridDSC               - Gets a description of this table/Help
-        Get-ScriptRoot              - Gets the current script path
-        Export-ISETheme            - Generates ISE XML Theme File for Export/Import/Migration
-        Resolve-HybridDSC           - Collects Necessary Script Information            
-        Publish-HybridDSC           - Creates a distributable package for Hybrid-DSC   
-        New-Subtable                - Converts Key/Value Subtable for Write-Theme      
-        New-Table                   - Converts Key/Value Tables for Write-Theme        
-        Convert-HashToArray         - Converts a Hashtable to a formatted array        
-        Write-Theme                 - Stylizes Command Line Output                     
-        Show-Message                - Shows a Message Box                              
-        Convert-XAMLToWindow        - Converts a block of XAML to a hash-table object  
-        Show-WPFWindow              - Initializes the Window Object                    
-        Get-XAML                    - Loads templatized XAML GUI's                     
-        Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
-        Get-LineDepth               - Gets the spacing for clean formatting            
-        Confirm-DomainName          - Confirms whether a supplied domain name is valid 
-        Show-ToastNotification      - Prepares and sends a Windows toast notification #>
-
-    Export-ModuleMember -Function Get-HybridDSC, Get-ScriptRoot, Export-ISETheme, Resolve-HybridDSC, Publish-HybridDSC, New-Subtable, 
-    New-Table, Convert-HashToArray, Write-Theme, Show-Message, Convert-XAMLToWindow, Show-WPFWindow, Get-XAML, Find-XAMLNamedElements,
-    Get-LineDepth, Confirm-DomainName, Show-ToastNotification
-
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ Network Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Resolve-NetworkMap          - The Kitchen Sink of Network Mapping
-        Get-NetworkInfo             - Collects various network information
-        Start-PingSweep             - Scans everything on the local network address
-        Get-NBTSCAN                 - This parses out NBTStat to return NBTScan
-        Get-NetworkHosts            - Collects the ARP tables for MAC address Info
-        Get-TelemetryData           - Collects external information for DNS and AD
-        Resolve-MacAddress          - Resolves the vendor of any given MAC address
-        Start-NetworkInfo           - Comprehensive combination of these other tools
-        Get-NetworkStatistics       - Comprehensive netstat reparsed correctly
-        Initialize-PortScan         - Scans some ports                                  #>
-
-    Export-ModuleMember -Function Resolve-NetworkMap, Get-NetworkInfo, Start-PingSweep, Get-NBTSCAN, Get-NetworkHosts, Get-TelemetryData, 
-    Resolve-MacAddress, Start-NetworkInfo, Get-NetworkStatistics, Initialize-PortScan
-
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ Directory Functions ]_________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Invoke-Login                - Initializes a live AD validation login context
-        Get-DSCPromoTable           - Retrieves GUI Naming Information
-        Get-DSCPromoSelection       - Resets GUI Elements according to selected type
-        Initialize-DomainController - Promotes a Domain Controller                      #>
-    
-    Export-ModuleMember -Function Invoke-Login, Get-DSCPromoTable, Get-DSCPromoSelection, Initialize-DomainController
-
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ Permissions Functions ]_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Add-ACL                     - Adds an Access Control list
-        New-ACLObject               - Creates a new ACL Object Template
-        Unlock-Script               - Will allow for unlocking a file.                  #>
-
-    Export-ModuleMember -Function Add-ACL, New-ACLObject, Unlock-Script
-
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ Server Functions ]____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Initialize-Server           - Orchestrates initial server configuration
-        Get-DSCFeatureList          - Obtains the features used for this modification
-        Sync-DNSSuffix              - Ensures the DNS Suffix is set
-        Register-PDCTimeSource      - Sets the Primary Domain Controller Time Source
-        Install-DSCRoot             - Installs dependencies for MDT and Hybrid-DSC
-        Install-HybridDSC           - Creates a Hybrid-DSC Deployment Share
-        Initialize-HybridIIS        - Automatically Configures IIS for MDT/BITS
-        Initialize-HybridDSC        - Will populate Applications,Images,Certificates    #>
-
-    Export-ModuleMember -Function Initialize-Server, Get-DSCFeatureList, Sync-DNSSuffix, Register-PDCTimeSource, Install-DSCRoot, 
-    Install-HybridDSC, Initialize-HybridIIS, Initialize-HybridDSC
-
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ MDT Functions ]_______________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Import-MDTModule            - Loads the Microsoft Deployment Toolkit Module
-        Export-Ini                  - Specifically exports an INI file for MDT
-        Export-BridgeScript         - Exports the file used to distribute Hybrid-DSC
-        Update-HybridDSC            - Recycles all Deployment Share Content
-        Update-Branding             - Updates the branding for a child item device      #>
-
-    Export-ModuleMember -Function Import-MDTModule, Export-Ini, Export-BridgeScript, Update-HybridDSC, Update-Branding
-
-<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
- //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
- \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-  ¯¯¯\\ [ Diagnostic Functions ]________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        Initialize-ViperBomb        - Loads the ViperBomb Service Configuration Tool
-        Resolve-UninstallList       - Obtains Uninstall Programs List
-        Resolve-LocalMachine        - Retrieves environment variables
-        Get-CurrentServices         - Gets a list of the systems current services
-        Get-ServiceProfile          - Compares the list of services to a profile type.
-        Update-ServiceProfile       - Filters the list of services based on input
-        Select-ServiceProfile       - Selects the corresponding service profile
-        Save-FileDialog             - Opens a 'Save' file dialog box
-        Resolve-Windows             - Obtains Windows Environment Variables
-        Get-DiskInfo                - Locates Hard Disk Statistics
-        Resolve-ViperBomb           - Collects Information needed for ViperBomb GUI
-        Start-ViperBombDiagnostics  - Loads the ViperBomb Console Configuration Panel
-        Import-ServiceConfiguration - Collects a Service configuration for import
-        New-ServiceTemplate         - Creates a new template instance (Immutable)
-        Get-ServiceProfile          - Converts loaded profile into useable GUI object
-        Show-Console                - Enables/Disables the Console                      
-        Get-CurrentPID              - Collects the (QMark/Processor) ID                 #>
-
-    Export-ModuleMember -Function Initialize-ViperBomb, Resolve-UninstallList, Resolve-LocalMachine, Get-CurrentServices, Get-ServiceProfile, Update-ServiceProfile, 
-    Select-ServiceProfile, Save-FileDialog, Resolve-Windows, Get-DiskInfo, Resolve-ViperBomb, Start-ViperBombDiagnostics, Import-ServiceConfiguration, 
-    New-ServiceTemplate, Get-ServiceProfile, Show-Console, Get-CurrentPID
-                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-<#___                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
- ¯¯¯#>  Write-Theme -Action "Hybrid-DSC [+]" "Module Loaded" <#_________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-     ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     #>
-'@ }
-
-    SC @Hybrid
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 # ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-ScriptRoot # Returns the current execution context path _______________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____    ____    ____    ____    ____    ____    ___// 
+    Function Get-HybridDSCRoot # _______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    { # Should normally return this module's physical path for the current ( User / Service Account )¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯                  
+        
+        $Module                    = "HybridDSC"
+        $Version                   = "2020.3.0"
+        $Root                      = "SOFTWARE\Policies\Secure Digits Plus LLC"
+        $Path                      = "HKLM:"
+        $Full                      = "$Path\$Root"
+        $Script                    = [ PSCustomObject ]@{ 
             
-            [ PSCustomObject ]@{ Parent = Split-Path $_ -Parent ; Leaf = Split-Path $_ -Leaf }
-        }   
+            Install                = {
+
+                Param ( $Source , $Destination , $Description )
+
+                IPMO BitsTransfer
+                
+                [ Net.ServicePointManager ]::SecurityProtocol = 3072
+                        
+                $Splat = @{ Source      = $Source
+                            Destination = $Destination 
+                            Description = $Description }
+                
+                Start-BitsTransfer @Splat
+            }
+
+            Package                = {
+
+                Param ( $Path )
+
+
+            }
+        }
+
+        If ( ! ( Test-Path $Full ) )
+        {
+            $Root.Split('\')       | % { If ( ! ( Test-Path "$Path\$_" ) ) { NI $Path -Name $_ -VB } ; $Path += "\$_" }
+
+            SP $Path -Name    "Date" -Value ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
+            NI $Path -Name   $Module -VB
+        }
+
+        $Path                      = "$Full\$Module\Module"
+
+        If ( ! ( Test-Path $Path ) )
+        {
+            NI "$Full\$Module" -Name "Module" -VB
+
+            SP $Path -Name    "Path" -Value "$Env:ProgramFiles\WindowsPowerShell\Modules\$Module" -VB
+            SP $Path -Name    "Date" -Value ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
+            SP $Path -Name "Version" -Value $Version -VB
+                
+            $Mod = GP $Path | % { $_.Path }  
+
+            If ( ! ( Test-Path $Mod ) )
+            {
+                NI $Mod -ItemType Directory -VB
+            }
+
+            Write-Host "  Downloading [~] Module" -F 10
+            $URI    = "https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Hybrid-DSC.zip?raw=true"
+            $Out    = "$Mod\HybridDSC.zip"
+            $Info   = "Procuring Module Installer"
+        
+            & $Script.Install $URI $Out $Info
+
+            Expand-Archive "$Mod\HybridDSC.zip" -DestinationPath "$Mod" -Force -VB 
+            RI "$Mod\HybridDSC.zip" -VB
+            
+            "Control,Graphics,Map".Split(',') | % { 
+                
+                Expand-Archive "$Mod\$_.zip" -DestinationPath $Mod -Force -VB ; RI "$Mod\$_.zip" -VB
+            }
+        }
+
+        GP $Path | % {
+
+            [ PSCustomObject ]@{
+
+                Path    = $_.Path
+                Date    = $_.Date
+                Version = $_.Version
+            }
+        }
                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -386,7 +292,7 @@
 
                 Author    = $_
                 Website   = "https://www.securedigitsplus.com"
-                Module    = $ENV:PSModulePath.Split( ';' ) | ? { GCI $_ -Recurse "*Hybrid-DSC*" } | % { "$_\Hybrid-DSC" }
+                Module    = $ENV:PSModulePath.Split( ';' ) | ? { GCI $_ -Recurse "*HybridDSC*" } | % { "$_\HybridDSC" }
                 Registry  = "HKLM:\Software\Policies\$_"
                 Company   = @( )
                 Drive     = @( )
@@ -614,7 +520,7 @@
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Export-ISETheme #_ Processes a Color theme for ISE _______________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    Function Export-ISETheme #_ Processes a Color theme for ISE ________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param (
 
@@ -793,9 +699,9 @@
         }
         
         $Return.Return                                                              #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+}#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\____  
+#//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯                                                                    // 
     Function Resolve-Windows # CIM / Edition Collection Table __________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding ( ) ] Param (
@@ -872,24 +778,42 @@
             If ( $PS          ) { $_.PSVersion }
             If ( $Environment ) { $_.Env       }
             If ( $All         ) { $_           }
-        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        }                                                                           #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____       
 }#____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\____  
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯                                                                    // 
-#//¯¯¯                                                                                                                                               \\
-#\\  [ Use-ViperBombServices ] @: Services & Group Policy Template Generator [ Modified version of "MadBomb122" & Charles Spark's scripts ]          //
-#//   ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____   \\  
-#\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/---\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__//  
+#//¯¯¯                                                                                                                                               \\ 
+#\\  [ Use-ViperBombServices ] @: Services & Group Policy Template Generator [ Modified version of "MadBomb122" & Charles Spark's scripts ]          // 
+#//   ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____   \\ 
+#\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__/---\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//==\\__// 
 #//¯¯\\___________________________________________________________________________________¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___ __ ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
 # ¯¯¯\\__[ Initial Script Prerequisite Declarations ]____________________________________//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
 #     ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯      
 #
-#     Foreword: This script has been extensively modified/completely revamped, however I still make every effort to credit the original authors.
-#     ¯¯¯¯¯¯¯¯                       ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯          ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-#               Revisions include, the 'code-behind' PowerShell script, as well as the XAML GUI.
+#    [2020/03/05]
 #
-#               MadBomb122 has a real name and in respect to him, I have chosen to leave that information outside of this script.
+#       Foreword: This script/program has been extensively modified/completely revamped.
+#
+#       The GUI in this version was originally developed by MadBomb122. His program is originally based on Black Viper's service configurations @
+#
+#       www.blackviper.com
+#
+#       Other details are in the readme and links are provided in the GUI.
+#
+#       I redesigned it and began to implement various changes that could add a consistent and scalable update system for Hybrid-DSC.
+#
+#       Fork Revisions/Updates include: 
+#
+#           - All necessary files are included within this single PowerShell script and module.
+#
+#           - No external files are necessary for it's use. 
+#
+#           - Heavily modified Service Profile loading , filtering, and sorting.
+#
+#           - XAML based GUI has been through a complete redesign
+#
+#           - MadBomb122 has a real name and in respect to him, I have chosen to leave that information outside of this script.
 #               I have collaborated with MadBomb122 over the course of the last 6-7 months, tentatively, in helping to teach him some refinement
 #               techniques on my journey to advance my Application Development experience.
 #
@@ -1156,7 +1080,7 @@
                 DataGrid         = 'Index,Scoped,Profile,Name,StartMode,Status,DisplayName,PathName,Description'.Split(',')
 
                 Skip             = @( ( 'BcastDVRUserService,DevicePickerUserSvc,DevicesFlowUserSvc,PimIndexMaintenanceSvc,PrintWorkflowUserSvc,UnistoreSvc,' + 
-                'UserDataSvc,WpnUserService' -join '' ).Split(',') | % { "$_`_$QMark" } ) + @( 'AppXSVC,BrokerInfrastructure,ClipSVC,CoreMessagingRegistrar,' + 
+                                   'UserDataSvc,WpnUserService' -join '' ).Split(',') | % { "$_`_$QMark" } ) + @( 'AppXSVC,BrokerInfrastructure,ClipSVC,CoreMessagingRegistrar,' + 
                 'DcomLaunch,EntAppSvc,gpsvc,LSM,MpsSvc,msiserver,NgcCtnrSvc,NgcSvc,RpcEptMapper,RpcSs,Schedule,SecurityHealthService,sppsvc,StateRepository,' + 
                 'SystemEventsBroker,tiledatamodelsvc,WdNisSvc,WinDefend' -join '' ).Split(',') | Sort
             }
@@ -1179,6 +1103,13 @@
                         Profile = $_.Profile[ $_.Values[$I]]
                     }
                 }
+            }
+
+            Template = [ PSCustomObject ]@{
+
+                Profile   = 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto'
+                StartMode = 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto'
+                State     = 'Stopped' , 'Running'
             }
         }
 
@@ -1245,7 +1176,7 @@
             Cfg               = $Model | % { If ( $_ -eq $Null ) { $Viper.Control } Else { $_ } }
         }
 
-        ForEach ( $i in 0..9 )
+        ForEach ( $I in 0..9 )
         {
             $X                = $Collect.Info[$I].Split(';')
 
@@ -1282,7 +1213,7 @@
             $Collect.Subtable[$I] = New-Subtable -Items $Items -Values $Values
         }
 
-        $Splat                = @{ 
+        $Splat                = @{
 
             Title             = "Diagnostic/Startup Panel"
             Depth             = 10
@@ -1365,7 +1296,7 @@
         
         $Get                          | % { 
 
-            $_.Scoped                 = $_.Index | % { "[-]" }
+            $_.Scoped                 = $_.Index | % { "[~]" }
             $_.Profile                = $_.Index | % { "-,-,-,-,-,-,-,-,-,-" }
             $_.Name                   = $_.Index | % { "-" }
             $_.StartMode              = $_.Index | % { "-" }
@@ -1395,7 +1326,7 @@
 
             If ( ( $Get.Name[$I] -in $Get.Current.Name ) -and ( $Get.Name[$I] -in $Get.Track.Current.Exc ) )
             {
-                $Get.Scoped[$I]       = "[_]"
+                $Get.Scoped[$I]       = "[X]"
                 $Get.Profile[$I]      = "-,-,-,-,-,-,-,-,-,-"
                 $Get.StartMode[$I]    = $Get.Current.StartMode[$I]
                 $Get.State[$I]        = $Get.Current.State[$I]
@@ -1598,33 +1529,35 @@
             {
                 Write-Theme -Action "Accepted [+]" "Terms of Service" 11 11 15
 
-                $UI                                       = [ PSCustomObject ]@{
+                Get-ServiceProfile                        | % {
+                
+                    $Master                               = [ PSCustomObject ]@{ 
 
-                    XAML                                  = Get-XAML -Service 
-                    Named                                 = Resolve-ViperBomb -Names
+                        System                            = Resolve-Windows -All
+                        Info                              = Resolve-ViperBomb -All
+                        Config                            = $_.Config
+                        Service                           = $_.Service
+                        Current                           = $_.Current
+                        Control                           = Resolve-ViperBomb -Control
+                        Filter                            = @( )
+                        Profile                           = @( )
+                        Refresh                           = @( )
+                        GUI                               = Convert-XAMLToWindow -XAML ( Get-Xaml -Service ) -NE ( Resolve-ViperBomb -Names ) -PassThru
+                    }
                 }
 
-                $Catalog                                  = Get-ServiceProfile
+                $Service                                  = [ PSCustomObject ]@{ 
                 
-                $Master                                   = [ PSCustomObject ]@{ 
-
-                    System                                = Resolve-Windows -All
-                    Info                                  = Resolve-ViperBomb -All
-                    Config                                = $Catalog.Config
-                    Service                               = $Catalog.Service
-                    Current                               = $Catalog.Current
-                    Control                               = Resolve-ViperBomb -Control
-                    Filter                                = @( )
-                    Profile                               = @( )
-                    Refresh                               = @( )
-                    GUI                                   = Convert-XAMLToWindow -XAML $UI.XAML -NE $UI.Named -PassThru
+                    Profile                               = "N/A,Automatic,Automatic,Manual,Disabled".Split(',')
+                    StartMode                             = "N/A,Automatic,Automatic,Manual,Disabled".Split(',')
+                    Status                                = "Stopped,Running".Split(',')
                 }
 
                 $Filter                                   = {
 
                     Param ( $Slot )
                 
-                    $Master.GUI.ServiceDialogSearch       | % { 
+                    $Master.GUI.ServiceDialogSearch       | % {
                         
                         If ( ! $_.IsEnabled )
                         {
@@ -1649,7 +1582,6 @@
                 }
 
                 $Master.Control.TermsOfService            = 1
-
             }
 
             Else 
@@ -1712,21 +1644,16 @@
         {
             If ( $Master.GUI.ServiceDialogSearch.Text -ne "" )
             {
-                If ( $Master.GUI.ServiceDialogSelect.IsEnabled -eq $True )
-                {
-                    $Text                                     = $Master.GUI.ServiceDialogSearch.Text
-                    $Query                                    = $Master.GUI.ServiceDialogSelect.SelectedItem.Content
-                    $Master.GUI.ServiceDialogSelect.IsEnabled = $False
-                }
-
-                $Immute                                       = $Master.Profile.Clone()
+                $Master.GUI.ServiceDialogSelect.IsEnabled     = $False
+                $Query                                        = $Master.GUI.ServiceDialogSelect.SelectedItem.Content
             }
-                
+            
+            $Text                                             = $Master.GUI.ServiceDialogSearch.Text
             $Master.GUI.ServiceDialogGrid.ItemsSource         = $Null
 
             $Return                                           = @( )
 
-            $Immute                                           | ? { $_.$Query -match $Text } | % { 
+            $Master.Profile.Clone()                           | ? { $_.$Query -match $Text } | % { 
                 
                 If ( $_.Name -in $Master.Filter )
                 {
@@ -1736,56 +1663,31 @@
             
             If ( $Return.Count -gt 0 )
             {
-                $Master.GUI.ServiceDialogGrid                 | % {
-                 
-                    $_.Visibility                             = "Visible" 
-                    $_.ItemsSource                            = $Return
-                    
-                }
-
-                $Master.GUI.ServiceDialogEmpty                | % { 
-                    
-                    $_.Visibility                             = "Collapsed"
-                    $_.Text                                   = ""
-                }
+                $Master.GUI.ServiceDialogGrid.Visibility      = "Visible" 
+                $Master.GUI.ServiceDialogGrid.ItemsSource     = $Return
+                $Master.GUI.ServiceDialogEmpty.Visibility     = "Collapsed"
+                $Master.GUI.ServiceDialogGrid.Text            = ""
             }
 
             If ( $Return.Count -eq 0 )
             {
-                $Master.GUI.ServiceDialogGrid                 | % { 
-                    
-                    $_.Visibility                             = "Collapsed"
-                    $_.ItemsSource                            = $Null
-                }
-
-                $Master.GUI.ServiceDialogEmpty                | % {
-                    
-                    $_.Visibility                             = "Visible"
-                    $_.Text                                   = "No results found"
-                }
+                $Master.GUI.ServiceDialogGrid.Visibility      = "Collapsed"
+                $Master.GUI.ServiceDialogGrid.ItemsSource     = $Null
+                $Master.GUI.ServiceDialogEmpty.Visibility     = "Visible"
+                $Master.GUI.ServiceDialogGrid.Text            = "No results found"
             }
 
             If ( $Master.GUI.ServiceDialogSearch.Text -eq "" )
             {
-                $Master.GUI | % { 
-
-                    If ( $_.ServiceDialogSelect.IsEnabled -eq $False )
-                    {
-                        $_.ServiceDialogSelect.IsEnabled      = $True
-                    }
-
-                    $_.ServiceDialogGrid                      | % { 
-                            
-                        $_.Visibility                         = "Visible"
-                        $_.ItemsSource                        = $Master.Profile
-                    }
-
-                    $_.ServiceDialogEmpty                     | % { 
-                            
-                        $_.Visibility                         = "Collapsed"
-                        $_.Text                               = ""
-                    }
+                If ( $Master.GUI.ServiceDialogSelect.IsEnabled -eq $False )
+                {
+                    $Master.GUI.ServiceDialogSelect.IsEnabled = $True
                 }
+
+                $Master.GUI.ServiceDialogGrid.Visibility      = "Visible"
+                $Master.GUI.ServiceDialogGrid.ItemsSource     = $Master.Profile
+                $Master.GUI.ServiceDialogEmpty.Visibility     = "Collapsed"
+                $Master.GUI.ServiceDialogEmpty.Text           = ""
             }
         })
             
@@ -1801,7 +1703,6 @@
             
                 $_.Text = "<Activate to designate a different file name/path>" 
             }
-        
 
         Show-WPFWindow -GUI $Master.GUI
 
@@ -4776,9 +4677,7 @@
                         {
                             ( New-Object System.Net.NetworkInformation.Ping ).SendPingAsync( 
                             
-                                $_.Collect[$I]                                         , # Address
-                                100                                                    , # KeepAlive
-                                ( ( 97..119 )[0..22+0..8] | % { "0x{0:x}" -f $_ } )    , 
+                                $_.Collect[$I] , 100 , ( ( 97..119 )[ 0..22 + 0..8 ] | % { "0x{0:x}" -f $_ } ) , 
                                 ( New-Object System.Net.NetworkInformation.PingOptions )
                             )
                         }
@@ -5693,7 +5592,7 @@
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-XAML # XAML Glossary and Generation Engine _____________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    Function Get-XAML # XAML Glossary and Generation  ___________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ][ OutputType ( "String" ) ] Param ( 
         
@@ -5707,64 +5606,100 @@
             [ Parameter ( ParameterSetName =         "Service" ) ][ Switch ] $Service        ,       
             [ Parameter ( ) ]                                     [ Switch ] $Testing        )
 
-            $XML                        = @{ }
-            $Schema                     = "http://schemas.microsoft.com/winfx/2006/xaml"
-            $Author                     = "Secure Digits Plus LLC"
+            $XAML                          = [ PSCustomObject ]@{
 
-            $CS                         = GCIM Win32_OperatingSystem | % { $_.Caption }
-            $B                          = $False , $True 
-            $YZ                         = "[X]" , "[_]"
+                XML                        = @{ }
+                GFX                        = Resolve-HybridDSC -Graphics
+                Schema                     = "http://schemas.microsoft.com/winfx/2006/xaml"
+                Author                     = "Secure Digits Plus LLC"
+                OS                         = GCIM Win32_OperatingSystem
+                CS                         = GCIM Win32_ComputerSystem
+                SP                         = 0..24 | % { @( "    " ) * $_ }
+                MX                         = 0..3  | % { IEX "`$M$_ = 0..120 | % { @( '¯' , '_' , ' ' , '-' )[$_] * `$_ }" }
+                
+                Glossary                   = [ PSCustomObject ]@{
 
-            $M                          = 0..3 | % { IEX "`$M$_ = 0..120 | % { @( '¯' , '_' , ' ' , '-' )[$_] * `$_ }" }
+                    Size                   = '$W="Width"','$H="Height"'
 
-            $Glossary                   = 
-            "   `$W = 'Width'             " , "   `$H = 'Height'            " , "  `$MA = 'Margin'          " , 
-            "  `$MN = 'Menu'              " , " `$MNI = 'MenuItem'          " , "  `$HD = 'Header'          " , 
-            "  `$GB = 'GroupBox'          " , " `$GBI = 'GroupBoxItem'      " , "  `$CB = 'ComboBox'        " , 
-            " `$CBI = 'ComboBoxItem'      " , " `$CHK = 'CheckBox'          " , "  `$TB = 'TextBox'         " , 
-            " `$TBL = 'TextBlock'         " , "   `$G = 'Grid'              " , "  `$RD = 'RowDefinition'   " , 
-            "  `$CD = 'ColumnDefinition'  " , "  `$GC = 'Grid.Column'       " , " `$GCS = 'Grid.ColumnSpan' " , 
-            "  `$GR = 'Grid.Row'          " , " `$GRS = 'Grid.RowSpan'      " , "  `$SI = 'SelectedIndex'   " , 
-            "  `$LA = 'Label'             " , "  `$BU = 'Button'            " , "  `$CO = 'Content'         " , 
-            "   `$Q = 'Name'              " , "  `$SE = 'Setter'            " , "  `$PR = 'Property'        " , 
-            "  `$BG = 'Background'        " , "  `$RB = 'RadioButton'       " , "  `$TW = 'TextWrapping'    " , 
-            "  `$BO = 'Border'            "
-            
-            $Glossary                   | % { IEX $_ }
+                    Style                  = '$BO="Border"','$SE="Setter"','$PR="Property"','$BG="Background"','$SI="SelectIndex"'
 
-            $GRD , $GCD                 = $RD , $CD | % { "$G.$_`s" }
-
-            $Glossary                  += " `$GRD = '$GRD'" , " `$GCD = '$GCD'" 
-
-            $HAL                        = "Left" ,   "Center" ,  "Right" | % { "HorizontalAlignment = '$_'" }
-            
-            $HCAL                       = $HAL | % { $_.Replace( 'lA' , 'lContentA' ) }
-
-            $VAL                        =   "Top" ,   "Center" , "Bottom" | % { "VerticalAlignment = '$_'" }
-            
-            $VCAL                       =  $VAL | % { $_.Replace( 'lA' , 'lContentA' ) } 
-
-            $SP                         = 0..25 | % { "    " * $_ }
-
-            $VC , $VV                   = "Collapsed" , "Visible" | % { "Visibility = '$_'" }
-
-            $CF ,  $OK ,  $CA           = "Confirm" , "Start" , "Cancel"
+                    #Space                  = @('$MA="Margin"','$PA="Padding"';('$Hx="{0}{2}",$HCx="{0}Content{2}",$Vx="{1}{2}",$VCx="{1}Content{2}"' -f "Horizontal" , "Vertical" , "Alignment").Split(','))
                     
-            $PW , $PWB , $PWC           = "Password" | % { "$_" , "$_`Box" , "$_`Char" }
+                    Space                  = '$MA="Margin"' , '$PA="Padding"' + @( '$Hx="{0}{2}",$HCx="{0}Content{2}",$Vx="{1}{2}",$VCx="{1}Content{2}"' -f "Horizontal" , "Vertical" , "Alignment" ).Split(',')
 
-            $GFX                        = Resolve-HybridDSC -Graphics
+                    Text                   = '$CO="Content"','$HD="Header"','$Q="Name"','$TW="TextWrapping"'
 
-            $Z                          = 0
+                    Object                 = '$BU="Button"','$CHK="CheckBox"','$CB="ComboBox"','$CBI="ComboBoxItem"','$GB="GroupBox"','$GBI="GroupBoxItem"','$LA="Label"','$MN="Menu"','$MNI="MenuItem"',
+                                             '$RB="RadioButton"','$TB="TextBox"','$TBL="TextBlock"'
+
+                    Grid                   = '$G="Grid"','$GC="Grid.Column"','$GCS="Grid.ColumnSpan"','$GR="Grid.Row"','$GRS="Grid.Rowspan"','$GRD="Grid.RowDefinitions"'
+                    $RD="RowDefinition"
+                    $GCD="Grid.ColumnDefinitions"
+                    $CD="ColumnDefinition"
+
+                    Pass                   = ( "{0},{0}Box,{0}Char" -f "Password" ).Split(',')
+                }
+
+                Certificate                = [ PSCustomObject ]@{
+
+                    Title                  = "Certificate Info"
+                    Width                  = 350
+                    Height                 = 200
+                }
+
+                Login                      = [ PSCustomObject ]@{
+
+                    Title                  = "AD Login"
+                    Width                  = 480
+                    Height                 = 280
+                }
+
+                NewAccount                 = [ PSCustomObject ]@{
+
+                    Title                  = "Account Designation"
+                    Width                  = 480
+                    Height                 = 280
+                }
+
+                HybridDSCPromo             = [ PSCustomObject ]@{
+
+                    Title                  = "Desired State Controller Promotion"
+                    Width                  = 800
+                    Height                 = 800
+                }
+
+                DCFound                    = [ PSCustomObject ]@{
+
+                    Title                  = "Domain Controller Found"
+                    Width                  = 350
+                    Height                 = 200
+                }
+
+                DSCRoot                    = [ PSCustomObject ]@{
+
+                    Title                  = "DSC Root Installation"
+                    Width                  = 640
+                    Height                 = 450
+                }
+
+                ProvisionDSC               = [ PSCustomObject ]@{
+
+                    Title                  = "DSC Deployment Share"
+                    Width                  = 640
+                    Height                 = 960
+                }
+
+                Service                    = [ PSCustomObject ]@{
+
+                    Title                  = "ViperBomb Service Configuration Utility"
+                    Width                  = 800
+                    Height                 = 600
+                }
+            }
 
             # ----------- #
             # Header Unit #
             # ----------- #
-
-
-
-
-
-
 
 
         #/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\
@@ -5772,7 +5707,7 @@
         {#___________________________________________________________________________/
 
             $Title                      = "Certificate Info"       
-                
+
              # ____   _________________________
              #//¯¯\\__[_______ Header ________] 
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -6489,16 +6424,9 @@
              #//¯¯\\__[___ Service Dialog ____]
              #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-             $X = @(9,7,8,9,9,9,8,8,9;@(10)*3;@(9,9,11,11,10,12,12)*3;9,8,8,9;@(10)*4;@(9)*4;@(10)*4;9,9,11,11,11,10,11,10,11,10,11,9,8,8;@(10)*11;
-                    9,10,11,12,14,13,14,15;@(17)*4;14,13,13,15,12,12,16,13,16,12,12,16,13,16,12,12,16,13,16,12,11,10,9,9;
-                    @(10;@(15)*4)*2;
-                    
-                    @(8;@(15)*3;10..12;14,23,23,14,23;12..10);
-                    @(10;@(15)*4);
-                    @(8;@(15)*3;10..12;14,23,23,14,23;12..10)*2;
-                    @(10;@(15)*4)*3;
-                    
-                    9,8,8,7,6) | % { $SP[$_] }
+             $X = @(9,7,8,9,9,9,8,8,9;@(10)*3;@(9,9,11,11,10,12,12)*3;9,8,8,9;@(10)*4;@(9)*4;@(10)*4;9,9,11,11,11,10,11,10,11,10,11,9,8,8;@(10)*11;9,10,11,12,14,13,14,15;
+                  @(17)*4;14,13,13,15,12,12,16,13,16,12,12,16,13,16,12,12,16,13,16,12,11,10,9,9;@(10;@(15)*4)*2;@(8;@(15)*3;10..12;14,23,23,14,23;12..10);@(10;@(15)*4);
+                  @(8;@(15)*3;10..12;14,23,23,14,23;12..10)*2;@(10;@(15)*4)*3;9,8,8,7,6) | % { $SP[$_] }
 
              $Y = @( " <TabItem Header = 'Service Dialog'>" , "<$G>" , "<$GRD>" ; 60 , 35 , "*" | % { "<$RD $H = '$_'/>" } ; "</$GRD>" , "<$G $GR = '0' >" , "<$GCD>" ; 
                      2.5 , 1.25 , 1.25 | % { "<$CD $W = '$_*' />" } ; "</$GCD>" , "<$GB $GC         = '0' " , "  $HD              = 'Operating System' " , 
@@ -6524,8 +6452,8 @@
                      "  Value             = '$( $_[0] )'>" ,  "<$SE       $PR          = '$BG'" , "  Value             = '#$( $_[1] )'/>" , "</DataTrigger>" } ;
                      "</Style.Triggers>" , "</Style>" , "</Data$GR`Style>" , "<Data$GC`s>" ; 
 
-                        ( "Index" , 30 ) , ( "Scoped" , 30 ) , ( "Profile" , 80 ) , ( "Name" , 120 ) , ( "StartMode" , 80 ) , ( "State" , 80 ) , ( "DisplayName" , 120 ) , 
-                        ( "PathName" , 100 ) , ( "Description" , 150 ) | % { 
+                     ( "Index" , 30 ) , ( "Scoped" , 30 ) , ( "Profile" , 80 ) , ( "Name" , 120 ) , ( "StartMode" , 80 ) , ( "State" , 80 ) , ( "DisplayName" , 120 ) , 
+                     ( "PathName" , 100 ) , ( "Description" , 150 ) | % { 
                         
                         If ( $_[0] -notin @( "Profile","StartMode","State" ) ) 
                         {
@@ -6536,23 +6464,34 @@
                                 "IsReadOnly              = 'True'/>"
                         }
 
-                        Else 
-                        { 
-                            "<DataGridTemplateColumn     Header                  = '$( $_[0] )' " ,
-                                                        "Width                   = '$( $_[1] )' " ,
-                                                        "SortMemberPath          = '$( $_[0] )' " ,
-                                                        "CanUserSort             = 'True'>" ,
-                                        "<DataGridTemplateColumn.CellTemplate>" ,
-                                            "<DataTemplate>" ,
-                                                 "<ComboBox ItemsSource          = '{ Binding $( $_[0] )}' " ,
-                                                         "  Text                 = '{ Binding Path                = $( $_[0] ), " ,
-                                                                                             "Mode                = TwoWay, " ,
-                                                                                             "UpdateSourceTrigger = PropertyChanged }' " ,
-                                                         "  IsEnabled            = '{ Binding ElementName         = $( $_[0] ), " ,
-                                                                                             "Path                = SelectedIndex }'/>" ,
-                                                 "</DataTemplate>" ,
-                                             "</DataGridTemplateColumn.CellTemplate>" ,
-                                         "</DataGridTemplateColumn>" 
+                        If ( $_[0] -in @( "Profile","StartMode","State" ) )
+                        {
+                            If ( $_[0] -eq "Profile" )
+                            {
+
+                            ItemsSource = "{ Binding ServiceTypeListDG }"
+                            Text        = "{ Binding Path        = BVType, 
+                                             Mode                = TwoWay, 
+                                             UpdateSourceTrigger = PropertyChanged }" 
+                            IsEnabled   = "{ Binding ElementName = CustomBVCB,
+                                             Path                = IsChecked }"/>
+                                $Z = 
+                                "<DataGridTemplateColumn     Header                  = '$( $_[0] )' " ,
+                                                            "Width                   = '$( $_[1] )' " ,
+                                                            "SortMemberPath          = '$( $_[0] )' " ,
+                                                            "CanUserSort             = 'True'>" ,
+                                            "<DataGridTemplateColumn.CellTemplate>" ,
+                                                "<DataTemplate>" ,
+                                                     "<ComboBox ItemsSource          = '{ Binding $( $_[0] )}' " ,
+                                                             "  Text                 = '{ Binding Path                = $( $_[0] ), " ,
+                                                                                                 "Mode                = TwoWay, " ,
+                                                                                                 "UpdateSourceTrigger = PropertyChanged }' " ,
+                                                             "  IsEnabled            = '{ Binding ElementName         = $( $_[0] ), " ,
+                                                                                                 "Path                = SelectedIndex }'/>" ,
+                                                     "</DataTemplate>" ,
+                                                 "</DataGridTemplateColumn.CellTemplate>" ,
+                                             "</DataGridTemplateColumn>"
+                            }
                         }
                     } ; "</Data$GC`s>" , "</Data$G>" , "<$TBL $GR = '2' $Q = 'ServiceDialogEmpty' $MA = '20' $( $VAL[1] ) $( $HAL[1] ) FontSize = '20'/>" , "</$G>" , "</TabItem>" )
 
@@ -7047,6 +6986,15 @@
                                                                                                     "$MDTFile" ,
                  "https://download.microsoft.com/download/3/3/9/339BE62D-B4B8-4956-B58D-73C4685FC492/$MDTFile" ,
                                                                                            "/quiet /norestart" # ~  4s
+            
+            $Pull[3] =                                                                       "PowerShell 7x64" ,
+                                                                                                       "7.0.0" ,
+                                                                                             "PowerShell 7x64" ,
+                                                                                           "PowerShell Core 7" ,
+                                                                                                   "$Base\PS7" ,
+                                                                                "PowerShell-7.0.0-win-x64.msi" ,
+              "https://github.com/PowerShell/PowerShell/releases/download/v7.0.0/PowerShell-7.0.0-win-x64.msi" ,
+                                                                                           "/quiet /norestart" 
 
             $ETA = "2m" , "10m" , "4s" | % { "Estimated Time [~] $_" }
         
@@ -9292,7 +9240,6 @@
             {
                 Update-MDTDeploymentShare -Path $Root.DSDrive -VB
             }
-        
         # ____   _________________________
         #//¯¯\\__[___ WDS Boot Images ___]
         #¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
@@ -9363,9 +9310,6 @@
     Function Sync-DNSSuffix # Modified / Jeff Hicks @ github.com/jdhitsolutions _________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param ( 
-        
-            # Not supporting multiple or network based computers yet.
-            # Based on registry modification, was still very critical to implement domain membership sync
 
             [ Parameter ( Position = 0 , ParameterSetName = "Get" ) ] [ Switch ] $Get    ,
             [ Parameter ( Position = 0 , ParameterSetName = "Set" ) ] [ Switch ] $Set    ,
@@ -9507,18 +9451,54 @@
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Publish-HybridDSC # Publishes the content to a package for distribution ____//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        "$Home\Documents\WindowsPowerShell\Modules" | % { 
+        
+        "$Env:ProgramFiles\WindowsPowerShell\Modules\HybridDSC" | % { 
     
-            $Package                    = [ PSCustomObject ]@{ 
+            $Package                    = [ PSCustomObject ]@{
     
-                Name                    = "Hybrid-DSC"
-                Root                    = $_
-                Full                    = ""
-                Folders                 = ""
-                Files                   = ""
-                Install                 = "Install-HybridDSCModule"
+                Name                    = "HybridDSC"
+                Path                    = $_
+                Full                    = "$_\HybridDSC.zip"
+                Folders                 = "Control,Graphics,Map".Split(',')
+                Files                   = "HybridDSC" | % { "$_.ps1" , "$_.psm1" }
             }
         }
+
+        $Package | % { 
+            
+            If ( Test-Path $_.Full ) { RI $_.Full -Force }
+
+            ForEach ( $I in $Package.Folders )
+            {
+                $_.Path , $I -join '\' | % {
+
+                    $Splat                  = @{
+
+                        Path                = "$_"
+                        DestinationPath     = "$_.zip"
+                    }
+
+                    $Splat.DestinationPath | ? { Test-Path $_ } | % { RI $_ -Force }
+
+                    Compress-Archive @Splat -VB
+
+                    $Package.Files += $Splat.DestinationPath.Split('\')[-1]
+                }
+            }
+        }
+            
+        ForEach ( $I in $Package.Files )
+        {
+            $Splat = @{ 
+
+                Path            = $Package.Path 
+                DestinationPath = "$( $Package.Path )\$I"
+                Update          = $True
+            }
+                
+            Compress-Archive @Splat -VB
+        }
+            
 
         $Package | % {
             
@@ -9537,6 +9517,7 @@
 
                 Compress-Archive @Splat -VB
             }
+        }
 
             $_.Files                    = GCI $_.Full -File
             $_.Files.FullName           | % { 
@@ -9681,6 +9662,185 @@
     Function Get-CurrentPID # Collects the (QMark/Processor) ID _________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         ( Get-Service *_* | ? ServiceType -eq 224 )[0].Name.Split( '_' )[-1]         #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Export-ModuleManifest # (Script/Module) and updates (Manifest/PSM1) File ___//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+
+    $Hybrid   = @{
+        
+        Path  = Get-HybridDSCRoot | % { $_.Path } | ? { Test-Path "$_\HybridDSC.ps1" }
+        Value = @'
+<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//  [ Secure Digits Plus LLC | Hybrid | Desired State Controller ]  \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯       _____________________________________________________        ¯¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯        __/¯¯\__[ Dynamically Engineered Digital Security ]__/¯¯\__         ¯¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\  _________________________ ________________ ___________________________________  //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__// | Application Development | Virtualization | Network and Hardware Magistration | \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯  //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//   https://www.securedigitsplus.com | Server-Client | Seedling-Spawning Script    \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ ___//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   [ Provisional Author : Michael C Cook Sr. | "The Buck Stops Here" ]    //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//   ____    ____    ____    ____    ____    ____    ____    ____    ____   \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
+\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
+//¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯  
+\\  [ HybridDSC ] @: Assemble and mobilize the module
+//   ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____    ____      
+\\__//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__//¯¯\\__//==\\__/----\__//==\\__//¯¯\\__//¯¯\\__/----\__//==\\__/----\__//==\\__/----\__//==\\___  
+//¯¯\\__________________________________________//¯¯\\__//¯¯\\__________________________//¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯\\ 
+\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\__    ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
+//¯¯\\__[  Declare Namespaces & Load Modules ]___________________________________________//¯\\__//¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
+¯    ¯¯¯¯                                    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
+        
+        $ENV:PSModulePath.Split( ';' ) | % { GCI $_ -Recurse "*Hybrid-DSC.ps1*" } | % { IPMO $_.FullName -Force }
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____    ____    ____    ____    ____    ____    ___// 
+#//¯¯\\__[ Module Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+¯¯    ¯¯¯¯                  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
+        Get-HybridDSCRoot           - Gets the current module location
+        Get-HybridDSC               - Gets a description of this table/Help
+        Get-ScriptRoot              - Gets the current script path
+        Export-ISETheme             - Generates ISE XML Theme File for Export/Import/Migration
+        Resolve-HybridDSC           - Collects Necessary Script Information            
+        Publish-HybridDSC           - Creates a distributable package for Hybrid-DSC   
+        New-Subtable                - Converts Key/Value Subtable for Write-Theme      
+        New-Table                   - Converts Key/Value Tables for Write-Theme        
+        Convert-HashToArray         - Converts a Hashtable to a formatted array        
+        Write-Theme                 - Stylizes Command Line Output                     
+        Show-Message                - Shows a Message Box                              
+        Convert-XAMLToWindow        - Converts a block of XAML to a hash-table object  
+        Show-WPFWindow              - Initializes the Window Object                    
+        Get-XAML                    - Loads templatized XAML GUI's                     
+        Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
+        Get-LineDepth               - Gets the spacing for clean formatting            
+        Confirm-DomainName          - Confirms whether a supplied domain name is valid 
+        Show-ToastNotification      - Prepares and sends a Windows toast notification #>
+
+    Export-ModuleMember -Function Get-HybridDSC, Get-ScriptRoot, Export-ISETheme, Resolve-HybridDSC, Publish-HybridDSC, New-Subtable, 
+    New-Table, Convert-HashToArray, Write-Theme, Show-Message, Convert-XAMLToWindow, Show-WPFWindow, Get-XAML, Find-XAMLNamedElements,
+    Get-LineDepth, Confirm-DomainName, Show-ToastNotification
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Network Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Resolve-NetworkMap          - The Kitchen Sink of Network Mapping
+        Get-NetworkInfo             - Collects various network information
+        Start-PingSweep             - Scans everything on the local network address
+        Get-NBTSCAN                 - This parses out NBTStat to return NBTScan
+        Get-NetworkHosts            - Collects the ARP tables for MAC address Info
+        Get-TelemetryData           - Collects external information for DNS and AD
+        Resolve-MacAddress          - Resolves the vendor of any given MAC address
+        Start-NetworkInfo           - Comprehensive combination of these other tools
+        Get-NetworkStatistics       - Comprehensive netstat reparsed correctly
+        Initialize-PortScan         - Scans some ports                                  #>
+
+    Export-ModuleMember -Function Resolve-NetworkMap, Get-NetworkInfo, Start-PingSweep, Get-NBTSCAN, Get-NetworkHosts, Get-TelemetryData, 
+    Resolve-MacAddress, Start-NetworkInfo, Get-NetworkStatistics, Initialize-PortScan
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Directory Functions ]_________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Invoke-Login                - Initializes a live AD validation login context
+        Get-DSCPromoTable           - Retrieves GUI Naming Information
+        Get-DSCPromoSelection       - Resets GUI Elements according to selected type
+        Initialize-DomainController - Promotes a Domain Controller                      #>
+    
+    Export-ModuleMember -Function Invoke-Login, Get-DSCPromoTable, Get-DSCPromoSelection, Initialize-DomainController
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Permissions Functions ]_______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Add-ACL                     - Adds an Access Control list
+        New-ACLObject               - Creates a new ACL Object Template
+        Unlock-Script               - Will allow for unlocking a file.                  #>
+
+    Export-ModuleMember -Function Add-ACL, New-ACLObject, Unlock-Script
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Server Functions ]____________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Initialize-Server           - Orchestrates initial server configuration
+        Get-DSCFeatureList          - Obtains the features used for this modification
+        Sync-DNSSuffix              - Ensures the DNS Suffix is set
+        Register-PDCTimeSource      - Sets the Primary Domain Controller Time Source
+        Install-DSCRoot             - Installs dependencies for MDT and Hybrid-DSC
+        Install-HybridDSC           - Creates a Hybrid-DSC Deployment Share
+        Initialize-HybridIIS        - Automatically Configures IIS for MDT/BITS
+        Initialize-HybridDSC        - Will populate Applications,Images,Certificates    #>
+
+    Export-ModuleMember -Function Initialize-Server, Get-DSCFeatureList, Sync-DNSSuffix, Register-PDCTimeSource, Install-DSCRoot, 
+    Install-HybridDSC, Initialize-HybridIIS, Initialize-HybridDSC
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ MDT Functions ]_______________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Import-MDTModule            - Loads the Microsoft Deployment Toolkit Module
+        Export-Ini                  - Specifically exports an INI file for MDT
+        Export-BridgeScript         - Exports the file used to distribute Hybrid-DSC
+        Update-HybridDSC            - Recycles all Deployment Share Content
+        Update-Branding             - Updates the branding for a child item device      #>
+
+    Export-ModuleMember -Function Import-MDTModule, Export-Ini, Export-BridgeScript, Update-HybridDSC, Update-Branding
+
+<#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+  ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+ //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+ \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+  ¯¯¯\\ [ Diagnostic Functions ]________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        Initialize-ViperBomb        - Loads the ViperBomb Service Configuration Tool
+        Resolve-UninstallList       - Obtains Uninstall Programs List
+        Resolve-LocalMachine        - Retrieves environment variables
+        Get-CurrentServices         - Gets a list of the systems current services
+        Get-ServiceProfile          - Compares the list of services to a profile type.
+        Update-ServiceProfile       - Filters the list of services based on input
+        Select-ServiceProfile       - Selects the corresponding service profile
+        Save-FileDialog             - Opens a 'Save' file dialog box
+        Resolve-Windows             - Obtains Windows Environment Variables
+        Get-DiskInfo                - Locates Hard Disk Statistics
+        Resolve-ViperBomb           - Collects Information needed for ViperBomb GUI
+        Start-ViperBombDiagnostics  - Loads the ViperBomb Console Configuration Panel
+        Import-ServiceConfiguration - Collects a Service configuration for import
+        New-ServiceTemplate         - Creates a new template instance (Immutable)
+        Get-ServiceProfile          - Converts loaded profile into useable GUI object
+        Show-Console                - Enables/Disables the Console                      
+        Get-CurrentPID              - Collects the (QMark/Processor) ID                 #>
+
+    Export-ModuleMember -Function Initialize-ViperBomb, Resolve-UninstallList, Resolve-LocalMachine, Get-CurrentServices, Get-ServiceProfile, 
+    Update-ServiceProfile, Select-ServiceProfile, Save-FileDialog, Resolve-Windows, Get-DiskInfo, Resolve-ViperBomb, Start-ViperBombDiagnostics, 
+    Import-ServiceConfiguration, New-ServiceTemplate, Get-ServiceProfile, Show-Console, Get-CurrentPID
+
+                                                                                    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+<#___                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+ ¯¯¯#>  Write-Theme -Action "Hybrid-DSC [+]" "Module Loaded" <#_________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+     ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     #>
+'@ }
+
+    SC @Hybrid
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
