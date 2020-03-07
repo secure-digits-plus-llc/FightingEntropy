@@ -57,7 +57,7 @@
 
                 Param ( $Path )
 
-                "HybridDSC,Install-HybridDSCModule,Control,Graphics,Map".Split(',') | % {
+                "HybridDSC,Control,Graphics,Map".Split(',') | % {
 
                     Expand-Archive "$Path\$_.zip" -DestinationPath "$Path" -Force -VB
                     RI "$Path\$_.zip" -VB
@@ -91,7 +91,7 @@
             }
 
             Write-Host "  Downloading [~] Module" -F 10
-            $URI    = "https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Hybrid-DSC.zip?raw=true"
+            $URI    = "https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/HybridDSC.zip?raw=true"
             $Out    = "$Mod\HybridDSC.zip"
             $Info   = "Procuring Module Installer"
         
@@ -9474,74 +9474,73 @@
         }
 
         # Create Installation Script
-        "$( $Package.Path )\Install-HybridDSCModule.ps1" | % {
-        
-            Set-Content -Path $_ -Value @'
-            Function Get-ScriptDirectory 
-            {
-                ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
+        Set-Content -Path "$( $Package.Path )\Install-HybridDSCModule.ps1" -Value @'
+        Function Get-ScriptDirectory 
+        {
+            ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
 
-                    If ( $_.Length -gt 0 )
-                    {
-                        [ PSCustomObject ]@{ 
-                
-                            Parent = Split-Path $_ -Parent
-                            Leaf   = Split-Path $_ -Leaf 
-                        }
-                    }
-
-                    Else 
-                    {
-                        Write-Host "Exception [!] File Path not detected. Dot Source the file, or Right-Click the file, Run w/ PowerShell" -F 12
-                    }
-                }
-            }
-        
-            Function Install-HybridDSCModule
-            {
-                $Source                    = Get-ScriptDirectory | % { If ( $_.Parent -ne $Null ) { $_.Parent } Else { Break } }
-                $Module                    = "HybridDSC"
-                $Version                   = "2020.3.0"
-                $Root                      = "SOFTWARE\Policies\Secure Digits Plus LLC"
-                $Path                      = "HKLM:"
-                $Full                      = "$Path\$Root"
-                
-                $Root.Split('\')           | % { If ( ! ( Test-Path "$Path\$_" ) ) { NI $Path -Name $_ -VB } ; $Path += "\$_" }
-        
-                SP $Path           -Name    "Date" -Value                   ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
-                NI $Path           -Name   $Module                                                              -VB
-
-                $Path                      = "$Full\$Module\Module"
-
-                NI "$Full\$Module" -Name  "Module"                                                              -VB
-                SP $Path           -Name    "Path" -Value "$Env:ProgramFiles\WindowsPowerShell\Modules\$Module" -VB
-                SP $Path           -Name    "Date" -Value                   ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
-                SP $Path           -Name "Version" -Value                                             $Version  -VB
-                    
-                $Mod                       = GP $Path | % { $_.Path }
-
-                If ( ! ( Test-Path $Mod ) )
+                If ( $_.Length -gt 0 )
                 {
-                    NI $Mod -ItemType Directory -VB
+                    [ PSCustomObject ]@{ 
+                                            
+                        Parent = Split-Path $_ -Parent
+                        Leaf   = Split-Path $_ -Leaf 
+                    }
                 }
 
-                Expand-Archive $Source $Mod -Force -VB
-
-                GCI $Mod *zip* | % { Expand-Archive $_.FullName $Mod -Force -VB ; RI $_.FullName -Force -VB }
-
-                GCI $Mod *ps1* | % { IPMO $_.FullName -Force }
+                Else 
+                {
+                    Write-Host "Exception [!] File Path not detected. Dot Source the file, or Right-Click the file, Run w/ PowerShell" -F 12
+                }
             }
+        }
+        
+        Function Install-HybridDSCModule
+        {
+            $Source                    = Get-ScriptDirectory | % { If ( $_.Parent -ne $Null ) { $_.Parent } Else { Break } }
+            $Module                    = "HybridDSC"
+            $Version                   = "2020.3.0"
+            $Root                      = "SOFTWARE\Policies\Secure Digits Plus LLC"
+            $Path                      = "HKLM:"
+            $Full                      = "$Path\$Root"
+                
+            $Root.Split('\')           | % { If ( ! ( Test-Path "$Path\$_" ) ) { NI $Path -Name $_ -VB } ; $Path += "\$_" }
+        
+            SP $Path           -Name    "Date" -Value                   ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
+            NI $Path           -Name   $Module                                                              -VB
 
-            Install-HybridDSCModule
+            $Path                      = "$Full\$Module\Module"
+
+            NI "$Full\$Module" -Name  "Module"                                                              -VB
+            SP $Path           -Name    "Path" -Value "$Env:ProgramFiles\WindowsPowerShell\Modules\$Module" -VB
+            SP $Path           -Name    "Date" -Value                   ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
+            SP $Path           -Name "Version" -Value                                             $Version  -VB
+                    
+            $Mod                       = GP $Path | % { $_.Path }
+
+            If ( ! ( Test-Path $Mod ) ) { NI $Mod -ItemType Directory -VB }
+
+            Expand-Archive $Source $Mod -Force -VB
+            GCI $Mod *zip* | % { Expand-Archive $_.FullName $Mod -Force -VB ; RI $_.FullName -Force -VB }
+            GCI $Mod *ps1* | % { IPMO $_.FullName -Force }
+        }
+
+        Install-HybridDSCModule
 '@
-        If ( $? -eq $True ) { $Package.Files += $_ }
+        If ( $? -eq $True ) { $Package.Files += "Install-HybridDSCModule.ps1" }
 
         # Creates new project-export zip file
         ForEach ( $I in $Package.Files )
         {
             $Package.Path , $I -join '\' | % { Compress-Archive -Path $_ -DestinationPath $Package.Full -Update -VB }
         }
-                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+
+        # Exports Publishing Object to Desktop
+        CP $Package.Full "$Home\Desktop"
+
+        # Cleans up after itself
+        GCI $Mod *zip* | % { RI $_ -Force -VB }
+        RI ( $Package.Path , "Install-HybridDSCModule.ps1" -join '\' ) -Force -VB    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
