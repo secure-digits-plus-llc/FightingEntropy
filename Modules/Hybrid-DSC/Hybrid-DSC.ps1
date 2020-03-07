@@ -29,16 +29,16 @@
 #//¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____    ____    ____    ____    ____    ____    ___// 
     Function Get-HybridDSCRoot # _______________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    { # Should normally return this module's physical path for the current ( User / Service Account )¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯                  
+    { # Should normally return this module's tentative installation path ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯      
         
         $Module                    = "HybridDSC"
         $Version                   = "2020.3.0"
         $Root                      = "SOFTWARE\Policies\Secure Digits Plus LLC"
         $Path                      = "HKLM:"
         $Full                      = "$Path\$Root"
-        $Script                    = [ PSCustomObject ]@{ 
+        $Script                    = [ PSCustomObject ]@{
             
-            Install                = {
+            Download               = {
 
                 Param ( $Source , $Destination , $Description )
 
@@ -53,11 +53,15 @@
                 Start-BitsTransfer @Splat
             }
 
-            Package                = {
+            Install                = {
 
                 Param ( $Path )
 
+                "HybridDSC,Install-HybridDSCModule,Control,Graphics,Map".Split(',') | % {
 
+                    Expand-Archive "$Path\$_.zip" -DestinationPath "$Path" -Force -VB
+                    RI "$Path\$_.zip" -VB
+                }
             }
         }
 
@@ -91,15 +95,9 @@
             $Out    = "$Mod\HybridDSC.zip"
             $Info   = "Procuring Module Installer"
         
-            & $Script.Install $URI $Out $Info
+            & $Script.Download $URI $Out $Info
 
-            Expand-Archive "$Mod\HybridDSC.zip" -DestinationPath "$Mod" -Force -VB 
-            RI "$Mod\HybridDSC.zip" -VB
-            
-            "Control,Graphics,Map".Split(',') | % { 
-                
-                Expand-Archive "$Mod\$_.zip" -DestinationPath $Mod -Force -VB ; RI "$Mod\$_.zip" -VB
-            }
+            & $Script.Install $Mod
         }
 
         GP $Path | % {
@@ -9452,7 +9450,8 @@
     Function Publish-HybridDSC # Publishes the content to a package for distribution ____//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         
-        "$Env:ProgramFiles\WindowsPowerShell\Modules\HybridDSC" | % { 
+        # Declare (Object/Properties)
+        "$Env:ProgramFiles\WindowsPowerShell\Modules\HybridDSC" | % {
     
             $Package                    = [ PSCustomObject ]@{
     
@@ -9464,198 +9463,84 @@
             }
         }
 
-        $Package | % { 
-            
-            If ( Test-Path $_.Full ) { RI $_.Full -Force }
+        # Clears any existing zip files
+        GCI $Package.Path *zip* | % { RI $_ -Force -VB }
 
-            ForEach ( $I in $Package.Folders )
-            {
-                $_.Path , $I -join '\' | % {
+        # Creates new sub-folder zip files
+        ForEach ( $I in $Package.Folders )
+        {
+            $Package.Path , $I -join '\' | % { Compress-Archive -Path "$_" -DestinationPath "$_.zip" -VB }
+            $Package.Files              += "$I.zip"
+        }
 
-                    $Splat                  = @{
+        # Create Installation Script
+        Set-Content -Path "$( $Package.Path )\Install-HybridDSCModule.ps1" -Value @'
+        Function Get-ScriptDirectory 
+        {
+            ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
 
-                        Path                = "$_"
-                        DestinationPath     = "$_.zip"
+                If ( $_.Length -gt 0 )
+                {
+                    [ PSCustomObject ]@{ 
+                                            
+                        Parent = Split-Path $_ -Parent
+                        Leaf   = Split-Path $_ -Leaf 
                     }
+                }
 
-                    $Splat.DestinationPath | ? { Test-Path $_ } | % { RI $_ -Force }
-
-                    Compress-Archive @Splat -VB
-
-                    $Package.Files += $Splat.DestinationPath.Split('\')[-1]
+                Else 
+                {
+                    Write-Host "Exception [!] File Path not detected. Dot Source the file, or Right-Click the file, Run w/ PowerShell" -F 12
                 }
             }
         }
-            
+        
+        Function Install-HybridDSCModule
+        {
+            $Source                    = Get-ScriptDirectory | % { If ( $_.Parent -ne $Null ) { $_.Parent } Else { Break } }
+            $Module                    = "HybridDSC"
+            $Version                   = "2020.3.0"
+            $Root                      = "SOFTWARE\Policies\Secure Digits Plus LLC"
+            $Path                      = "HKLM:"
+            $Full                      = "$Path\$Root"
+                
+            $Root.Split('\')           | % { If ( ! ( Test-Path "$Path\$_" ) ) { NI $Path -Name $_ -VB } ; $Path += "\$_" }
+        
+            SP $Path           -Name    "Date" -Value                   ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
+            NI $Path           -Name   $Module                                                              -VB
+
+            $Path                      = "$Full\$Module\Module"
+
+            NI "$Full\$Module" -Name  "Module"                                                              -VB
+            SP $Path           -Name    "Path" -Value "$Env:ProgramFiles\WindowsPowerShell\Modules\$Module" -VB
+            SP $Path           -Name    "Date" -Value                   ( Get-Date -UFormat "%m/%d/%Y %T" ) -VB
+            SP $Path           -Name "Version" -Value                                             $Version  -VB
+                    
+            $Mod                       = GP $Path | % { $_.Path }
+
+            If ( ! ( Test-Path $Mod ) ) { NI $Mod -ItemType Directory -VB }
+
+            Expand-Archive $Source $Mod -Force -VB
+            GCI $Mod *zip* | % { Expand-Archive $_.FullName $Mod -Force -VB ; RI $_.FullName -Force -VB }
+            GCI $Mod *ps1* | % { IPMO $_.FullName -Force }
+        }
+
+        Install-HybridDSCModule
+'@
+        If ( $? -eq $True ) { $Package.Files += "Install-HybridDSCModule.ps1" }
+
+        # Creates new project-export zip file
         ForEach ( $I in $Package.Files )
         {
-            $Splat = @{ 
-
-                Path            = $Package.Path 
-                DestinationPath = "$( $Package.Path )\$I"
-                Update          = $True
-            }
-                
-            Compress-Archive @Splat -VB
-        }
-            
-
-        $Package | % {
-            
-            $_.Full                     = $_.Root , $_.Name -join '\'
-            $_.Folders                  = $_.Full | % { GCI $_ -Directory }
-
-            $_.Folders.FullName         | % { 
-
-                $Splat                  = @{
-
-                    Path                = "$_"
-                    DestinationPath     = "$_.zip"
-                }
-
-                $Splat.DestinationPath | ? { Test-Path $_ } | % { RI $_ -Force }
-
-                Compress-Archive @Splat -VB
-            }
+            $Package.Path , $I -join '\' | % { Compress-Archive -Path $_ -DestinationPath $Package.Full -Update -VB }
         }
 
-            $_.Files                    = GCI $_.Full -File
-            $_.Files.FullName           | % { 
-            
-                $Splat                  = @{
-                
-                    Path                = "$_"
-                    DestinationPath     = $Package | % { $_.Full.Replace( $_.Name , $_.Install ) }
-                    Update              = $True
-                }
-                
-                Compress-Archive @Splat -VB
-            }
+        # Exports Publishing Object to Desktop
+        CP $Package.Full "$Home\Desktop"
 
-            $_.Folders.FullName         | % { RI "$_.zip" -Force } 
-
-            $Path                       = $Package | % { $_.Root , $_.Install -join '\' }
-
-                SC -Path "$Path.ps1" -Value @'
-                Function Get-ScriptDirectory 
-                {
-                    ( $PSCommandPath , $PSISE.CurrentFile.FullPath )[ $PSISE -ne $Null ] | % {
-
-                        [ PSCustomObject ]@{ 
-            
-                            Parent = Split-Path $_ -Parent
-                            Leaf   = Split-Path $_ -Leaf 
-                        }
-                    }
-                }
-    
-                Function Install-HybridDSCModule
-                {
-                    $Control          = [ PSCustomObject ]@{ 
-
-                        Path          = $env:USERPROFILE
-                        Target        = "Documents\WindowsPowerShell\Modules\Hybrid-DSC"
-                        Chunk         = ""
-                        Full          = ""
-                        Source        = Get-ScriptDirectory | % { $_.Parent }
-                    }
-        
-                    $Control          | % { 
-        
-                        $_.Full       = "{0}\{1}" -f $_.Path , $_.Target
-                        $_.Chunk      = $_.Target.Split('\')
-                        $Path         = $_.Path
-                    }
-
-                    ForEach ( $i in 0..( $Control.Chunk.Count - 1 ) )
-                    {
-                        $Leaf         = $Control.Chunk[$I]
-
-                        If ( ! ( Test-Path "$Path\$Leaf" ) )
-                        {
-                            NI "$Path\$Leaf" -ItemType Directory | Out-Null
-                            Write-Host "   Created [+] $Path" -F 11
-                        }
-
-                        Else
-                        {
-                            Write-Host "  Detected [~] $_" -F 11
-                        }
-                
-                        $Path = "$Path\$Leaf"
-                    }
-
-                    If ( $Path -eq $Control.Full )
-                    {
-                        GCI $Control.Full | % { 
-        
-                            If ( $_ -ne $Null ) 
-                            { 
-                                Write-Host " Detected [!] $( $_.Name ), removing" -F 11 
-                                RI $_.FullName -Recurse -Force 
-                            }
-                        }
-
-                        $Control | % { 
-
-                            ForEach ( $i in "Install-HybridDSCModule" )
-                            {
-                                If ( Test-Path "$( $_.Source )\$I.zip" )
-                                {
-                                    Write-Host "Extracting [~] $Path\$I" -F 14
-                            
-                                    Expand-Archive "$( $_.Source )\$I.zip" $_.Full -VB
-                                }
-
-                                Else
-                                {
-                                    Write-Host " Exception [!] Zip file not found"
-                                }
-                            }
-
-                            ForEach ( $i in "Graphics" , "Control" , "Map" ) 
-                            {
-                                Write-Host "Extracting [~] $( $_.Full )\$I.zip" -F 11
-                        
-                                Expand-Archive "$( $_.Full )\$I.zip" $_.Full
-                        
-                                RI "$Path\$I.zip"
-                            }
-                        }
-
-                        IPMO Hybrid-DSC -Force
-                    }
-                }
-    
-                Install-HybridDSCModule
-
-'@
-
-                $Output = "$( $Package.Full ).zip"
-
-                If ( Test-Path $Output )
-                {
-                    RI $Output -Force -VB
-                }
-
-                ForEach ( $i in "ps1" , "zip" )
-                {
-                    "$Path.$I" | % {
-
-                        $Splat              = @{
-
-                            Path            = $_
-                            DestinationPath = $Output
-                            Update          = $True
-                        
-                        }
-
-                        Compress-Archive @Splat -VB
-                
-                        RI $_ -Force -VB
-                    }
-                }
-            }                                                                        #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+        # Cleans up after itself
+        GCI $Mod *zip* | % { RI $_ -Force -VB }
+        RI ( $Package.Path , "Install-HybridDSCModule.ps1" -join '\' ) -Force -VB    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -9670,7 +9555,7 @@
 
     $Hybrid   = @{
         
-        Path  = Get-HybridDSCRoot | % { $_.Path } | ? { Test-Path "$_\HybridDSC.ps1" }
+        Path  = Get-HybridDSCRoot | % { "$( $_.Path )\HybridDSC" } | ? { Test-Path "$_.ps1" } | % { "$_.psm1" }
         Value = @'
 <#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -9696,14 +9581,18 @@
 //¯¯\\__[  Declare Namespaces & Load Modules ]___________________________________________//¯\\__//¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
 ¯    ¯¯¯¯                                    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
         
-        $ENV:PSModulePath.Split( ';' ) | % { GCI $_ -Recurse "*Hybrid-DSC.ps1*" } | % { IPMO $_.FullName -Force }
+        "HKLM:\SOFTWARE\Policies\Secure Digits Plus LLC\HybridDSC\Module" | % { 
+                
+            If ( Test-Path $_ ) { GP $_ | % { GCI $_.Path *ps1* | % { IPMO $_.FullName -Force } } }
+            Else { Write-Host "Exception [!] Module failed to load" -F 12 }
+        }
 
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___  
  //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯\\ 
  \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____    ____    ____    ____    ____    ____    ___// 
 #//¯¯\\__[ Module Functions ]___________________________________________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-¯¯    ¯¯¯¯                  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
+¯¯    ¯¯¯¯                  ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯      
         Get-HybridDSCRoot           - Gets the current module location
         Get-HybridDSC               - Gets a description of this table/Help
         Get-ScriptRoot              - Gets the current script path
@@ -9721,11 +9610,12 @@
         Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
         Get-LineDepth               - Gets the spacing for clean formatting            
         Confirm-DomainName          - Confirms whether a supplied domain name is valid 
-        Show-ToastNotification      - Prepares and sends a Windows toast notification #>
+        Show-ToastNotification      - Prepares and sends a Windows toast notification 
+        Export-ModuleManifest       - Executes an update to the associated PSM1 (File/Manifest) #>
 
     Export-ModuleMember -Function Get-HybridDSC, Get-ScriptRoot, Export-ISETheme, Resolve-HybridDSC, Publish-HybridDSC, New-Subtable, 
     New-Table, Convert-HashToArray, Write-Theme, Show-Message, Convert-XAMLToWindow, Show-WPFWindow, Get-XAML, Find-XAMLNamedElements,
-    Get-LineDepth, Confirm-DomainName, Show-ToastNotification
+    Get-LineDepth, Confirm-DomainName, Show-ToastNotification, Export-ModuleManifest
 
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -9840,7 +9730,8 @@
      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     #>
 '@ }
 
-    SC @Hybrid
+    Set-Content @Hybrid
+
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
