@@ -2881,35 +2881,100 @@
         Param ( [ Parameter ( Mandatory ) ] [ Windows.Window ] $GUI )
 
         $OP = $Null ; $Null = $GUI.Dispatcher.InvokeAsync( { $OP = $GUI.ShowDialog() ; SV -Name OP -Value $OP -Scope 1 } ).Wait() ; $OP 
+
+                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-CharacterMap # Returns Char via [ Int ], [ String ], or [ String[] ] ___//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param ( 
+                
+            [ Parameter ( ParameterSetName =     "Index" , Position = 0 , Mandatory ) ] [ Int       ] $Index     ,
+            [ Parameter ( ParameterSetName = "Character" , Position = 0 , Mandatory ) ] [ String    ] $Character ,
+            [ Parameter ( ParameterSetName =    "String" , Position = 0 , Mandatory ) ] [ String [] ] $Line      )
+
+            $Script               = [ PSCustomObject ]@{
+                
+                Type              = {
+
+                    Param ( $N )
+
+                        If          ( $N -in     0..31  ) {   "System" }
+                    ElseIf          ( $N -in   127..159 ) { "Reserved" }
+                    ElseIf          ( $N -in   768..879 ) {    "Micro" }
+                    Else
+                    {
+                        [ Char ] $N | % {
+
+                                If  ( $_ -match    '\s' ) {    "Space" }
+                            ElseIf  ( $_ -match '[a-z]' ) {   "Letter" }
+                            ElseIf  ( $_ -match    '\d' ) {   "Number" }
+                            ElseIf  ( $_ -match '[ -~]' ) {   "Symbol" }
+                            Else                          {   "Exotic" }
+                        }
+                    }
+                }
+
+                Char              = {
+                    
+                    Param ( $C )
+
+                    $X = 0
+                    Do
+                    {
+                        If ( [ Char ] $X -ne $C )
+                        {
+                            $X ++
+                        }
+                    }
+                    Until ( [ Char ] $X -eq $C -or $X -ge 65535 )
+                    $X
+                }
+            }
+
+            $Object               = { 
+                    
+                Param ( $I )
+
+                [ PSCustomObject ]@{
+
+                    Index         = $I
+                    Character     = [ Char ] $I
+                    Type          = & $Script.Type $I
+                }
+            }
+
+            If ( $Index )
+            {
+                & $Object ( $Index )
+            }
+
+            If ( $Character )
+            {
+                & $Object ( & $Script.Char ( $Character ) )
+            }
+
+            If ( $Line )
+            {
+                $Line.ToCharArray() | % {
+
+                    & $Object ( & $Script.Char ( $_ ) )
+                }
+	    }
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Find-XAMLNamedElements # Returns named items in a XAML HereString __________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] [ OutputType ( "Array" ) ] Param (
+	[ CmdLetBinding () ] [ OutputType ( "Array" ) ] Param (
 
             [ Parameter ( Mandatory = $True , Position = 0 , HelpMessage = "XAML Here String" ) ] [ String ] $XAML )
 
-        $Xaml = $Xaml.Replace( '"' , "'" )
-        
-        $Array = $Xaml.Split( "`n" )
+	$Xaml.Split( "`n" ) | ? { $_ -match "Name" } | % { $_.Split('=')[1] } | % { $_.Replace("'",'"') } | % { $_.Split('"')[1] }
 
-        $Collect = @( )
-
-        0..( $Array.Count - 1 ) | ? { $Array[$_] -like "* Name = *" } | % {
-    
-            $Line = $Array[$_].Split(' ') | ? { $_.Length -ne 0 } 
-
-            $Collect += $Line[( 0..( $Line.Count - 1 ) | ? { $Line[$_] -eq "Name" } ) + 2 ] 
-        }
-
-        $Return = 0..( $Collect.Count - 1 ) | % { 
-        
-            $Collect[$_].Replace( "'" , '' ) 
-        }
-
-        Return $Return                                                               #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
