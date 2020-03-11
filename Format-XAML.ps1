@@ -1,4 +1,4 @@
-    Function Create-XamlObject
+Function Create-XamlObject
     {
         [ CmdLetBinding () ] Param ( [ Parameter ( Mandatory , Position = 0 ) ] [ String ] $Xaml )
 
@@ -19,33 +19,32 @@
                 $X
             }
 
-            XamlObject = {
+            XamlObject                = {
 
                 Param ( $XAML )
 
-                $Return = [ PSCustomObject ]@{
+                $Return               = [ PSCustomObject ]@{
 
-                    Split   = $Xaml.Split("`n")
-                    Track   = 0..( $Xaml.Split("`n").Count - 1 )
-                    Count   = 0
-                    Items   = @( )
-                    Indent  = @( )
-                    Focus   = @( )
+                    Index             = 0
+                    Count             = 0
+                    Track             = 0..( $Xaml.Split("`n").Count - 1 )
+                    Split             = $Xaml.Split("`n")               
+                    Items             = @( )
+                    Focus             = @( )
                 }
 
-                ForEach ( $I in 0..( $Return.Split.Count - 1 ) )
+                $Return.Focus         = ForEach ( $I in 0..( $Return.Split.Count - 1 ) )
                 {
-                    $Return.Focus += $Return.Split[$I] | % { 
+                    $Return.Split[$I] | % {
 
                         [ PSCustomObject ]@{
 
-                            Track = $I
-                            Tab   = & $Script.Tab $_
-                            Line  = $_
-                            Items = $_.Split(" ") | ? { $_.Length -gt 0 }
+                            Track     = $I
+                            Tab       = & $Script.Tab $_
+                            Line      = $_
+                            Items     = $_.Split(" ") | ? { $_.Length -gt 0 }
                         }
                     }
-                    $Return.Count ++
                 }
 
                 $Index                = 0
@@ -60,24 +59,23 @@
                 {
                     $Current          = [ PSCustomObject ]@{
 
-                        Track         = $X
+                        Index         = $X
                         Indent        = $Tabs[$X]
                         Item          = $Items[$X]
-                        Values        = @( )
+                        Buffer        = $Tabs[$X] + $Items[$X].Length + 1
+                        Value         = @( )
                     }
 
                     If ( $Items[$X] -notmatch ">" )
                     {
                         Do
                         {
-                            $Value           = $Props[$Track]
-                            $Current.Values += $Value
-                            $Track          ++
+                            $Current.Value += $Props[ $Track ]
+                            $Track  ++
                         }
+                        Until ( $Props[ $Track - 1 ] -match ">" )
 
-                        Until ( $Value -match ">" )
-
-                        $Current.Values      = ( $Current.Values -join ' ' ).Replace("' ","'`n")
+                        $Current.Value = ( $Current.Value -join ' ' ).Replace("' />","'/>").Replace("' >","'>").Replace("' ","';").Split(';')
                     }
 
                     $Return.Items    += $Current
