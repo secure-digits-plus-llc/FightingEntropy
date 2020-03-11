@@ -3034,9 +3034,7 @@
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
         [ CmdLetBinding () ] Param ( 
             
-            [ Parameter ( Mandatory , Position = 0           ) ] [ String ] $Xaml  ,
-            [ Parameter ( HelpMessage = "Troubleshooting L1" ) ] [ Switch ] $Focus , 
-            [ Parameter ( HelpMessage = "Troubleshooting L2" ) ] [ Switch ] $Report )
+            [ Parameter ( Mandatory , Position = 0 ) ] [ String ] $Xaml )
 
         $Script       = [ PSCustomObject ]@{
 
@@ -3054,158 +3052,188 @@
 
                 $X
             }
-        }
 
-        $Return               = [ PSCustomObject ]@{
+            Focus = {
 
-            Index             = 0
-            Count             = 0
-            Track             = 0..( $Xaml.Split("`n").Count - 1 )
-            Split             = $Xaml.Split("`n")               
-            Items             = @( )
-            Focus             = @( )
-        }
+                Param ( $Obj )
 
-        $Return.Focus         = ForEach ( $I in 0..( $Return.Split.Count - 1 ) )
-        {
-            $Return.Split[$I] | % {
-
-                [ PSCustomObject ]@{
-
-                    Track     = $I
-                    Tab       = & $Script.Tab $_
-                    Line      = $_
-                    Items     = $_.Split(" ") | ? { $_.Length -gt 0 }
-                }
-            }
-        }
-
-        If ( $Focus )
-        {
-            Return $Return.Focus ; Break
-        }
-
-        $Index                = 0
-        $Track                = 0
-                
-        $List                 = $Return.Focus | ? { $_.Items    -match "<" }
-        $Tabs                 = $List.Tab
-        $Items                = $Return.Focus.Items    -match "<"
-        $Props                = $Return.Focus.Items -notmatch "<"
-
-        ForEach ( $X in 0..( $List.Count - 1 ) )
-        {
-            $Current          = [ PSCustomObject ]@{
-
-                Index         = $X
-                Indent        = $Tabs[$X]
-                Item          = $Items[$X]
-                Buffer        = $Tabs[$X] + $Items[$X].Length + 1
-                Property      = @( )
-                Value         = @( )
-            }
-
-            If ( $Items[$X] -notmatch ">" )
-            {
-                Do
+                ForEach ( $I in 0..( $Obj.Split("`n").Count - 1 ) )
                 {
-                    $Current.Value += $Props[ $Track ]
-                    $Track  ++
-                }
-                Until ( $Props[ $Track - 1 ] -match ">" )
+                    $Obj.Split("`n")[$I] | % {
+                    
+                        [ PSCustomObject ]@{
 
-                $Current.Value = ( $Current.Value -join ' ' ).Replace("' />","'/>").Replace("' >","'>").Replace("' ","';").Split(';')
-
-                If ( $Current.Value -ne $Null )
-                {
-                    If ( $Current.Value.Count -eq 1 )
-                    {
-                        $Split = $Current.Value.Split(' = ')
-
-                        $Current.Property = $Split[0]
-                        $Current.Value    = $Split[1] 
-                    }
-
-                    If ( $Current.Value.Count -gt 1 )
-                    {
-                        $Current.Property = 0..( $Current.Value.Count - 1 )
-
-                        ForEach ( $Z in 0..( $Current.Value.Count - 1 ) )
-                        {
-                            $Split = $Current.Value[$Z].Split(' = ')
-                                    
-                            $Current.Property[$Z] = $Split[0]
-                            $Current.Value[$Z]    = $Split[1] 
+                            Track = $I
+                            Tab   = & $Script.Tab $_
+                            Line  = $_
+                            Items = $_.Split(" ") | ? { $_.Length -gt 0 }
                         }
                     }
                 }
             }
 
-            $Return.Items    += $Current
-            $Index           ++
-        }
+            Items = {
 
-        If ( $Report )
-        {
-            Return $Return.Items ; Break 
-        }
+                Param ( $Focus )
 
-        $MaxBuff  = ( $Return.Items.Buffer                     | Sort )[-1]
-        $MaxSpace = ( $Return.Items.Property | % { $_.Length } | Sort )[-1]
-        $Space    = {
+                #$Track        = 0
 
-            Param ( $Property )
-        
-            $MaxSpace - $Property.Length | % { 
+                $List         = $Focus | ? { $_.Items -match "<" }
 
-                If ( $_ -gt 0 )
-                {
-                    "{0}{1}" -f $Property , ( " " * $_ )
+                $Stack        = [ PSCustomObject ]@{
+
+                    Index     = 0
+                    Track     = 0..( $List.Count - 1 )
+                    List      = $List
+                    Tabs      = $List.Tab
+                    Items     = $Focus.Items             -match "<"
+                    Props     = $Focus.Items          -notmatch "<"
+                    Format    = @( )
                 }
 
-                If ( $_ -eq 0 )
+                #$List         = $Focus | ? { $_.Items    -match "<" }
+                #$Tabs         = $List.Tab
+                #$Items        = $Focus.Items    -match "<"
+                #$Props        = $Focus.Items -notmatch "<"
+
+                ForEach ( $X in 0..( $List.Count - 1 ) )
                 {
-                    $Property
-                }
-            }
-        }
+                    $Current          = [ PSCustomObject ]@{
 
-        ForEach ( $L in 0..( $Return.Items.Count - 1 ) )
-        {
-            $Return.Items[$L] | % { 
-                        
-                $Item = If ( $_.Indent -gt 0 ) { "{0} {1}" -f ( " " * $_.Indent ) , $_.Item } Else { $_.Item }
-                $Buff = " " * ( $MaxBuff - $Item.Length )
-
-                If ( $_.Property.Count -eq 0 )
-                {
-                    $Item
-                }
-
-                If ( $_.Property.Count -eq 1 )
-                {
-                    $Prop = & $Space $_.Property
-                    "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value
-                }
-
-                If ( $_.Property.Count -gt 1 )
-                {
-                    $Prop = & $Space $_.Property[0]
-                    "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value[0]
-
-                    $Buff = " " * ( $MaxBuff + 1 )
-
-                    $Z = 1
-                    Do
-                    {
-                        $Prop = & $Space $_.Property[$Z]
-                        "{0} {1} = {2}" -f $Buff , $Prop , $_.Value[$Z]
-                        $Z ++
+                        Index         = $X
+                        Indent        = $Stack.Tabs[$X]
+                        Item          = $Stack.Items[$X]
+                        Buffer        = $Stack.Tabs[$X] + $Stack.Items[$X].Length + 1
+                        Property      = @( )
+                        Value         = @( )
                     }
-                    Until ( $Z -eq $_.Property.Count )
+
+                    If ( $Items[$X] -notmatch ">" )
+                    {
+                        Do
+                        {
+                            $Current.Value += $Stack.Props[ $Stack.Index ]
+                            $Stack.Index  ++
+                        }
+                        Until ( $Stack.Props[ $Stack.Index - 1 ] -match ">" )
+
+                        $Current.Value = ( $Current.Value -join ' ' ).Replace("' />","'/>").Replace("' >","'>").Replace("' ","';").Split(';')
+
+                        If ( $Current.Value -ne $Null )
+                        {
+                            If ( $Current.Value.Count -eq 1 )
+                            {
+                                $Split = $Current.Value.Split(' = ')
+
+                                $Current.Property = $Split[0]
+                                $Current.Value    = $Split[1] 
+                            }
+
+                            If ( $Current.Value.Count -gt 1 )
+                            {
+                                $Current.Property = 0..( $Current.Value.Count - 1 )
+
+                                ForEach ( $Z in 0..( $Current.Value.Count - 1 ) )
+                                {
+                                    $Split = $Current.Value[$Z].Split(' = ')
+                                            
+                                    $Current.Property[$Z] = $Split[0]
+                                    $Current.Value[$Z]    = $Split[1] 
+                                }
+                            }
+                        }
+                    }
+
+                    $Stack.Format += $Current
+
+                }
+
+                $Stack.Format
+            }
+
+            Format      = { # Prepares a chunk of XAML for Clean Object Handling/Production
+
+                Param ( $Full )
+
+                $MaxBuff  = ( $Full.Buffer                     | Sort )[-1]
+                $MaxSpace = ( $Full.Property | % { $_.Length } | Sort )[-1]
+                
+                $Space    = { # Internal Script Property for item spacing (Can be easily switched/reversed)
+        
+                    Param ( $Property )
+                
+                    $MaxSpace - $Property.Length | % { 
+        
+                        If ( $_ -gt 0 )
+                        {
+                            "{0}{1}" -f $Property , ( " " * $_ )
+                        }
+        
+                        If ( $_ -eq 0 )
+                        {
+                            $Property
+                        }
+                    }
+                }
+        
+                ForEach ( $L in 0..( $Full.Count - 1 ) )
+                {
+                    $Full[$L] | % { 
+                                
+                        $Item = If ( $_.Indent -gt 0 ) { "{0} {1}" -f ( " " * $_.Indent ) , $_.Item } Else { $_.Item }
+                        $Buff = " " * ( $MaxBuff - $Item.Length )
+        
+                        If ( $_.Property.Count -eq 0 )
+                        {
+                            $Item
+                        }
+        
+                        If ( $_.Property.Count -eq 1 )
+                        {
+                            $Prop = & $Space $_.Property
+                            "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value
+                        }
+        
+                        If ( $_.Property.Count -gt 1 )
+                        {
+                            $Prop = & $Space $_.Property[0]
+                            "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value[0]
+        
+                            $Buff = " " * ( $MaxBuff + 1 )
+        
+                            $Z = 1
+                            Do
+                            {
+                                $Prop = & $Space $_.Property[$Z]
+                                "{0} {1} = {2}" -f $Buff , $Prop , $_.Value[$Z]
+                                $Z ++
+                            }
+                            Until ( $Z -eq $_.Property.Count )
+                        }
+                    }
                 }
             }
-        }                                                                             #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+
+            Object = {
+
+                Param ( $Xaml )
+
+                $Focus  = & $Script.Focus  $Xaml
+                $Items  = & $Script.Items  $Focus
+                $Format = & $Script.Format $Items
+
+                [ PSCustomObject ]@{
+
+                    Track             = 0..( $Xaml.Split("`n").Count - 1 )
+                    Split             = $Xaml.Split("`n")               
+                    Focus             = $Focus
+                    Items             = $Items
+                    Format            = $Format
+                }
+            }
+        }
+
+        $Return               = & $Script.Object $Xaml                                #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                              __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\____________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
@@ -9651,6 +9679,8 @@
             }
         }
 
+        Export-ModuleManifest
+
         # Clears any existing zip files
         GCI $Package.Path *zip* | % { RI $_ -Force -VB }
 
@@ -9727,7 +9757,7 @@
         CP $Package.Full "$Home\Desktop" -Force
 
         # Cleans up after itself
-        GCI $Mod *zip* | % { RI $_ -Force -VB }
+        GCI $Package.Path *zip* | % { RI $_ -Force -VB }
         RI ( $Package.Path , "Install-HybridDSCModule.ps1" -join '\' ) -Force -VB    #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -9767,14 +9797,23 @@
 //¯¯\\__________________________________________//¯¯\\__//¯¯\\__________________________//¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯¯ ¯¯ ¯¯¯¯ -- ¯¯¯\\ 
 \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\__    ____ -- ____ __ ____ -- ____ __ ____ -- ____ __ ___// 
 //¯¯\\__[  Declare Namespaces & Load Modules ]___________________________________________//¯\\__//¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯\\==//¯¯\----/¯¯¯  
-¯    ¯¯¯¯                                    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
+¯    ¯¯¯¯                                    ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    #>
         
         "HKLM:\SOFTWARE\Policies\Secure Digits Plus LLC\HybridDSC\Module" | % { 
                 
-            If ( Test-Path $_ ) { GP $_ | % { GCI $_.Path *ps1* | % { IPMO $_.FullName -Force } } }
+            If ( Test-Path $_ )                                                 # Check Path
+            { 
+                GP $_                                                     | % { # Check path property
+                
+                    GCI $_.Path *HybridDSC.ps1*                           | % { # Check file
+                  
+                        IPMO $_.FullName -Force                                 # Load file
+                    } 
+                }
+            }
+
             Else { Write-Host "Exception [!] Module failed to load" -F 12 }
         }
-
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\___  
  //¯¯\\__________________________________________________________________________/¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯\\ 
@@ -9786,7 +9825,7 @@
         Get-ScriptRoot              - Gets the current script path
         Export-ISETheme             - Generates ISE XML Theme File for Export/Import/Migration
         Resolve-HybridDSC           - Collects Necessary Script Information            
-        Publish-HybridDSC           - Creates a distributable package for Hybrid-DSC   
+        Publish-HybridDSC           - Creates a distributable package for HybridDSC   
         New-Subtable                - Converts Key/Value Subtable for Write-Theme      
         New-Table                   - Converts Key/Value Tables for Write-Theme        
         Convert-HashToArray         - Converts a Hashtable to a formatted array        
@@ -9796,14 +9835,16 @@
         Show-WPFWindow              - Initializes the Window Object                    
         Get-XAML                    - Loads templatized XAML GUI's                     
         Find-XAMLNamedElements      - Looks for XAML 'Named' Items                     
+        Get-CharacterMap            - Resolves characters to index, and strings to array of objects
+        Format-XamlObject           - [ Experimental ] - Reformats a chunk of XAML or markup 
         Get-LineDepth               - Gets the spacing for clean formatting            
         Confirm-DomainName          - Confirms whether a supplied domain name is valid 
         Show-ToastNotification      - Prepares and sends a Windows toast notification 
         Export-ModuleManifest       - Executes an update to the associated PSM1 (File/Manifest) #>
 
-    Export-ModuleMember -Function Get-HybridDSC, Get-ScriptRoot, Export-ISETheme, Resolve-HybridDSC, Publish-HybridDSC, New-Subtable, 
-    New-Table, Convert-HashToArray, Write-Theme, Show-Message, Convert-XAMLToWindow, Show-WPFWindow, Get-XAML, Find-XAMLNamedElements,
-    Get-LineDepth, Confirm-DomainName, Show-ToastNotification, Export-ModuleManifest
+    Export-ModuleMember -Function Get-HybridDSCRoot, Get-HybridDSC, Get-ScriptRoot, Export-ISETheme, Resolve-HybridDSC, Publish-HybridDSC, New-Subtable, 
+    New-Table, Convert-HashToArray, Write-Theme, Show-Message, Convert-XAMLToWindow, Show-WPFWindow, Get-XAML, Find-XAMLNamedElements, Get-CharacterMap,
+    Format-XamlObject, Get-LineDepth, Confirm-DomainName, Show-ToastNotification, Export-ModuleManifest
 
 <#                                                                                  #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
   ____                                                                            __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
@@ -9914,12 +9955,37 @@
 <#___                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 //¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 \\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
- ¯¯¯#>  Write-Theme -Action "Hybrid-DSC [+]" "Module Loaded" <#_________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+ ¯¯¯#>  Write-Theme -Action "HybridDSC [+]" "Module Loaded" <#__________________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
      ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯     #>
 '@ }
 
-    Set-Content @Hybrid
+    Set-Content @Hybrid -VB 
 
+    If ( $? -eq $True )
+    {
+        $Splat = @{ 
+
+            Items  = "Directory,FullName,Name,LastWriteTime".Split(',')
+            Values = ""
+        }
+
+        $Splat | % { 
+            
+            $_.Values = $_.Items | % { ( GI $Hybrid.Path ).$_ } 
+        }
+
+        $Splat = @{ 
+
+            Title = "Successful [+] : Module Manifest Exported"
+            Depth = 1
+            ID    = "( Manifest Details )"
+            Table = New-SubTable @Splat 
+        }
+        
+        Write-Theme -Table ( New-Table @Splat ) -Prompt "Press Enter to Continue"
+
+    }
+                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
