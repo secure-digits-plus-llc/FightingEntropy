@@ -25,12 +25,12 @@
 
                 $Return = [ PSCustomObject ]@{
 
-                    Split = $Xaml.Split("`n")
-                    Track = 0..( $Xaml.Split("`n").Count - 1 )
-                    Depth = 0
-                    Count = 0
-                    Items = @( )
-                    Focus = @( )
+                    Split   = $Xaml.Split("`n")
+                    Track   = 0..( $Xaml.Split("`n").Count - 1 )
+                    Count   = 0
+                    Items   = @( )
+                    Indent  = @( )
+                    Focus   = @( )
                 }
 
                 ForEach ( $I in 0..( $Return.Split.Count - 1 ) )
@@ -48,29 +48,39 @@
                     $Return.Count ++
                 }
 
-                $Current              = @( )
                 $Index                = 0
                 $Track                = 0
+                
+                $List                 = $Return.Focus | ? { $_.Items    -match "<" }
+                $Tabs                 = $List.Tab
+                $Items                = $Return.Focus.Items    -match "<"
+                $Props                = $Return.Focus.Items -notmatch "<"
 
-                $Items                = $Return.Focus.Items | ? { $_    -match "<" }
-                $Props                = $Return.Focus.Items | ? { $_ -notmatch "<" }
-
-                ForEach ( $X in 0..( $Items.Count - 1 ) )
+                ForEach ( $X in 0..( $List.Count - 1 ) )
                 {
-                    $Current          = $Items[$X] -join ''
+                    $Current          = [ PSCustomObject ]@{
+
+                        Track         = $X
+                        Indent        = $Tabs[$X]
+                        Item          = $Items[$X]
+                        Values        = @( )
+                    }
 
                     If ( $Items[$X] -notmatch ">" )
                     {
                         Do
                         {
-                            $Current  = "{0} {1}" -f $Current , $Props[$Track]
-                            $Track    ++
+                            $Value           = $Props[$Track]
+                            $Current.Values += $Value
+                            $Track          ++
                         }
-                        Until ( $Current -match ">" )
+
+                        Until ( $Value -match ">" )
+
+                        $Current.Values      = ( $Current.Values -join ' ' ).Replace("' ","'`n")
                     }
 
-                    $Return.Items    += $Current 
-                    $Current          = @( )
+                    $Return.Items    += $Current
                     $Index           ++
                 }
             }
