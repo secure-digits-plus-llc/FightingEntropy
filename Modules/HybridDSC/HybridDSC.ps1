@@ -1,4 +1,4 @@
-﻿<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
+<#___ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____ -- ____  
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
 \\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__// 
 //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\   ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯    ¯¯¯¯   //¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\ 
@@ -1065,8 +1065,7 @@
 
             Types                = [ PSCustomObject ]@{
 
-                Types            = @( "H" , "P" | % { "10$_`:D" } ; "S" , "T" | % { "DT:$_" } ; "LT:S" ) | % { "$_+" , "$_-" }
-                Titles           = @( "Home" , "Pro" | % { "Win10 $_ | Default" } ; "Safe" , "Tweaked" | % { "Desktop | $_" } ; "Laptop | Safe" ) | % { "$_ Max" , "$_ Min" }
+                ID               = "10H:D,10P:D,DT:S,DT:T,LT:S".Split(',') | % { "$_+" , "$_-" }
             }
 
             Services             = [ PSCustomObject ]@{ 
@@ -1077,19 +1076,19 @@
 
                 DataGrid         = 'Index,Scoped,Profile,Name,StartMode,Status,DisplayName,PathName,Description'.Split(',')
 
-                Skip             = @( ( 'BcastDVRUserService,DevicePickerUserSvc,DevicesFlowUserSvc,PimIndexMaintenanceSvc,PrintWorkflowUserSvc,UnistoreSvc,' + 
-                                   'UserDataSvc,WpnUserService' -join '' ).Split(',') | % { "$_`_$QMark" } ) + @( 'AppXSVC,BrokerInfrastructure,ClipSVC,CoreMessagingRegistrar,' + 
-                'DcomLaunch,EntAppSvc,gpsvc,LSM,MpsSvc,msiserver,NgcCtnrSvc,NgcSvc,RpcEptMapper,RpcSs,Schedule,SecurityHealthService,sppsvc,StateRepository,' + 
-                'SystemEventsBroker,tiledatamodelsvc,WdNisSvc,WinDefend' -join '' ).Split(',') | Sort
+                Skip             = @( ('BcastDVRUserService,DevicePickerUserSvc,DevicesFlowUserSvc,PimIndexMaintenanceSvc,PrintWorkflowUserSvc,UnistoreSvc,' + 
+                                   'UserDataSvc,WpnUserService').Split(',')|%{"$_`_$QMark"} ; ( 'AppXSVC,BrokerInfrastructure,ClipSVC,CoreMessagingRegistrar,' + 
+                                   'DcomLaunch,EntAppSvc,gpsvc,LSM,MpsSvc,msiserver,NgcCtnrSvc,NgcSvc,RpcEptMapper,RpcSs,Schedule,SecurityHealthService,sppsvc,StateRepository,' + 
+                                   'SystemEventsBroker,tiledatamodelsvc,WdNisSvc,WinDefend').Split(',') ) | Sort
             }
 
-            Names                = @( 0..4 | % { "MenuConfig" , 'Home,Pro,Desktop,Desktop,Laptop'.Split(',')[$_] , 'Default,Default,Safe,Tweaked,Safe'.Split(',')[$_] -join '' } | % {
-                "$_`Max" , "$_`Min" } ; 'Feedback,FAQ,About,Copyright,MadBombDonate,MadBombGitHub,BlackViper,SecureDigitsPlus'.Split(',') | % { "MenuInfo$_" } ;
-                'Search,Select,Grid,Empty'.Split(',') | % { "ServiceDialog$_" } ; 'OS,Build,Chassis'.Split(',') | % { "Current$_" } ; 
-                'Active,Inactive,Skipped'.Split(',') | % { "Display$_" } ; 'Simulate,Xbox,Change,StopDisabled'.Split(',') | % { "Misc$_" } ; 
-                'DiagErrors,Log,Console,DiagReport'.Split(',') | % { "Devel$_" } ; 'Build,Edition,Laptop'.Split(',') | % { "Bypass$_" } ;
-                @( 'Service,Script'.Split(',') | % { "Logging$_" } ; 'Registry,Template'.Split(',') | % { "Backup$_" } ) | % { "$_`Browse,$_`File".Split(',') } ;
-                'Service,Script'.Split(',') | % { "$_`Profile" , "$_`Label"  } ; "Start,Cancel" -Split ',' )
+            Names                = @( 0..4 | % { "MenuConfig" , 'Home,Pro,Desktop,Desktop,Laptop'.Split(',')[$_] , 'Default,Default,Safe,Tweaked,Safe'.Split(',')[$_] -join '' } | % { "$_`Max" , "$_`Min" } ; 
+                                     'Feedback,FAQ,About,Copyright,MadBombDonate,MadBombGitHub,BlackViper,SecureDigitsPlus'.Split(',')                | % { "MenuInfo$_" } ;
+                                     'Search,Select,Grid,Empty'.Split(',') | % { "ServiceDialog$_" } ;                  'OS,Build,Chassis'.Split(',') | % {  "Current$_" } ; 
+                                     'Active,Inactive,Skipped'.Split(',')  | % {       "Display$_" } ; 'Simulate,Xbox,Change,StopDisabled'.Split(',') | % {     "Misc$_" } ; 
+                                     'DiagErrors,Log,Console,DiagReport'.Split(',') | % { "Devel$_" } ; 'Build,Edition,Laptop'.Split(',') | % { "Bypass$_" } ;
+                                     @( 'Service,Script'.Split(',') | % { "Logging$_" } ; 'Registry,Template'.Split(',') | % { "Backup$_" } ) | % { "$_`Browse,$_`File".Split(',') } ;
+                                     'Service,Script'.Split(',') | % { "$_`Profile" , "$_`Label"  } ; "Start,Cancel" -Split ',' )
 
             Config              = $ServiceConfig | % {
                 
@@ -1105,8 +1104,8 @@
 
             Template = [ PSCustomObject ]@{
 
-                Profile   = 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto'
-                StartMode = 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto'
+                Profile   = 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)'
+                StartMode = 'Skip' , 'Disabled' , 'Manual' , 'Auto' , 'Auto (DS)'
                 State     = 'Stopped' , 'Running'
             }
         }
@@ -2881,99 +2880,18 @@
         Param ( [ Parameter ( Mandatory ) ] [ Windows.Window ] $GUI )
 
         $OP = $Null ; $Null = $GUI.Dispatcher.InvokeAsync( { $OP = $GUI.ShowDialog() ; SV -Name OP -Value $OP -Scope 1 } ).Wait() ; $OP 
-
-                                                                                     #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
-}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
-#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
-#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
-    Function Get-CharacterMap # Returns Char via [ Int ], [ String ], or [ String[] ] ___//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
-    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-        [ CmdLetBinding () ] Param ( 
-                
-            [ Parameter ( ParameterSetName =     "Index" , Position = 0 , Mandatory ) ] [ Int       ] $Index     ,
-            [ Parameter ( ParameterSetName = "Character" , Position = 0 , Mandatory ) ] [ String    ] $Character ,
-            [ Parameter ( ParameterSetName =    "String" , Position = 0 , Mandatory ) ] [ String [] ] $Line      )
-
-            $Script               = [ PSCustomObject ]@{
-                
-                Type              = {
-
-                    Param ( $N )
-
-                        If          ( $N -in     0..31  ) {   "System" }
-                    ElseIf          ( $N -in   127..159 ) { "Reserved" }
-                    ElseIf          ( $N -in   768..879 ) {    "Micro" }
-                    Else
-                    {
-                        [ Char ] $N | % {
-
-                                If  ( $_ -match    '\s' ) {    "Space" }
-                            ElseIf  ( $_ -match '[a-z]' ) {   "Letter" }
-                            ElseIf  ( $_ -match    '\d' ) {   "Number" }
-                            ElseIf  ( $_ -match '[ -~]' ) {   "Symbol" }
-                            Else                          {   "Exotic" }
-                        }
-                    }
-                }
-
-                Char              = {
-                    
-                    Param ( $C )
-
-                    $X = 0
-                    Do
-                    {
-                        If ( [ Char ] $X -ne $C )
-                        {
-                            $X ++
-                        }
-                    }
-                    Until ( [ Char ] $X -eq $C -or $X -ge 65535 )
-                    $X
-                }
-            }
-
-            $Object               = { 
-                    
-                Param ( $I )
-
-                [ PSCustomObject ]@{
-
-                    Index         = $I
-                    Character     = [ Char ] $I
-                    Type          = & $Script.Type $I
-                }
-            }
-
-            If ( $Index )
-            {
-                & $Object ( $Index )
-            }
-
-            If ( $Character )
-            {
-                & $Object ( & $Script.Char ( $Character ) )
-            }
-
-            If ( $Line )
-            {
-                $Line.ToCharArray() | % {
-
-                    & $Object ( & $Script.Char ( $_ ) )
-                }
-	    }
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Find-XAMLNamedElements # Returns named items in a XAML HereString __________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
     {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
-	[ CmdLetBinding () ] [ OutputType ( "Array" ) ] Param (
+        [ CmdLetBinding () ] [ OutputType ( "Array" ) ] Param (
 
             [ Parameter ( Mandatory = $True , Position = 0 , HelpMessage = "XAML Here String" ) ] [ String ] $XAML )
 
-	$Xaml.Split( "`n" ) | ? { $_ -match "Name" } | % { $_.Split('=')[1] } | % { $_.Replace("'",'"') } | % { $_.Split('"')[1] }
-
+        $Xaml.Split( "`n" ) | ? { $_ -match "Name" } | % { $_.Split('=')[1] } | % { $_.Replace("'",'"') } | % { $_.Split('"')[1] }
+                    
                                                                                      #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
 }#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
@@ -2984,105 +2902,311 @@
 
             [ Parameter ( Mandatory , ValueFromPipeline ) ] [ String ] $Object )
 
-        $Array     = @( $Object.Split( "`n" ) )
-        $Return    = @( 0..( $Array.Count - 1 ) )
+        $Script                                 = [ PSCustomObject ]@{
 
-        ForEach ( $I in $Return )
-        {
-            $Parse  = [ PSCustomObject ]@{
+            Tab  = {
 
-                Line    = @( $Array[$I].ToCharArray() )
-                Space   = 0
-                Factor  = 0
-                Remain  = 0
-                Content = @( )
+                Param ( $Line )
+
+                $X,$Y = 0,0
+
+                Do 
+                {
+                    If ( $Line[$X] -match "\s" ) { $X ++ } Else { $Y = 1 }
+                }
+                Until ( $Y -eq 1 )
+
+                $X
             }
 
-            ForEach ( $J in $Parse.Line )
-            {
-                If ( $Parse.Content.Count -eq 0 )
-                {
-                    If ( $J -ne " " )
-                    {
-                        $Parse.Content += $J
-                    }
+            Line = {
 
-                    Else
-                    {
-                        $Parse.Space ++
-                    }
+                Param ( $Line )
+
+                $CL = Get-CharacterMap -Line $Line
+                $CT = & $Script.Type $Line
+                
+                [ PSCustomObject ]@{
+
+                    String = $Line
+                    Length = $Line.Length
+                    Track  = 0..( $Line.Length - 1 )
+                    Array  = $Line.ToCharArray()
+                    Split  = $Line.Split(' ')| ? { $_.Length -gt 0 }
+                    Type   = & $Script.Type $Line 
+                    Tab    = If ( $CL.Type[0] -eq "Space" ) { $X = 0 ; Do { $X ++ } Until ( $CL[$X].Type -ne "Space" ) ; $X } Else { 0 }
                 }
+            }                                                                        #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Get-CharacterMap # Resolves Characters via Index, String, or String[] ______//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param ( 
+                
+            [ Parameter ( ParameterSetName =     "Index" , Position = 0 , Mandatory ) ] [ Int       ] $Index     ,
+            [ Parameter ( ParameterSetName = "Character" , Position = 0 , Mandatory ) ] [ String    ] $Character ,
+            [ Parameter ( ParameterSetName =    "String" , Position = 0 , Mandatory ) ] [ String    ] $Line      )
 
+        $Script               = [ PSCustomObject ]@{
+                
+            Type              = {
+
+                Param ( $N )
+
+                    If          ( $N -in     0..31  ) {   "System" }
+                ElseIf          ( $N -in   127..159 ) { "Reserved" }
+                ElseIf          ( $N -in   768..879 ) {    "Micro" }
                 Else
                 {
-                    $Parse.Content += $J
+                    [ Char ] $N | % {
+
+                            If  ( $_ -match    '\s' ) {    "Space" }
+                        ElseIf  ( $_ -match '[a-z]' ) {   "Letter" }
+                        ElseIf  ( $_ -match    '\d' ) {   "Number" }
+                        ElseIf  ( $_ -match '[ -~]' ) {   "Symbol" }
+                        Else                          {   "Exotic" }
+                    }
                 }
             }
 
-            $Parse | % { 
-        
-                $_.Remain = $_.Space % 4
-                $_.Factor = $( 
+            Char              = {
+                    
+                Param ( $C )
+
+                $X = 0
+                Do
+                {
+                    If ( [ Char ] $X -ne $C )
+                    {
+                        $X ++
+                    }
+                }
+                Until ( [ Char ] $X -eq $C -or $X -ge 65535 )
             
-                    If ( $_.Remain -ne 0 ) 
-                    {
-                        ( $_.Space - $_.Remain ) / 4
-                    }
+                $X
+            }
+        }
 
-                    Else
-                    {
-                        $_.Space / 4
-                    }
-                )
-                $_.Content = $_.Content -join ''
+        $Template             = { 
+                    
+            Param ( $I )
+
+            [ PSCustomObject ]@{
+
+                Rank          = $I
+                Character     = [ Char ] $I
+                Type          = & $Script.Type $I
+            }
+        }
+
+        If ( $Index )
+        {
+            & $Template ( $Index )
+        }
+
+        If ( $Character )
+        {
+            & $Template ( & $Script.Char ( $Character ) )
+        }
+
+        If ( $Line )
+        {
+            ForEach ( $Z in 0..( $Line.Length - 1 ) )
+            {
+                $X = & $Script.Char ( $Line.ToCharArray()[$Z] )
+                $X = & $Template ( $X )
+
+                [ PSCustomObject ]@{
+
+                        Index     = $Z
+                        Rank      = $X.Rank
+                        Character = $X.Character
+                        Type      = $X.Type 
+                }
+            }
+        }
+    }                                                                                #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                             __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+#//¯¯\\___________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
+#\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
+    Function Format-XamlObject # Resolves Characters via Index, String, or String[] _____//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
+    {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
+        [ CmdLetBinding () ] Param ( 
+            
+            [ Parameter ( Mandatory , Position = 0           ) ] [ String ] $Xaml  ,
+            [ Parameter ( HelpMessage = "Troubleshooting L1" ) ] [ Switch ] $Focus , 
+            [ Parameter ( HelpMessage = "Troubleshooting L2" ) ] [ Switch ] $Report )
+
+        $Script       = [ PSCustomObject ]@{
+
+            Tab       = {
+
+                Param ( $Line )
+
+                $X , $Y = 0 , 0
+
+                Do 
+                {
+                    If ( $Line[$X] -match "\s" ) { $X ++ } Else { $Y = 1 }
+                }
+                Until ( $Y -eq 1 )
+
+                $X
+            }
+        }
+
+        $Return               = [ PSCustomObject ]@{
+
+            Index             = 0
+            Count             = 0
+            Track             = 0..( $Xaml.Split("`n").Count - 1 )
+            Split             = $Xaml.Split("`n")               
+            Items             = @( )
+            Focus             = @( )
+        }
+
+        $Return.Focus         = ForEach ( $I in 0..( $Return.Split.Count - 1 ) )
+        {
+            $Return.Split[$I] | % {
+
+                [ PSCustomObject ]@{
+
+                    Track     = $I
+                    Tab       = & $Script.Tab $_
+                    Line      = $_
+                    Items     = $_.Split(" ") | ? { $_.Length -gt 0 }
+                }
+            }
+        }
+
+        If ( $Focus )
+        {
+            Return $Return.Focus ; Break
+        }
+
+        $Index                = 0
+        $Track                = 0
+                
+        $List                 = $Return.Focus | ? { $_.Items    -match "<" }
+        $Tabs                 = $List.Tab
+        $Items                = $Return.Focus.Items    -match "<"
+        $Props                = $Return.Focus.Items -notmatch "<"
+
+        ForEach ( $X in 0..( $List.Count - 1 ) )
+        {
+            $Current          = [ PSCustomObject ]@{
+
+                Index         = $X
+                Indent        = $Tabs[$X]
+                Item          = $Items[$X]
+                Buffer        = $Tabs[$X] + $Items[$X].Length + 1
+                Property      = @( )
+                Value         = @( )
             }
 
-            $Return[$I] = $Parse
-        }
-
-        $X = 0..( $Return.Count - 1 )
-        $Y = 0..( $Return.Count - 1 ) 
-
-        0..( $Return.Count - 1 ) | % { 
-
-            $X[$_] = $Return[$_].Factor
-            $Y[$_] = $( 
-    
-                If ( $Return[$_].Remain -ne 0 )
+            If ( $Items[$X] -notmatch ">" )
+            {
+                Do
                 {
-                    ( " " * $Return[$_].Remain ) + $Return[$_].Content
+                    $Current.Value += $Props[ $Track ]
+                    $Track  ++
                 }
+                Until ( $Props[ $Track - 1 ] -match ">" )
 
-                Else
+                $Current.Value = ( $Current.Value -join ' ' ).Replace("' />","'/>").Replace("' >","'>").Replace("' ","';").Split(';')
+
+                If ( $Current.Value -ne $Null )
                 {
-                    $Return[$_].Content
+                    If ( $Current.Value.Count -eq 1 )
+                    {
+                        $Split = $Current.Value.Split(' = ')
+
+                        $Current.Property = $Split[0]
+                        $Current.Value    = $Split[1] 
+                    }
+
+                    If ( $Current.Value.Count -gt 1 )
+                    {
+                        $Current.Property = 0..( $Current.Value.Count - 1 )
+
+                        ForEach ( $Z in 0..( $Current.Value.Count - 1 ) )
+                        {
+                            $Split = $Current.Value[$Z].Split(' = ')
+                                    
+                            $Current.Property[$Z] = $Split[0]
+                            $Current.Value[$Z]    = $Split[1] 
+                        }
+                    }
                 }
-            )
+            }
+
+            $Return.Items    += $Current
+            $Index           ++
         }
 
-        [ PSCustomObject ]@{
-
-            X = $X -join ','
-            Y = ( $Y.Replace( '"' , "'" ) | % { '"' + $_ + '"' } )
+        If ( $Report )
+        {
+            Return $Return.Items ; Break 
         }
-    }
 
+        $MaxBuff  = ( $Return.Items.Buffer                     | Sort )[-1]
+        $MaxSpace = ( $Return.Items.Property | % { $_.Length } | Sort )[-1]
+        $Space    = {
 
-    #Get-LineDepth -Object @"
-    #"@ | % { $X = $_.X ; $Y = $_.Y } 
-
-    #$M = 0..3 | % { $X = @( '¯' , '_' , ' ' , '-' )[$_] ; IEX "`$M$_ = [ PSCustomObject ]@{ Char = '$X' };" }
-
-    #ForEach ( $I in $M0 , $M1 , $M2 , $M3 )  
-    #{
-    #    0..120   | % { 
+            Param ( $Property )
         
-    #        $Value = ( $I.Char * $_ ) -join ''
+            $MaxSpace - $Property.Length | % { 
 
-    #        $I   | Add-Member -MemberType NoteProperty -Name $_ -Value $Value 
-    #    }
-    #}                                                                                #____    ____    ____    ____    ____    ____    ____    ____      
- #____                                                                              __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
+                If ( $_ -gt 0 )
+                {
+                    "{0}{1}" -f $Property , ( " " * $_ )
+                }
+
+                If ( $_ -eq 0 )
+                {
+                    $Property
+                }
+            }
+        }
+
+        ForEach ( $L in 0..( $Return.Items.Count - 1 ) )
+        {
+            $Return.Items[$L] | % { 
+                        
+                $Item = If ( $_.Indent -gt 0 ) { "{0} {1}" -f ( " " * $_.Indent ) , $_.Item } Else { $_.Item }
+                $Buff = " " * ( $MaxBuff - $Item.Length )
+
+                If ( $_.Property.Count -eq 0 )
+                {
+                    $Item
+                }
+
+                If ( $_.Property.Count -eq 1 )
+                {
+                    $Prop = & $Space $_.Property
+                    "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value
+                }
+
+                If ( $_.Property.Count -gt 1 )
+                {
+                    $Prop = & $Space $_.Property[0]
+                    "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value[0]
+
+                    $Buff = " " * ( $MaxBuff + 1 )
+
+                    $Z = 1
+                    Do
+                    {
+                        $Prop = & $Space $_.Property[$Z]
+                        "{0} {1} = {2}" -f $Buff , $Prop , $_.Value[$Z]
+                        $Z ++
+                    }
+                    Until ( $Z -eq $_.Property.Count )
+                }
+            }
+        }                                                                             #____ -- ____    ____ -- ____    ____ -- ____    ____ -- ____      
+}#____                                                                              __//¯¯\\__//==\\__/----\__//==\\__/----\__//==\\__/----\__//¯¯\\___  
 #//¯¯\\____________________________________________________________________________/¯¯¯    ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯¯ ¯¯ ¯¯¯\\ 
 #\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯        ____    ____ __ ____ __ ____ __ ____ __ ____ __ ____    ___// 
     Function Confirm-DomainName # Verifies that text entries are valid ___________________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
@@ -3092,6 +3216,7 @@
             [ Parameter ( Mandatory = $True , ParameterSetName = "0" ) ][ String ] $NetBIOS  ,
             [ Parameter ( Mandatory = $True , ParameterSetName = "1" ) ][ String ] $Domain   ,
             [ Parameter ( Mandatory = $True , ParameterSetName = "2" ) ][ String ] $SiteName )
+
 
         $C              = "abcdefghijklmnopqrstuvwxyz" , "0123456789" , ".-" , "``~!@#$%^&*()=+_[]{}\|;:'`",<>/? "
         $I              = $C -join ''
@@ -3104,15 +3229,13 @@
 
         $Reserved       = @{ 
             
-            Words       = @( "ANONYMOUS,AUTHENTICATED USER,BATCH,BUILTIN,DIALUP,DIGEST AUTH,INTERACTIVE,INTERNET,NT AUTHORITY,NT DOMAIN" ,
-                             "NTLM AUTH,NULL,PROXY,REMOTE INTERACTIVE,RESTRICTED,SCHANNEL AUTH,SELF,SERVER,SERVICE,SYSTEM,TERMINAL SERVER"
-                             "THIS ORGANIZATION,USERS,WORLD" ; "LOCAL" | % { $_ , "$_ SYSTEM"  } ; "NETWORK" | % { $_ , "$_ SERVICE" } ; 
-                             "GROUP" , "OWNER" | % { $_ , "$_ SERVER" } | % { "CREATOR $_" } ) -join ',' | % { $_.Split( ',' ) } | Sort
+            Words       = (("ANONYMOUS,AUTHENTICATED USER,BATCH,BUILTIN,{0} {1},{0} {1} SERVER,{0} {2},{0} {2} SERVER,DIALUP,DIGEST AUTH,INTERACTIVE,INTERNET"+
+                            ",{3},{3} SYSTEM,{4},{4} SERVICE,NT AUTHORITY,NT DOMAIN,NTLM AUTH,NULL,PROXY,REMOTE INTERACTIVE,RESTRICTED,SCHANNEL AUTH,SELF,SER"+
+                            "VER,SERVICE,SYSTEM,TERMINAL SERVER,THIS ORGANIZATION,USERS,WORLD") -f "CREATOR,GROUP,OWNER,LOCAL,NETWORK".Split(',') ).Split(',')
 
-            DNSHost     = "-GATEWAY" , "-GW" , "-TAC" <# RFC 952 #>
+            DNSHost     = "-GATEWAY,-GW,-TAC".Split(',') <# RFC 952 #>
 
-            SDDL        = "AN,AO,AU,BA,BG,BO,BU,CA,CD,CG,CO,DA,DC,DD,DG,DU,EA,ED,HI,IU,LA,LG,LS,LW,ME,MU,NO,NS,NU,PA,PO,PS,PU,RC,RD" +
-                          "RE,RO,RS,RU,SA,SI,SO,SU,SY,WD" | % { $_.Split( ',' ) }
+            SDDL        = "AN,AO,AU,BA,BG,BO,BU,CA,CD,CG,CO,DA,DC,DD,DG,DU,EA,ED,HI,IU,LA,LG,LS,LW,ME,MU,NO,NS,NU,PA,PO,PS,PU,RC,RD,RE,RO,RS,RU,SA,SI,SO,SU,SY,WD".Split(',')
         }
 
         If ( $NetBIOS  ) 
@@ -9601,7 +9724,7 @@
         }
 
         # Exports Publishing Object to Desktop
-        CP $Package.Full "$Home\Desktop"
+        CP $Package.Full "$Home\Desktop" -Force
 
         # Cleans up after itself
         GCI $Mod *zip* | % { RI $_ -Force -VB }
