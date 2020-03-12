@@ -1,3 +1,4 @@
+
     Function Format-XamlObject # Formats a Xaml Object to have a clean structure
     {
         [ CmdLetBinding () ] Param ( 
@@ -114,35 +115,35 @@
 
                     $Ct.Value = ( $Ct.Value -join ' ' ).Replace("' />","'/>").Replace("' >","'>").Replace("' ","';").Split(';')
 
-                        If ( $Ct.Value -ne $Null )
+                    If ( $Ct.Value -ne $Null )
+                    {
+                        If ( $Ct.Value.Count -eq 1 )
                         {
-                            If ( $Ct.Value.Count -eq 1 )
-                            {
-                                $Sp                  = $Ct.Value.Split(' = ')
+                            $Sp                  = $Ct.Value.Split(' = ')
 
-                                $Ct.Property         = $Sp[0]
-                                $Ct.Value            = $Sp[1]
-                            }
+                            $Ct.Property         = $Sp[0]
+                            $Ct.Value            = $Sp[1]
+                        }
 
-                            If ( $Ct.Value.Count -gt 1 )
-                            {
-                                $Ct.Property         = 0..( $Ct.Value.Count - 1 ) 
+                        If ( $Ct.Value.Count -gt 1 )
+                        {
+                            $Ct.Property         = 0..( $Ct.Value.Count - 1 ) 
 
-                                0..( $Ct.Value.Count - 1 ) | % {
+                            0..( $Ct.Value.Count - 1 ) | % {
 
-                                    $Sp              = $Ct.Value[$_].Split(' = ')
+                                $Sp              = $Ct.Value[$_].Split(' = ')
 
-                                    $Ct.Property[$_] = $Sp[0]
-                                    $Ct.Value[$_]    = $Sp[1]
-                                }
+                                $Ct.Property[$_] = $Sp[0]
+                                $Ct.Value[$_]    = $Sp[1]
                             }
                         }
                     }
 
                     $St.Format += $Ct
                     $St.Index  ++
+
                 }
-                
+
                 $St.Format
             }
 
