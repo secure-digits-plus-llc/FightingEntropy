@@ -5,222 +5,137 @@
             
             [ Parameter ( Mandatory , Position = 0 ) ] [ String ] $Xaml )
 
-        $Script       = [ PSCustomObject ]@{
+            $Script             = [ PSCustomObject ]@{
 
-            Tab       = {
+        Tab             = {
 
-                Param ( $Line )
 
-                $X , $Y = 0 , 0
+            Param ( $Line )
 
-                Do 
-                {
-                    If ( $Line[$X] -match "\s" ) { $X ++ } Else { $Y = 1 }
-                }
-                Until ( $Y -eq 1 )
+            $X , $Y = 0 , 0
 
-                $X
+            Do 
+            {
+                If ( $Line[$X] -match "\s" ) { $X ++ } Else { $Y = 1 }
             }
+            Until ( $Y -eq 1 )
 
-            Focus = {
+            $X
+        }
+        
+        # 
+        Template        = {
 
-                Param ( $Obj )
+            Param ( $Index )
 
-                ForEach ( $I in 0..( $Obj.Split("`n").Count - 1 ) )
-                {
-                    $Obj.Split("`n")[$I] | % {
-                    
-                        [ PSCustomObject ]@{
-
-                            Track = $I
-                            Tab   = & $Script.Tab $_
-                            Line  = $_
-                            Items = $_.Split(" ") | ? { $_.Length -gt 0 }
-                        }
-                    }
-                }
-            }
-
-            Items = {
-
-                Param ( $Focus )
-
-                $List         = $Focus | ? { $_.Items -match "<" }
-
-                $St           = [ PSCustomObject ]@{
-
-                    Index     = 0
-                    Track     = 0..( $List.Count - 1 )
-                    List      = $List
-                    Tabs      = $List.Tab
-                    Items     = $Focus.Items    -match "<"
-                    Props     = $Focus.Items -notmatch "<"
-                    Format    = @( )
-                }
-
-                ForEach ( $X in $St.Track )
-                {
-                    $Ct          = [ PSCustomObject ]@{
-
-                        Index         = $X
-                        Indent        = $St.Tabs[$X]
-                        Item          = $St.Items[$X]
-                        Buffer        = $St.Tabs[$X] + $St.Items[$X].Length + 1
-                        Property      = @( )
-                        Value         = @( )
-                    }
-
-                    $Sw = 0
-
-                    If ( $Ct.Item -notmatch ">" )
-                    {
-                        Do
-                        {
-                            $Sp = $St.Props[ $St.Index ]
-
-                            If ( $Sp -notmatch "\s" -and $Sp -match "\w" )
-                            {
-                                $Ct.Property += $SP
-
-                                $Value = ""
-
-                                Do
-                                {
-                                    $St.Index ++
-                                    $Sp = $St.Props[ $St.Index ]
-                                            
-                                    If ( $Sp -match "\w" )
-                                    {
-                                        If ( $Sp -match "['{2}]" )
-                                        {
-                                            $Value = $Sp
-                                        }
-                                                
-                                        Else 
-                                        {
-                                            $Value += $Sp
-                                        }
-                                    }
-                                }
-                                Until ( $Value -match "['{2}]" )
-
-                                $Ct.Value += $Value
-                                $Sw = 0
-                            }
-
-                            $St.Index  ++
-                        }
-                        Until ( $SP -match ">" )
-                    }
-
-                    $Ct.Value = ( $Ct.Value -join ' ' ).Replace("' />","'/>").Replace("' >","'>").Replace("' ","';").Split(';')
-
-                    If ( $Ct.Value -ne $Null )
-                    {
-                        If ( $Ct.Value.Count -eq 1 )
-                        {
-                            $Sp                  = $Ct.Value.Split(' = ')
-
-                            $Ct.Property         = $Sp[0]
-                            $Ct.Value            = $Sp[1]
-                        }
-
-                        If ( $Ct.Value.Count -gt 1 )
-                        {
-                            $Ct.Property         = 0..( $Ct.Value.Count - 1 ) 
-
-                            0..( $Ct.Value.Count - 1 ) | % {
-
-                                $Sp              = $Ct.Value[$_].Split(' = ')
-
-                                $Ct.Property[$_] = $Sp[0]
-                                $Ct.Value[$_]    = $Sp[1]
-                            }
-                        }
-                    }
-
-                    $St.Format += $Ct
-                    $St.Index  ++
-
-                }
-
-                $St.Format
-            }
-
-            Format      = { # Prepares a chunk of XAML for Clean Object Handling/Production
-
-                Param ( $Full )
-
-                $MaxBuff  = ( $Full.Buffer                     | Sort )[-1]
-                $MaxSpace = ( $Full.Property | % { $_.Length } | Sort )[-1]
+            [ PSCustomObject ]@{ 
                 
-                $Space    = { # Internal Script Property for item spacing (Can be easily switched/reversed)
-        
-                    Param ( $Property )
-                
-                    $MaxSpace - $Property.Length | % { 
-        
-                        If ( $_ -gt 0 )
-                        {
-                            "{0}{1}" -f $Property , ( " " * $_ )
-                        }
-        
-                        If ( $_ -eq 0 )
-                        {
-                            $Property
-                        }
+                Index         = $Index
+                Track         = ""
+                Name          = ""
+                Property      = @( )
+                Value         = @( )
+                Children      = @( )
+            }
+        }
+
+        Reg             = "(?<=\<).+?(?=\>)"
+
+        Status          = {
+            
+            Param ( $Item , $Total )
+            Write-Progress -Activity "Collecting [~] Objects" ( ( $X / $Items.Count - 1 ) * 100 )
+
+        }
+        # 
+        Obj             = {
+
+            Param ( $Xaml )
+
+            # $Xaml               = $Xaml_Input
+
+            [ PSCustomObject ]@{
+
+                Track             = ForEach ( $I in 0..( $Xaml.Split( "`n" ).Count - 1 ) ) 
+                {
+                    [ PSCustomObject ]@{
+            
+                        Index     = $I
+                        Line      = $Xaml.Split("`n")[$I]
+                        Level     = ""
+                        Type      = ""
+                        Prop      = @( )
+                        Value     = @( )
                     }
                 }
-        
-                ForEach ( $L in 0..( $Full.Count - 1 ) )
+                Xaml              = $Xaml
+                Array             = $Xaml.Split( "`n" )
+                Items             = $Xaml.Split( "`n" ).Split(' ') | ? { $_.Length -gt 0 }
+            }
+        }
+    }
+
+        $Root                       = & $Script.Obj $Xaml_Input
+
+        $Array                      = $Root.Array
+        $Return                     = $Root.Items -match "<"
+        $Track                      = 0..( $Return.Count - 1 ) 
+        $Items                      = $Root.Items
+        $Path                       = "."
+        $X                          = 0
+        $Index                      = 0
+        $Y                          = $Return.Count - 1
+        $Depth                      = 0
+
+        # $I = 0
+
+        ForEach ( $I in $Track )
+        {
+            $Track[$I]              = & $Script.Template $I
+
+            $Track[$I]              | % { 
+
+                $_.Track            = $Return[$I]
+                $_.Name             = $Return[$I].Replace("<",'').Replace(">",'').Replace("/",'')
+
+                If ( $_.Track    -match ">" )
                 {
-                    $Full[$L] | % { 
-                                
-                        $Item = If ( $_.Indent -gt 0 ) { "{0} {1}" -f ( " " * $_.Indent ) , $_.Item } Else { $_.Item }
-                        $Buff = " " * ( $MaxBuff - $Item.Length )
-        
-                        If ( $_.Property.Count -eq 0 )
+                    $X ++
+                }
+                
+                If ( $_.Track -notmatch ">" )
+                {
+                    $X ++
+                    Do
+                    {
+                        $_.Track    = $_.Track , $Items[$X] -join ' '
+                        $X ++
+                    }
+                    Until ( $_.Track -match ">" )
+
+                    $_.Track = $_.Track -Replace "\'\s\/>" , "'/>" -Replace "\'\s>" , "'/>"
+
+                    If ( ( $_.Name.Split('.') ).Count -eq 1 )
+                    {
+                        $Split = $_.Track.Replace("<$($_.Name) ",'').Replace("' ","';").Split(';')
+
+                        If ( $Split.Count -eq 1 )
                         {
-                            $Item
+                            $_.Property = $Split.Split(" = ")[0]
+                            $_.Value    = $Split.Split(" = ")[1]
                         }
-        
-                        If ( $_.Property.Count -eq 1 )
+
+                        If ( $Split.Count -gt 1 )
                         {
-                            $Prop = & $Space $_.Property
-                            "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value
-                        }
-        
-                        If ( $_.Property.Count -gt 1 )
-                        {
-                            $Prop = & $Space $_.Property[0]
-                            "{0} {1} {2} = {3}" -f $Item , $Buff , $Prop , $_.Value[0]
-        
-                            $Buff = " " * ( $MaxBuff + 1 )
-        
-                            $Z = 1
-                            Do
+                            ForEach ( $J in 0..( $Split.Count - 1 ) )
                             {
-                                $Prop = & $Space $_.Property[$Z]
-                                "{0} {1} = {2}" -f $Buff , $Prop , $_.Value[$Z]
-                                $Z ++
+                                $_.Property += $Split[$J].Split(" = ")[0]
+                                $_.Value    += $Split[$J].Split(" = ")[1]
                             }
-                            Until ( $Z -eq $_.Property.Count )
                         }
+
+                        $Split = $Null
                     }
                 }
             }
         }
-
-        $Focus  = & $Script.Focus  $Xaml
-        $Items  = & $Script.Items  $Focus
-        $Format = & $Script.Format $Items
-
-        [ PSCustomObject ]@{
-
-            Track             = 0..( $Xaml.Split("`n").Count - 1 )
-            Split             = $Xaml.Split("`n")               
-            Focus             = $Focus
-            Items             = $Items
-            Format            = $Format
-        }
-}
