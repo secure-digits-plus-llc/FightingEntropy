@@ -1,3 +1,4 @@
+
 Function Format-XamlObject # Formats a Xaml Object to have a clean structure ________//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯\\__//¯¯¯  
 {#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯ -- ¯¯¯¯    ¯¯¯¯      
     [ CmdLetBinding () ] Param ( 
@@ -58,7 +59,7 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
             $Drive                                  = "DSC:"
             $Name                                   = $Null
             $Path                                   = $Null
-            $Root                                   = & $Script.Object $Xaml_Input
+            $Root                                   = & $Script.Object $Xaml
             $Depth                                  = 0
             $Type                                   = "@"
             $Indent                                 = 0
@@ -198,6 +199,8 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
 
             $X                                  = 0
 
+            $Return                             = @( )
+
             ForEach ( $X in 0..$Count )
             {
                 $OP                             = $T[$X] | % { 
@@ -211,15 +214,12 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                     }
                 }
 
+                $Slot                           = $OP | % { "{0}{1}" -f $_.Indent , $_.Tag }
+                
                 If ( $OP.Remain -gt 0 )
                 { 
-                    $Slot = "{0}{1}{2}" -f $OP.Indent , $OP.Tag , ( " " * $OP.Remain )
+                    $Slot = "{0}{1}" -f $Slot , ( " " * $OP.Remain )
                 } 
-                
-                If ( $OP.Remain -eq 0 )
-                { 
-                    $Slot = "{0}{1}" -f $OP.Indent , $OP.Tag
-                }
 
                 If ( $T[$X].Property -ne $Null )
                 {
@@ -231,7 +231,7 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                             Property = $T[$X].Property + ( " " * ( $Max.Property - $T[$X].Property.Length ) )
                             Value    = $T[$X].Value
                         
-                        } | % { "{0} {1} = {2}" -f $_.Object  , $_.Property  , $_.Value }
+                        } | % { "{0} {1} = {2}" -f $_.Object , $_.Property , $( $_.Value ) }
                     }
         
                     If ( $T[$X].Property.Count -gt 1 )
@@ -240,11 +240,11 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                         {    
                             [ PSCustomObject ]@{
 
-                                Object   = If ( $_ -eq 0 ) { $Slot } Else { " " * $OP.Buffer }
+                                Object   = If ( $J -eq 0 ) { $Slot } Else { " " * $OP.Buffer }
                                 Property = $T[$X].Property[$J] + ( " " * ( $Max.Property - $T[$X].Property[$J].Length ) )
                                 Value    = $T[$X].Value[$J]
                             
-                            } | % { "{0} {1} = {2}" -f $_.Object , $_.Property  , $_.Value }
+                            } | % { "{0} {1} = {2}" -f $_.Object , $_.Property , $( $_.Value ) }
                         }
                     }
                 }
@@ -255,3 +255,4 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                 }
             }
         }
+}
