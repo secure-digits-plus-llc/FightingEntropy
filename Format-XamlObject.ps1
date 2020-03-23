@@ -12,6 +12,8 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
 
                 [ PSCustomObject ]@{ 
 
+                    Array                       = $Xaml.Split("`n")
+                    Items                       = $Xaml.Split("`n").Split(' ') | ? { $_.Length -gt 0 }
                     Track                       = ForEach ( $I in 0..( $Xaml.Split( "`n" ).Count - 1 ) )
                     {
                         [ PSCustomObject ]@{ 
@@ -21,8 +23,6 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                         }
                     }
                     Xaml                        = $Xaml 
-                    Array                       = $Xaml.Split("`n") 
-                    Items                       = $Xaml.Split("`n").Split(' ') | ? { $_.Length -gt 0 }
                 }
             }
         
@@ -42,7 +42,6 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                     Slice                       = ""
                     Depth                       = ""
                     Indent                      = ""
-                    End                         = ""
                     Tag                         = ""
                     Property                    = $Null
                     Value                       = $Null
@@ -59,7 +58,7 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
             $Drive                              = "DSC:"
             $Name                               = $Null
             $Path                               = $Null
-            $Root                               = & $Script.Object $Xaml_Input
+            $Root                               = & $Script.Object $Xaml  #= $Xaml_Input
             $Depth                              = 0
             $Type                               = "@"
             $Indent                             = 0
@@ -82,11 +81,8 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                 Write-Progress -Activity "Collecting [~] Track Information" -PercentComplete ( ( $X / $Count ) * 100 )
 
                 $T                             += & $Script.Template $X $Drive
-
-                $T[$X].Tag                      = $Return[$X] -Replace "(\s+)" , ""
-                $T[$X].Type                     = $Type
-
                 $T[$X].Track                    = $Return[$X]
+
                 If ( $T[$X].Track -notmatch ">" )
                 {
                     While( $T[$X].Track -notmatch ">" )
@@ -96,9 +92,11 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                     }
                 }
                 $Index ++
-                $T[$X].Track                    = $T[$X].Track -Replace "(\s+)" , " " -Replace "(\'\s\/>)" , "'/>" -Replace "(\'\s[>])" , "'>"
 
-                $T[$X].Slice                    = $T[$X].Track -Replace ( $T[$X].Tag + " " ) , "" -Replace "' " , "';" -Split ";"
+                $T[$X].Tag                      = $Return[$X] -Replace "(\s*)" , ""
+                $T[$X].Type                     = $Type
+                $T[$X].Track                    = $T[$X].Track -Replace              "(\s+)" , " " -Replace "(\'\s\/>)" , "'/>" -Replace "(\'\s[>])" , "'>"
+                $T[$X].Slice                    = $T[$X].Track -Replace ( $T[$X].Tag + " " ) ,  "" -Replace        "' " , "';"  -Split   ";"
 
                 If ( $T[$X].Slice.Count -gt 1 )
                 {
@@ -131,7 +129,7 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                         
                         "+"                     = $Path , $T[$X].Name -join '\'
                         "/"                     = $Path 
-                        "-"                     = Split-Path $Path -Parent 
+                        "-"                     = Split-Path $Path -Parent
                     
                     }[ $T[$X].Type ]
 
@@ -144,7 +142,7 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                             "-"
                         }
 
-                        Else 
+                        Else
                         {
                             $_
                         }
@@ -162,10 +160,10 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                 $Depth                          = $Path.Split('\').Count - 2
                 $T[$X].Depth                    = $Depth
 
-                If ( $Sw0 -ne $True  -and $T[$X].Tag   -match "(<\/)"  -and $T[$X].Type -eq "/" )
+                If ( $Sw0 -ne $True  -and $T[$X].Tag    -match "(<\/)" -and $T[$X].Type -eq "/" )
                 { 
                     $Sw0 = $True
-                } 
+                }
 
                 If ( $Sw0 -ne $False -and $T[$X].Tag -notmatch "(<\/)" -and $T[$X].Type -eq "+" )
                 {
@@ -175,110 +173,68 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
                 $T[$X].Indent                   = @{
                     
                     "@"                         = 0
-                    "/"                         = If ( !$Sw0 ) { $Depth } Else { $Depth - 1 }
-                    "-"                         = If ( !$Sw0 ) { $Depth } Else { $Depth - 1 }
+                    "/"                         = If ( ! $Sw0 ) { $Depth } Else { $Depth - 1 }
+                    "-"                         = If ( ! $Sw0 ) { $Depth } Else { $Depth - 1 }
                     "+"                         = $Depth
 
                 }[ $Type ]
             }
         }
-    #    ____    ____________________________________________________________________________________________________      #
-    #   //¯¯\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___  #
-    #   \\__//¯¯¯     End Parameter [~] : Finalize the object arrangement for output                             ___//¯¯\\ #
-    #    ¯¯¯\\__________________________________________________________________________________________________//¯¯\\__// #
-    #        ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯  #
+
+    #    ____    ____________________________________________________________________________________________________      # 
+    #   //¯¯\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___  # 
+    #   \\__//¯¯¯     End Parameter [~] : Finalize the object arrangement for output                             ___//¯¯\\ # 
+    #    ¯¯¯\\__________________________________________________________________________________________________//¯¯\\__// # 
+    #        ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯  # 
         End
         {
-            $Buffer                             = [ PSCustomObject ]@{  # Numbers only
+            $Buffer                             = [ PSCustomObject ]@{ 
 
-                Indent                          = ""
-                MaxIndent                       = ( $T.Indent                     | Sort )[ -1 ] * 4
-                PostIndent                      = ""
-                OutputIndent                    = ""
-
-                Tag                             = ""
-                MaxTag                          = ( $T.Tag      | % { $_.Length } | Sort )[ -1 ]
-                PostTag                         = ""
-                OutputTag                       = ""
-
-                Property                        = ""
-                MaxProperty                     = ( $T.Property | % { $_.Length } | Sort )[ -1 ]
-                PostProperty                    = ""
-                OutputProperty                  = ""
+                Indent                          = (   $T.Indent | Sort )[ -1 ] * 4
+                Tag                             = (      $T.Tag | % { $_.Length } | Sort )[ -1 ]
+                Left                            = ""
+                Property                        = ( $T.Property | % { $_.Length } | Sort )[ -1 ]
             }
             
-            ForEach ( $X in 0..$Count )
-            {
-                $Buffer                         | % { 
-
-                    $_.Indent                   = $T[$X].Indent * 4
-                    $_.PostIndent               = $_.MaxIndent - $_.Indent
-                    $_.OutputIndent             = ( " " * $_.Indent ) 
+            $Buffer                             | % { 
                 
-                    $_.Tag                      = $T[$X].Tag.Length
-                    $_.PostTag                  = $_.MaxTag - $_.Tag
-                    $_.OutputTag                = $T[$X].Tag
-
-                    "{0}{1}" -f $_.OutputIndent , $_.OutputTag
-                }
+                $_.Left = $_.Indent + $_.Tag 
             }
 
-                
-                $Indent                         = $T[$X].Indent * 4
-                $PostIndent                     = $Indent
-                $Item                           = $T[$X].Tag.Length 
-                $Space                          = $Buffer.Left + $Buffer.Tag 
-                
-                - ( $Indent + $Item )
-
-                    $Max                        = [ PSCustomObject ]@{ 
-
-                        Margin                  = $Indent 
-                        Item                    = $T[$X].Tag
-                        Space                   = $Buffer.Left - ( $T[$X].Indent * 4 )  
-                        Indent                  = $Buffer.Left
-                        Item                    = $Buffer.Tag
-                    }
-                }
-
-                "{0} {1}" -f $Indent , $Item
-                
-                # ____________________________________________________                                                     | MaxIndent  
-                #                                                     _______________________________________
-                # [        ]                             # Actual Indent                                                   | MaxIndent   
-                #           [       ]                    # Actual Tag                                                      | MaxTag
-                # [                                    ] # [Indent] + [Item buffer] = Maximum length                       | MaxLength
-                #                    [                 ] # Remaining Space                               | MaxSpace
-
-
-                # /__ General __/
-                # Indent                    = $Buffer | % { $_.Left + $_.Tag }
-                # Tag                       = 
-
-                $MaxIndent                      = $Buffer | % { $_.Left * 4 }    # {0}[ Maximum Indent/Margin Buffer ]
-                $MaxSpace                       = $MaxIndent + $Buffer.Tag       # {1}[ Maximum     Space/Tag Buffer ]
-                $MaxProperty                    = $Buffer.Property + $MaxSpace   # {2}[ Maximum      Property Buffer ]
+            ForEach ( $X in 0..$Count )
+            {
+                $Indent                         = " " * $T[$X].Indent * 4
+                $Tag                            = $T[$X].Tag
 
                 If ( $T[$X].Property.Count -eq 0 )
                 {   
-
+                    "{0}{1}" -f $Indent , $Tag
                 }
-
+    
                 If ( $T[$X].Property.Count -eq 1 )
                 {
+                    $Space                      = $Buffer.Property - $T[$X].Property.Length
+                    $Property                   = $T[$X].Property + ( $Space * " " )
 
+                    "{0}{1}{2} = {3}" -f $Indent , $Tag , $Property , $T[$X].Value
                 }
-
+    
                 If ( $T[$X].Property.Count -gt 1 )
                 {
-
                     ForEach ( $J in 0..( $T[$X].Property.Count - 1 ) )
                     {
+                        $Space                  = $Buffer.Property - $T[$X].Property[$J].Length
+                        $Property               = $T[$X].Property[$J] +( $Space * " " )
+                            
                         If ( $J -eq 0 )
                         {
-                        
+                            "{0}{1}{2} = {3}" -f $Indent , $Tag , $Property , $T[$X].Value[$J]
                         }
 
+                        Else 
+                        {   
+                            "{0}{1} = {2}" -f ( $Buffer.Left * " " ) , $Property , $T[$X].Value[$J]
+                        }
                     }
                 }
             }
