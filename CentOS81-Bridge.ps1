@@ -1,34 +1,52 @@
-# To use for remote management of CentOS 8.1
-# or at least... just a checklist of things to do first
-
 su -
 yum update
 sudo nano /etc/sysconfig/selinux
-  SELINUX=disabled
+
+	SELINUX=enforcing -> disabled
 
 # Install PowerShell
-curl https://packages.microsoft.com/config/rhel/7/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
-pwsh
 
-# Install LAMP Services List
-yum install ... 
-{
-  epel-release
-  httpd 
-  httpd-tools 
-  mariadb-server 
-  mariadb
-  perl
-  postfix
-  dovecot
-  php 
-  php-fpm 
-  php-mysqlnd 
-  php-opcache 
-  php-gd 
-  php-xml 
-  php-mbstring
-}
+curl https://packages.microsoft.com/config/rhel/7/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
+yum install powershell
+pwsh
+su -
+
+# firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
+
+yum install cifs-utils
+mkdir /bin/Module
+sudo mount.cifs //dsc1/module /bin/Module -o user=administrator@securedigitsplus.com
+
+
+# Join AD
+#/¯¯¯¯¯¯¯
+
+yum install "realmd,sssd,oddjob,oddjob-mkhomedir,adcli,samba,samba-common,samba-common-tools,krb5-workstation".Split(',')
+
+# File Sharing Capability Tangent
+yum install samba
+nano /etc/samba.conf
+
+# Install VSCode
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+@: sudo nano /etc/yum.repos.d/vscode.repo ... {
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+
+sudo yum install code
+#\______________________________
+
+
+# Install Services List
+
+"epel-release,httpd,httpd-tools,mariadb-server,mariadb,perl,postfix,dovecot,samba,php,php-fpm,php-mysqlnd,php-opcache,php-gd,php-xml,php-mbstring".Split(',')
+yum install 
 
 # Initialize Apache
 firewall-cmd --permanent --zone=public --add-service=http
@@ -47,18 +65,51 @@ systemctl status mariadb
 mysql_secure_installation
 mysql -u root -p
 
-# Initialize PHP
 systemctl start php-fpm
 systemctl enable php-fpm
 systemctl status php-fpm
 systemctl restart httpd
 setsebool -P httpd_execmem 1
 
-# Firewall
 firewall-cmd --permanent --add-port=80/tcp
 firewall-cmd --permanent --add-port=443/tcp
 
-yum install postfix
+# Installing Roundcube
+wget https://github.com/roundcube/roundcubemail/releases/download/1.4.2/roundcubemail-1.4.2-complete.tar.gz
+tar xvf roundcubemail-1.4.2-complete.tar.gz
+sudo mkdir /var/www # if apache was installed, it'll say it exists... so don't do it unless you want to see the message I just mentioned... which could be fun on another planet maybe
+sudo mv roundcubemail-1.4.2 /var/www/roundcube
+
+sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+sudo dnf module reset php
+sudo dnf module enable php:remi-7.4 -y
+
+@: sudo dnf install ..{ 
+php-ldap 
+php-imagick 
+php-common 
+php-gd 
+php-imap 
+php-json 
+php-curl 
+php-zip 
+php-xml 
+php-mbstring 
+php-bz2 
+php-intl 
+php-gmp
+}
+# MySQL Database Setup
+mysql -u root -p
+create database roundcube default character set utf8 collate utf_general_ci;
+create user MailAdmin@localhost identified by 'password';
+grant all privileges on roundcube.* to MailAdmin@localhost;
+
+mysql -u root -p mail < /var/www/roundcube/SQL/mysql.initial.sql
+
+sudo nano /etc/httpd/conf.d/roundcube.conf
+sudo nano /etc/httpd/conf.d/mail.securedigitsplus.com.conf
+
 gedit /etc/postfix/main.cf
 #/
          30 | compatibility_level = 2
@@ -155,7 +206,6 @@ gedit /etc/postfix/main.cf
 	738 | shlib_directory = /usr/lib64/postfix
 #\
 
-yum install telnet -y
 yum install dovecot -y
 gedit /etc/dovecot/conf.d/dovecot.conf
 	 24 | protocols = imap pop3 lmtp
@@ -165,19 +215,18 @@ gedit /etc/dovecot/conf.d/10-mail.conf
 
 gedit /etc/dovecot/conf.d/10-auth.conf
 	 10 | disable_plaintext_auth = yes
-	100 | auth mechanisms = plain "login"
+	100 | auth mechanisms = plain login
 
 gedit /etc/dovecot/conf.d/10-master.conf
-	 91 | user = "useraccount / postfix"
-	 92 | group = "groupaccount / postfix"
+	 91 | user = postfix
+	 92 | group = postfix
 
 gedit /etc/dovecot/conf.d/20-imap.conf
-         67 | # imap_client_workarounds = delay-newmail tb-extra-mailbox-sep
+         67 | imap_client_workarounds = delay-newmail tb-extra-mailbox-sep
 
 gedit /etc/dovedot/conf.d/20-pop3.conf
 	 50 | pop3_uidl_format = %08Xu%08Xv
 	 90 | pop3_client_workarounds = outlook-no-nuls oe-ns-eoh
-pop3.conf
          
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 ARCH=$( /bin/arch )
@@ -185,3 +234,13 @@ subscription-manager repos --enable "codeready-builder-for-rhel-8-${ARCH}-rpms"
 dnf config-manager --set-enabled PowerTools
 
 openssl req -new -x509 -days 365 -nodes -out /etc/pki/dovecot/certs/mycert.pem -keyout /etc/pki/dovecot/private/mykey.pem
+
+sudo firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
+systemctl reload firewalld
+sudo dnf install wget
+wget https://dl.eff.org/certbot-auto
+chmod a+x certbot-auto
+sudo mv certbot-auto /usr/local/bin/certbot
+sudo chown root /usr/local/bin/certbot
+sudo chmod 0755 /usr/local/bin/certbot
+
