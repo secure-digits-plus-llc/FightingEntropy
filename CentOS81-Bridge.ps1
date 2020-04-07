@@ -1,210 +1,301 @@
-su -
-yum update
-sudo nano /etc/sysconfig/selinux
 
-	SELINUX=enforcing -> disabled
 
-# Install PowerShell
-
-curl https://packages.microsoft.com/config/rhel/7/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
-yum install powershell
-pwsh
 su -
 
-# firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
+# powershell cifs-utils 
+# epel-release httpd httpd-tools
+# realmd sssd oddjob oddjob-mkhomedir adcli samba samba-common samba-common-tools krb5-workstation
 
+# POWERSHELL / PWSH
+curl https://packages.microsoft.com/config/rhel/8/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
+yum install powershell -y
+sudo pwsh
+
+# CIFS
 yum install cifs-utils
 mkdir /bin/Module
 sudo mount.cifs //dsc1/module /bin/Module -o user=administrator@securedigitsplus.com
 
+# ------------------------------------
 
-# Join AD
-#/¯¯¯¯¯¯¯
+# Active Directory
+# "oddjob","samba","-common" | % { 'yum install realmd sssd {0} {0}-mkhomedir adcli {1} {1}{2} {1}{2}-tools krb5-workstation -y' }
+# realm join -v -U administrator@securedigitsplus.com
 
-yum install "realmd,sssd,oddjob,oddjob-mkhomedir,adcli,samba,samba-common,samba-common-tools,krb5-workstation".Split(',')
+# ____________________________________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ Visual Studio Code |
 
-# File Sharing Capability Tangent
-yum install samba
-nano /etc/samba.conf
+    "https://packages.microsoft.com" | % { @{ Keys = "$_/keys/microsoft.asc" ; Repo = "$_/yumrepos/vscode" } | % { 
+            
+        sudo rpm --import $_.Keys
+        Set-Content "/etc/yum.repos.d/vscode.repo" "[code]|name=Visual Studio Code|baseurl=$( $_.Repo )|enabled=1|gpgcheck=1|gpgkey=$( $_.Keys )".Split('|') -VB
+    }
 
-# Install VSCode
-#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+    sudo yum install code
+    code --install-extension ms-vscode.powershell
+                                                                                #_____________________
+#\______________________________________________________________________________/ Visual Studio Code |
 
-sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-@: sudo nano /etc/yum.repos.d/vscode.repo ... {
-[code]
-name=Visual Studio Code
-baseurl=https://packages.microsoft.com/yumrepos/vscode
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+yum update
 
-sudo yum install code
-#\______________________________
+Function Set-Selinux
+{
+    "/etc/sysconfig/selinux" | % { Set-Content $_ ( GC $_ -Replace "SELINUX=enforcing" , "SELINUX=disabled" ) }
+}
 
+Function Set-Network
+{
+    Param ( $Target )
 
-# Install Services List
+    sudo yum install wget tar net-tools
 
-"epel-release,httpd,httpd-tools,mariadb-server,mariadb,perl,postfix,dovecot,samba,php,php-fpm,php-mysqlnd,php-opcache,php-gd,php-xml,php-mbstring".Split(',')
-yum install 
+    If ( ( hostname ) -ne $Target )
+    {
+        hostnamectl set-hostname $Target
+    }
 
-# Initialize Apache
-firewall-cmd --permanent --zone=public --add-service=http
-firewall-cmd --permanent --zone=public --add-service=https
-systemctl start httpd
-systemctl enable httpd
-systemctl reload httpd
-chown apache:apache /var/www/html -R
+    ifconfig | % { 
+        
+        If ( $_ -match "inet " -and $_ -notmatch "127.0.0.1" ) 
+        {
+            $X            = $_ -Split " " | ? { $_.Length -gt 0 }
+            $Y            = GC /etc/hosts
+            $Z            = [ PSCustomObject ]@{
+
+                IPAddress = $X[1]
+                Hostname  = ( $Target -Split '.' )[0]
+                FullName  = $Target
+                Netmask   = $X[3]
+                Broadcast = $X[5]
+            
+            } 
+            
+            If ( $Z.IPAddress -notin $Y )
+            {
+                Set-Content /etc/hosts "{0} {1} {2}" -f $Z.IPAddress , $Z.HostName , $Z.FullName
+            }
+        }
+    }
+}
+
+# firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
+# epel-release wget tar net-tools / httpd httpd-tools / mariadb-server mariadb / postfix dovecot / samba 
+# php php-fpm php-mysqlnd php-opcache php-gd php-xml php-mbstring
+# php-ldap php-imagick php-common php-gd php-imap php-json php-curl php-zip php-xml php-mbstring php-bz2 php-intl php-gmp
+
+Function Initialize-Service
+{
+    [ CmdLetBinding () ] Param ( [ Parameter ( Mandatory ) ] [ String ] $Name )
+
+    Echo "Initializing/Reloading $Name"
+    ForEach ( $I in 0..2 )
+    {
+        $X = ("Starting,start","Enabling,enable","Reloading,reload")[$I].Split(',')
+
+        Echo $X[0]
+        systemctl $X[1] $Name
+    }
+    Echo "Operation Complete"
+}
+
+Function Install-Apache
+{
+    sudo yum install epel-release httpd httpd-tools -y
+    chown apache:apache /var/www/html -R
+
+    "/etc/httpd/conf/httpd.conf" | % { 
+        
+        @{ 
+            Path    = $_ 
+            Content = GC $_ 
+        
+        } | % {
+
+            ForEach ( $I in 0..( $_.Content.Length - 1 ) )
+            {
+                If ( $_.Content[$I] -match "(<Directory />)" ) 
+                { 
+                    $_.Content[$I+1] = "    AllowOverride All" 
+                }
+            }
+
+            Set-Content @_
+        }
+
+        "" , "s" | % { 
+            
+            IEX "firewall-cmd --zone=public --permanent --add-service=http$_"
+        }
+
+        Initialize-Service httpd
+    }
+}
+
+Function Install-MariaDB
+{
+    sudo yum install mariadb mariadb-server -y
+    Initialize-Service mariadb
+}
+
+Function Install-PostFix
+{
+    sudo yum install postfix -y
+
+    "/etc/postfix/main.cf" | % { 
+
+        @{
+            Path    = $_
+            Content = GC $_ 
+        }
+
+        30 | compatibility_level = 2
+    #   41 | #soft_bounce = no
+        50 | queue_directory = /var/spool/postfix
+        55 | command_directory = /usr/sbin
+        61 | daemon_directory = /usr/libexec/postfix
+        67 | data_directory = /var/lib/postfix
+        78 | mail_owner = postfix
+    #   85 | #default_privs = nobody
+        94 | myhostname = mail.securedigitsplus.com #
+    #   95 | #myhostname = More than likely for a virtual host or fallback #
+       102 | mydomain = securedigitsplus.com        #
+    #  118 | #myorigin = $myhostname
+       119 | myorigin = $mydomain
+       132 | inet_interfaces = all
+    #  133 | #inet_interfaces = $myhostname
+    #  134 | #inet_interfaces = $myhostname , localhost
+       135 | inet_interfaces = localhost
+       138 | inet_protocols = all
+    #  149 | #proxy_interfaces = 
+    #  150 | #proxy_interfaces = 1.2.3.4
+       183 | mydestination = $myhostname, localhost.$mydomain, localhost
+    #  184 | #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+       185 | mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
+    #  186 | #  mail.$mydomain, www.$mydomain, ftp.$mydomain
+       227 | local_recipient_maps = unix:passwd.byname $alias_maps
+       228 | local_recipient_maps = proxy:unix:passwd.byname $alias_maps
+       229 | local_recipient_maps = 
+       240 | unknown_local_recipient_reject_code = 550
+    #  268 | #mynetworks_style = class
+       269 | mynetworks_style  = subnet
+    #  270 | #mynetworks_style = host
+       283 | mynetworks = 192.168.1.0/24, 127.0.0.0/8
+    #  284 | #mynetworks = $config_directory/mynetworks
+    #  285 | #mynetworks = hash:/etc/postfix/network_table
+    #  315 | #relay_domains = $mydestination [ Scope ]
+    #  332 | #relayhost = $mydomain
+    #  333 | #relayhost = [gateway.my.domain]
+    #  334 | #relayhost = [mailserver.isp.tld]
+       335 | #relayhost = uucphost
+       336 | #relayhost = [an.ip.add.ress]
+       350 | #relay_recipient_maps = hash:/etc/postfix/relay_recipients
+       367 | in_flow_delay = 1s
+       404 | #alias_maps = dbm:/etc/aliases
+       405 | alias_maps = hash:/etc/aliases
+       406 | #alias_maps = hash:/etc/aliases, nis:mail.aliases
+       407 | #alias_maps = netinfo:/aliases
+       414 | #alias_database = dbm:/etc/aliases
+       415 | #alias_database = dbm:/etc/mail/aliases
+       416 | alias_database = hash:/etc/aliases
+       417 | #alias_database = hash:/etc/aliases, hash:/opt/majordomo/aliases
+       428 | #recipient_delimiter = +
+       437 | #home_mailbox = Mailbox
+       438 | home_mailbox = Maildir/
+       444 | #mail_spool_directory = /var/mail
+       445 | #mail_spool_directory = /var/spool/mail
+       466 | #mailbox_command = /some/where/procmail
+       467 | #mailbox_command = /some/where/procmail -a "$EXTENSION"
+       486 | #mailbox_transport = lmtp:unix:/var/lib/imap/socket/lmtp
+       498 | # local_destination_recipient_limit = 300
+       499 | # local_destination_concurrency_limit = 5
+       510 | #mailbox_transport = cyrus
+       526 | #fallback_transport = lmtp:unix:/var/lib/imap/socket/lmtp
+       527 | #fallback_transport = 
+       548 | #luser_relay = $user@other.host
+       549 | #luser_relay = $local@other.host
+       550 | #luser_relay = admin+$local
+       567 | #header_checks = regexp:/etc/postfix/header_checks
+       580 | #fast_flush_domains = $relay_domains
+       591 | #smtpd_banner = $myhostname ESMTP $mail_name
+       592 | #smtpd_banner = $myhostname ESMTP $mail_name ($mail_version)
+       608 | #local_destination_concurrency_limit = 2
+       609 | #default_destination_concurrency_limit = 20
+       617 | debug_peer_level = 2
+       625 | #debug_peer_list = 127.0.0.1
+       626 | #debug_peer_list = some.domain
+       635 | debugger_command = 
+       636 |      PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+       637 | 	   ddd $daemon_directory/$process_name $Process_id & sleep 5
+       665 | sendmail_path = /usr/sbin/sendmail.postfix
+       670 | newaliases_path = /usr/bin/newaliases.postfix
+       675 | mailq_path = /usr/bin/mailq.postfix
+       681 | setgid_group = postdrop
+       685 | html_directory = no
+       689 | manpage_directory = /user/share/man
+       694 | sample_directory = /usr/share/doc/postfix/samples
+       698 | readme_directory = /usr/share/doc/postfix/README_FILES
+       709 | smtpd_tls_cert_file = /etc/pki/tls/certs/postfix.pem
+       715 | smtpd_tls_key_file = /etc/pki/tls/private/postfix.key
+       720 | smtpd_tls_security_level = may
+       725 | smtpd_tls_CApath = /etc/pki/tls/certs
+       731 | smtpd_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
+       736 | smtp_tls_security_level = may
+       737 | meta_directory = /etc/postfix
+       738 | shlib_directory = /usr/lib64/postfix
+    }
+}
+
+systemctl reload firewalld
 
 # Initialize MariaDB
 systemctl start mariadb
 systemctl enable mariadb
 systemctl status mariadb
 
-# Initialize MySQL Root
-mysql_secure_installation
-mysql -u root -p
+Function Install-RoundCube
+{
+    roundcubemail-1.4.2 | % { 
 
-systemctl start php-fpm
-systemctl enable php-fpm
-systemctl status php-fpm
-systemctl restart httpd
-setsebool -P httpd_execmem 1
+        wget https://github.com/roundcube/roundcubemail/releases/download/1.4.2/$_-complete.tar.gz
+        sudo tar xvzf $_-complete.tar.gz
+        sudo mv $_ /var/www/roundcube/
+    }
 
-firewall-cmd --permanent --add-port=80/tcp
-firewall-cmd --permanent --add-port=443/tcp
+    sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-8.rpm -y
+    sudo dnf module reset php
+    sudo dnf module enable php:remi-7.4 -y
 
-# Installing Roundcube
-wget https://github.com/roundcube/roundcubemail/releases/download/1.4.2/roundcubemail-1.4.2-complete.tar.gz
-tar xvf roundcubemail-1.4.2-complete.tar.gz
-sudo mkdir /var/www # if apache was installed, it'll say it exists... so don't do it unless you want to see the message I just mentioned... which could be fun on another planet maybe
-sudo mv roundcubemail-1.4.2 /var/www/roundcube
+    sudo dnf install -y " ldap imagick common gd imap json curl zip xml mbstring bz2 intl gmp".Replace(" "," php-")
 
-sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm
-sudo dnf module reset php
-sudo dnf module enable php:remi-7.4 -y
+    @{  
+        Path  = "/etc/httpd/conf.d/roundcube.conf" 
+        Value = "<VirtualHost *:80>","  ServerName mail.securedigitsplus.com","","  DocumentRoot /var/www/roundcube/","  ErrorLog /var/log/httpd/roundcube_error.log",
+                "  CustomLog /var/log/httpd/roundcube_access.log combined","","<Directory />","    Options FollowSymLinks","    AllowOverride All","  </Directory>","",
+                "  <Directory /var/www/roundcube/>","    Options FollowSymLinks MultiViews","    AllowOverride All","    Order allow,deny","    allow from all","  </Directory>","",
+                "</VirtualHost>" 
+    
+    }         | % { Set-Content @_ }
+    
+    # Initialize MySQL Root
+    mysql_secure_installation
+    mysql -u root -p
+    create database roundcube default character set utf8 collate utf8_general_ci;
+    create user postmaster@localhost identified by 'password';
+    grant all privileges on roundcube.* to postmaster@localhost;
+    flush privileges;
+    exit;
 
-@: sudo dnf install ..{ 
-php-ldap 
-php-imagick 
-php-common 
-php-gd 
-php-imap 
-php-json 
-php-curl 
-php-zip 
-php-xml 
-php-mbstring 
-php-bz2 
-php-intl 
-php-gmp
+    mysql -u root -p roundcube < /var/www/roundcube/SQL/mysql.initial.sql
+
+    "start","enable","status" | % { IEX "systemctl $_ php-fpm" }
+
+    systemctl restart httpd
+    setsebool -P httpd_execmem 1
+
 }
-# MySQL Database Setup
-mysql -u root -p
-create database roundcube default character set utf8 collate utf_general_ci;
-create user MailAdmin@localhost identified by 'password';
-grant all privileges on roundcube.* to MailAdmin@localhost;
 
-mysql -u root -p mail < /var/www/roundcube/SQL/mysql.initial.sql
+#/_________________________________________
 
-sudo nano /etc/httpd/conf.d/roundcube.conf
-sudo nano /etc/httpd/conf.d/mail.securedigitsplus.com.conf
-
-gedit /etc/postfix/main.cf
-#/
-         30 | compatibility_level = 2
-         41 | soft_bounce = no
-         50 | queue_directory = /var/spool/postfix
-         55 | command_directory = /usr/sbin
-	 61 | daemon_directory = /usr/libexec/postfix
-	 67 | data_directory = /var/lib/postfix
-	 78 | mail_owner = postfix
-	 85 | default_privs = nobody
-	 94 | myhostname = "hostname of the system"
-        102 | mydomain = "domain of the network"
-        118 | myorigin = $mydomain
-   132..135 | 0 | inet_interfaces = all
-	      1 | inet_interfaces = $myhostname
-              2 | inet_interfaces = $myhostname , localhost
-	      3 | inet_interfaces = localhost
-	138 | inet_protocols = all
-	149 | proxy_interfaces = 
-	150 | proxy_interfaces = 1.2.3.4
-   183..186 | 0 | mydestination = $myhostname, localhost.$mydomain, localhost
-              1 | #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
-              2 | mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
-              3 | #  mail.$mydomain, www.$mydomain, ftp.$mydomain
-   227..229 | 0 | local_recipient_maps = unix:passwd.byname $alias_maps
-              1 | local_recipient_maps = proxy:unix:passwd.byname $alias_maps
-              2 | local_recipient_maps = 
-        240 | unknown_local_recipient_reject_code = 550
-   268..270 | 0 | #mynetworks_style = class
-              1 | mynetworks_style  = subnet
-	      2 | #mynetworks_style = host
-   283..285 | 0 | mynetworks = 192.168.1.0/24, 127.0.0.0/8
-              1 | #mynetworks = $config_directory/mynetworks
-              2 | #mynetworks = hash:/etc/postfix/network_table
-        315 | #relay_domains = $mydestination [ Scope ]
-   332..336 | 0 | #relayhost = $mydomain
-              1 | #relayhost = [gateway.my.domain]
-              2 | #relayhost = [mailserver.isp.tld]
-              3 | #relayhost = uucphost
-              4 | #relayhost = [an.ip.add.ress]
-        350 | #relay_recipient_maps = hash:/etc/postfix/relay_recipients
-        367 | in_flow_delay = 1s
-	404 | #alias_maps = dbm:/etc/aliases
-        405 | alias_maps = hash:/etc/aliases
-	406 | #alias_maps = hash:/etc/aliases, nis:mail.aliases
-        407 | #alias_maps = netinfo:/aliases
-        414 | #alias_database = dbm:/etc/aliases
-        415 | #alias_database = dbm:/etc/mail/aliases
-        416 | alias_database = hash:/etc/aliases
-        417 | #alias_database = hash:/etc/aliases, hash:/opt/majordomo/aliases
-        428 | #recipient_delimiter = +
-	437 | #home_mailbox = Mailbox
-	438 | #home_mailbox = Maildir/
-	444 | #mail_spool_directory = /var/mail
-	445 | #mail_spool_directory = /var/spool/mail
-	466 | #mailbox_command = /some/where/procmail
-	467 | #mailbox_command = /some/where/procmail -a "$EXTENSION"
-	486 | #mailbox_transport = lmtp:unix:/var/lib/imap/socket/lmtp
-	498 | # local_destination_recipient_limit = 300
-        499 | # local_destination_concurrency_limit = 5
-        510 | #mailbox_transport = cyrus
-	526 | #fallback_transport = lmtp:unix:/var/lib/imap/socket/lmtp
-	527 | #fallback_transport = 
-	548 | #luser_relay = $user@other.host
-	549 | #luser_relay = $local@other.host
-	550 | #luser_relay = admin+$local
-	567 | #header_checks = regexp:/etc/postfix/header_checks
-	580 | #fast_flush_domains = $relay_domains
-	591 | #smtpd_banner = $myhostname ESMTP $mail_name
-	592 | #smtpd_banner = $myhostname ESMTP $mail_name ($mail_version)
-	608 | #local_destination_concurrency_limit = 2
-	609 | #default_destination_concurrency_limit = 20
-	617 | debug_peer_level = 2
-	625 | #debug_peer_list = 127.0.0.1
-	626 | #debug_peer_list = some.domain
-	635 | debugger_command = 
-	636 |      PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
-	637 | 	   ddd $daemon_directory/$process_name $Process_id & sleep 5
-	665 | sendmail_path = /usr/sbin/sendmail.postfix
-	670 | newaliases_path = /usr/bin/newaliases.postfix
-	675 | mailq_path = /usr/bin/mailq.postfix
-	681 | setgid_group = postdrop
-	685 | html_directory = no
-	689 | manpage_directory = /user/share/man
-	694 | sample_directory = /usr/share/doc/postfix/samples
-	698 | readme_directory = /usr/share/doc/postfix/README_FILES
-	709 | smtpd_tls_cert_file = /etc/pki/tls/certs/postfix.pem
-	715 | smtpd_tls_key_file = /etc/pki/tls/private/postfix.key
-	720 | smtpd_tls_security_level = may
-	725 | smtpd_tls_CApath = /etc/pki/tls/certs
-	731 | smtpd_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
-	736 | smtp_tls_security_level = may
-	737 | meta_directory = /etc/postfix
-	738 | shlib_directory = /usr/lib64/postfix
-#\
 
 yum install dovecot -y
 gedit /etc/dovecot/conf.d/dovecot.conf
@@ -228,14 +319,12 @@ gedit /etc/dovedot/conf.d/20-pop3.conf
 	 50 | pop3_uidl_format = %08Xu%08Xv
 	 90 | pop3_client_workarounds = outlook-no-nuls oe-ns-eoh
          
-yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-ARCH=$( /bin/arch )
-subscription-manager repos --enable "codeready-builder-for-rhel-8-${ARCH}-rpms"
-dnf config-manager --set-enabled PowerTools
-
 openssl req -new -x509 -days 365 -nodes -out /etc/pki/dovecot/certs/mycert.pem -keyout /etc/pki/dovecot/private/mykey.pem
+#
 
+# does not work in pwsh 
 sudo firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
+
 systemctl reload firewalld
 sudo dnf install wget
 wget https://dl.eff.org/certbot-auto
@@ -244,3 +333,4 @@ sudo mv certbot-auto /usr/local/bin/certbot
 sudo chown root /usr/local/bin/certbot
 sudo chmod 0755 /usr/local/bin/certbot
 
+sudo nano /etc/httpd/conf.d/mail.securedigitsplus.com.conf
