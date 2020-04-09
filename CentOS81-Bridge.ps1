@@ -1,20 +1,63 @@
+# ________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ PowerShell - Obtains pwsh to process script
+    su -                                                                  
+    curl https://packages.microsoft.com/config/rhel/8/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
+    yum install powershell -y
+    sudo pwsh
+#\________________________________________________________________________/
+# ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+Class Content
+{
+	[ String    ] $Path
+	[ String [] ] $Content
+	[ String [] ] $Search
+	[ String [] ] $Target
+
+	Content( [ String ] $Path , [ String [] ] $Search , [ String [] ] $Target )
+	{
+		$This.Path    = $Path
+		$This.Content = Get-Content $This.Path
+		$This.Search  = $Search
+		$This.Target  = $Target
+
+		ForEach ( $I in $This.Content )
+		{
+			If ( $This.Search.Count -gt 1 )
+			{
+				ForEach ( $J in 0..( $This.Search.Count - 1 ) )
+				{
+					If ( $This.Content[$I] -match $This.Search[$J] )
+					{
+						$This.Content[$I] = $This.Content[$I] -Replace $This.Search[$J] , $This.Target[$J]
+					}
+				}
+			}
+
+			Else
+			{
+				If ( $This.Content[$I] -match $This.Search )
+				{
+					$This.Content[$I] = $This.Content[$I] -Replace $This.Search , $This.Target
+				}
+			}
+		}
+
+		Set-Content $This.Path $This.Content
+	}
+}
+
+# ____________________________________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ CIFS for Windows Shares |
+
+    yum install cifs-utils
+    sudo mount.cifs //dsc1/module /mnt -o user=administrator@securedigitsplus.com
+    # epel-release httpd httpd-tools [ Apache ]
+    # realmd sssd oddjob oddjob-mkhomedir adcli samba samba-common samba-common-tools krb5-workstation
+
+    # POWERSHELL / PWSH
 
 
-su -
-
-# powershell cifs-utils 
-# epel-release httpd httpd-tools
-# realmd sssd oddjob oddjob-mkhomedir adcli samba samba-common samba-common-tools krb5-workstation
-
-# POWERSHELL / PWSH
-curl https://packages.microsoft.com/config/rhel/8/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
-yum install powershell -y
-sudo pwsh
-
-# CIFS
-yum install cifs-utils
-mkdir /bin/Module
-sudo mount.cifs //dsc1/module /bin/Module -o user=administrator@securedigitsplus.com
 
 # ------------------------------------
 
@@ -25,7 +68,10 @@ sudo mount.cifs //dsc1/module /bin/Module -o user=administrator@securedigitsplus
 # ____________________________________________________________________________________________________
 #/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ Visual Studio Code |
 
-    "https://packages.microsoft.com" | % { @{ Keys = "$_/keys/microsoft.asc" ; Repo = "$_/yumrepos/vscode" } | % { 
+    "https://packages.microsoft.com" | % { 
+        
+        @{ Keys = "$_/keys/microsoft.asc" ; 
+           Repo = "$_/yumrepos/vscode" } | % { 
             
         sudo rpm --import $_.Keys
         Set-Content "/etc/yum.repos.d/vscode.repo" "[code]|name=Visual Studio Code|baseurl=$( $_.Repo )|enabled=1|gpgcheck=1|gpgkey=$( $_.Keys )".Split('|') -VB
@@ -77,7 +123,7 @@ Function Set-Network
         }
     }
 }
-
+sudo dnf install php-ldap php-imagick php-common php-gd php-imap php-json php-curl php-zip php-xml php-mbstring php-bz2 php-intl php-gmp
 # firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
 # epel-release wget tar net-tools / httpd httpd-tools / mariadb-server mariadb / postfix dovecot / samba 
 # php php-fpm php-mysqlnd php-opcache php-gd php-xml php-mbstring
@@ -148,13 +194,13 @@ Function Install-PostFix
             Content = GC $_ 
         }
 
-        30 | compatibility_level = 2
+    #   30 | compatibility_level = 2
     #   41 | #soft_bounce = no
-        50 | queue_directory = /var/spool/postfix
-        55 | command_directory = /usr/sbin
-        61 | daemon_directory = /usr/libexec/postfix
-        67 | data_directory = /var/lib/postfix
-        78 | mail_owner = postfix
+    #   50 | queue_directory = /var/spool/postfix
+    #   55 | command_directory = /usr/sbin
+    #   61 | daemon_directory = /usr/libexec/postfix
+    #   67 | data_directory = /var/lib/postfix
+    #   78 | mail_owner = postfix
     #   85 | #default_privs = nobody
         94 | myhostname = mail.securedigitsplus.com #
     #   95 | #myhostname = More than likely for a virtual host or fallback #
@@ -245,13 +291,6 @@ Function Install-PostFix
     }
 }
 
-systemctl reload firewalld
-
-# Initialize MariaDB
-systemctl start mariadb
-systemctl enable mariadb
-systemctl status mariadb
-
 Function Install-RoundCube
 {
     roundcubemail-1.4.2 | % { 
@@ -269,10 +308,28 @@ Function Install-RoundCube
 
     @{  
         Path  = "/etc/httpd/conf.d/roundcube.conf" 
-        Value = "<VirtualHost *:80>","  ServerName mail.securedigitsplus.com","","  DocumentRoot /var/www/roundcube/","  ErrorLog /var/log/httpd/roundcube_error.log",
-                "  CustomLog /var/log/httpd/roundcube_access.log combined","","<Directory />","    Options FollowSymLinks","    AllowOverride All","  </Directory>","",
-                "  <Directory /var/www/roundcube/>","    Options FollowSymLinks MultiViews","    AllowOverride All","    Order allow,deny","    allow from all","  </Directory>","",
-                "</VirtualHost>" 
+        Value = @"
+        <VirtualHost *:80>
+          ServerName mail.securedigitsplus.com
+          DocumentRoot /var/www/roundcube/
+
+          ErrorLog /var/log/httpd/roundcube_error.log        
+          CustomLog /var/log/httpd/roundcube_access.log combined
+
+          <Directory />
+            Options FollowSymLinks
+            AllowOverride All
+          </Directory>
+        
+          <Directory /var/www/roundcube/>
+            Options FollowSymLinks MultiViews
+            AllowOverride All
+            Order allow,deny
+            allow from all
+          </Directory>
+        
+        </VirtualHost>
+"@ 
     
     }         | % { Set-Content @_ }
     
@@ -292,15 +349,35 @@ Function Install-RoundCube
     systemctl restart httpd
     setsebool -P httpd_execmem 1
 
+    systemctl reload firewalld
+
+    $Conf = gc /etc/php.ini | ? { $_ -match ";date.timezone =" } | % { "date.timezone = America/New_York" }
 }
 
 #/_________________________________________
 
-
 yum install dovecot -y
-gedit /etc/dovecot/conf.d/dovecot.conf
-	 24 | protocols = imap pop3 lmtp
 
+$Conf           = "/etc/dovecot/conf.d" | % {
+    
+    @{
+        Dovecot = "$_/dovecot.conf" 
+        Mail    = "$_/10-mail.conf" 
+        Auth    = "$_/10-auth.conf" 
+        Master  = "$_/10-master.conf" 
+        IMAP    = "$_/20-imap.conf" 
+        POP3    = "$_/20-pop3.conf" 
+    }
+}
+
+
+gedit /etc/dovecot/dovecot.conf
+
+$Dovecot = "/etc/dovecot/dovecot.conf"
+
+ForEach ( $I in $Dovecot )
+     24 | protocols = imap pop3 lmtp
+     
 gedit /etc/dovecot/conf.d/10-mail.conf
 	 24 | mail_location = maildir:~/Maildir
 
@@ -313,7 +390,7 @@ gedit /etc/dovecot/conf.d/10-master.conf
 	 92 | group = postfix
 
 gedit /etc/dovecot/conf.d/20-imap.conf
-         67 | imap_client_workarounds = delay-newmail tb-extra-mailbox-sep
+     67 | imap_client_workarounds = delay-newmail tb-extra-mailbox-sep
 
 gedit /etc/dovedot/conf.d/20-pop3.conf
 	 50 | pop3_uidl_format = %08Xu%08Xv
