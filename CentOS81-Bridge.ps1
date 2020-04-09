@@ -1,92 +1,104 @@
-# ________________________________________________________________________
-#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ PowerShell - Obtains pwsh to process script
+# _______________________________________________________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ PowerShell - Obtains pwsh to process script \\
     su -                                                                  
-    curl https://packages.microsoft.com/config/rhel/8/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
+    curl https://packages.microsoft.com/config/rhel/7/prod.repo | sudo tee /etc/yum.repos.d/microsoft.repo
     yum install powershell -y
     sudo pwsh
 #\________________________________________________________________________/
 # ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
-Class Content
-{
-	[ String    ] $Path
-	[ String [] ] $Content
-	[ String [] ] $Search
-	[ String [] ] $Target
+    Class Content # Gets content, makes replacements, and sets the updated content back to source
+    {
+        [ String    ] $Path
+        [ String [] ] $Content
+        [ String [] ] $Search
+        [ String [] ] $Target
 
-	Content( [ String ] $Path , [ String [] ] $Search , [ String [] ] $Target )
-	{
-		$This.Path    = $Path
-		$This.Content = Get-Content $This.Path
-		$This.Search  = $Search
-		$This.Target  = $Target
+        Content( [ String ] $Path , [ String [] ] $Search , [ String [] ] $Target )
+        {
+            $This.Path    = $Path
+            $This.Content = Get-Content $This.Path
+            $This.Search  = $Search
+            $This.Target  = $Target
 
-		ForEach ( $I in $This.Content )
-		{
-			If ( $This.Search.Count -gt 1 )
-			{
-				ForEach ( $J in 0..( $This.Search.Count - 1 ) )
-				{
-					If ( $This.Content[$I] -match $This.Search[$J] )
-					{
-						$This.Content[$I] = $This.Content[$I] -Replace $This.Search[$J] , $This.Target[$J]
-					}
-				}
-			}
+            ForEach ( $I in $This.Content )
+            {
+                If ( $This.Search.Count -gt 1 )
+                {
+                    ForEach ( $J in 0..( $This.Search.Count - 1 ) )
+                    {
+                        If ( $This.Content[$I] -match $This.Search[$J] )
+                        {
+                            $This.Content[$I] = $This.Content[$I] -Replace $This.Search[$J] , $This.Target[$J]
+                        }
+                    }
+                }
 
-			Else
-			{
-				If ( $This.Content[$I] -match $This.Search )
-				{
-					$This.Content[$I] = $This.Content[$I] -Replace $This.Search , $This.Target
-				}
-			}
-		}
+                Else
+                {
+                    If ( $This.Content[$I] -match $This.Search )
+                    {
+                        $This.Content[$I] = $This.Content[$I] -Replace $This.Search , $This.Target
+                    }
+                }
+            }
 
-		Set-Content $This.Path $This.Content
-	}
-}
-
-# ____________________________________________________________________________________________________
-#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ CIFS for Windows Shares |
-
-    yum install cifs-utils
-    sudo mount.cifs //dsc1/module /mnt -o user=administrator@securedigitsplus.com
-    # epel-release httpd httpd-tools [ Apache ]
-    # realmd sssd oddjob oddjob-mkhomedir adcli samba samba-common samba-common-tools krb5-workstation
-
-    # POWERSHELL / PWSH
-
-
-
-# ------------------------------------
-
-# Active Directory
-# "oddjob","samba","-common" | % { 'yum install realmd sssd {0} {0}-mkhomedir adcli {1} {1}{2} {1}{2}-tools krb5-workstation -y' }
-# realm join -v -U administrator@securedigitsplus.com
-
-# ____________________________________________________________________________________________________
-#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ Visual Studio Code |
-
-    "https://packages.microsoft.com" | % { 
-        
-        @{ Keys = "$_/keys/microsoft.asc" ; 
-           Repo = "$_/yumrepos/vscode" } | % { 
-            
-        sudo rpm --import $_.Keys
-        Set-Content "/etc/yum.repos.d/vscode.repo" "[code]|name=Visual Studio Code|baseurl=$( $_.Repo )|enabled=1|gpgcheck=1|gpgkey=$( $_.Keys )".Split('|') -VB
+            Set-Content $This.Path $This.Content
+        }
     }
 
-    sudo yum install code
-    code --install-extension ms-vscode.powershell
-                                                                                #_____________________
-#\______________________________________________________________________________/ Visual Studio Code |
+
+# ____________________________________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ Join ADDS Domain \\
+Function Install-ADDS
+{
+    Param ( $Username )
+
+    yum install realmd sssd oddjob oddjob-mkhomedir adcli samba samba-common samba-common-tools krb5-workstation -y
+    realm join -v -U $Username
+}
+#\___________________________________________________________________________________________________//
+# ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+# ____________________________________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ CIFS for Windows Shares \\
+    Function Install-CIFS
+    {
+        Param ( $Server , $Share , $Mount = "/mnt" , $Username )
+
+        yum install cifs-utils
+        sudo mount.cifs //$Server/$Share $Mount -o user=$Username
+    }
+#\___________________________________________________________________________________________________//
+# ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+
+# ____________________________________________________________________________________________________
+#/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\ Visual Studio Code \\
+    Function Install-VSCode
+    {
+        "https://packages.microsoft.com" | % {
+            
+            @{
+                Name = $_ 
+                Keys = "$_/keys/microsoft.asc"
+                Repo = "$_/yumrepos/vscode"
+            }
+                
+            sudo rpm --import $_.Keys
+            Set-Content "/etc/yum.repos.d/vscode.repo" "[code]|name=Visual Studio Code|baseurl=$( $_.Repo )|enabled=1|gpgcheck=1|gpgkey=$( $_.Keys )".Split('|') -VB
+        }
+
+        sudo yum install code
+        code --install-extension ms-vscode.powershell
+    }
+#\___________________________________________________________________________________________________//
+# ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
 yum update
 
 Function Set-Selinux
 {
-    "/etc/sysconfig/selinux" | % { Set-Content $_ ( GC $_ -Replace "SELINUX=enforcing" , "SELINUX=disabled" ) }
+    [Content]::("/etc/sysconfig/selinux","SELINUX=enforcing","SELINUX=disabled")
 }
 
 Function Set-Network
@@ -123,11 +135,6 @@ Function Set-Network
         }
     }
 }
-sudo dnf install php-ldap php-imagick php-common php-gd php-imap php-json php-curl php-zip php-xml php-mbstring php-bz2 php-intl php-gmp
-# firewall-cmd --zone=public --permanent --add-service={http,https,smtp-submission,smtps,imap,imaps}
-# epel-release wget tar net-tools / httpd httpd-tools / mariadb-server mariadb / postfix dovecot / samba 
-# php php-fpm php-mysqlnd php-opcache php-gd php-xml php-mbstring
-# php-ldap php-imagick php-common php-gd php-imap php-json php-curl php-zip php-xml php-mbstring php-bz2 php-intl php-gmp
 
 Function Initialize-Service
 {
