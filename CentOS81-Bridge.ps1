@@ -138,17 +138,37 @@ Function Set-Network
 
 Function Initialize-Service
 {
-    [ CmdLetBinding () ] Param ( [ Parameter ( Mandatory ) ] [ String ] $Name )
+    [ CmdLetBinding () ] Param ( 
+    
+        [ Parameter ( Mandatory , Position = 0 ) ] [ String ] $Name ,
+        [ ValidateSet ( "Launch" , "Status" , "Restart" ) ]
+        [ Parameter ( Mandatory , Position = 1 ) ] [ String ] $Mode )
 
-    Echo "Initializing/Reloading $Name"
-    ForEach ( $I in 0..2 )
-    {
-        $X = ("Starting,start","Enabling,enable","Reloading,reload")[$I].Split(',')
+        $Line, $Top, $Bot = ForEach ( $I in 0..2 )
+        { 
+            "#" + " /\"[$I] + ( @( "-¯_"[$I] ) * 44 -join '' ) + " \/"[$I] + "#"
+        }
 
-        Echo $X[0]
-        systemctl $X[1] $Name
-    }
-    Echo "Operation Complete"
+        @{   Launch = @{ 0 = "Launching"        ; 1 = 0, 1, 2 }
+             Status = @{ 0 = "Launch w/ Status" ; 1 = 0, 1, 4 }
+            Restart = @{ 0 = "Restarting"       ; 1 = 3       } }[ $Mode ] | % {
+
+            $Line , $Top , "    $( $_[0] ): $Name", $Bot
+
+            ForEach ( $Run in "start,enable,reload,restart,status".Split(',')[ $_[1] ] )
+            {
+                $Top , "    systemctl $Run $Name"
+
+                @{  $True  = "[+] Successful" ; 
+                    $False = "[!] Exception"  }[$?] | % { 
+
+                    "#\_{0} {1} _/#" -f ("_" * ( 40 - $_.Length ) ), $_
+                    $Line
+                }
+            }
+
+            $Top , "    Operation [+] Complete" , $Bot , $Line
+        }
 }
 
 Function Install-Apache
@@ -156,31 +176,23 @@ Function Install-Apache
     sudo yum install epel-release httpd httpd-tools -y
     chown apache:apache /var/www/html -R
 
-    "/etc/httpd/conf/httpd.conf" | % { 
-        
-        @{ 
-            Path    = $_ 
-            Content = GC $_ 
-        
-        } | % {
+    "/etc/httpd/conf/httpd.conf" | % { @{ Path = $_ ; Content = GC $_ } | % {
 
-            ForEach ( $I in 0..( $_.Content.Length - 1 ) )
-            {
-                If ( $_.Content[$I] -match "(<Directory />)" ) 
-                { 
-                    $_.Content[$I+1] = "    AllowOverride All" 
-                }
+        ForEach ( $I in 0..( $_.Content.Length - 1 ) )
+        {
+            If ( $_.Content[$I] -match "(<Directory />)" )
+            { 
+                $_.Content[$I+1] = "    AllowOverride All" 
             }
-
-            Set-Content @_
         }
 
-        "" , "s" | % { 
-            
-            IEX "firewall-cmd --zone=public --permanent --add-service=http$_"
-        }
+        Set-Content @_
 
-        Initialize-Service httpd
+        "" , "s" | % { IEX "firewall-cmd --zone=public --permanent --add-service=http$_" }
+
+        @{ Name = "httpd" ; Mode = "Launch" } | % { Initialize-Service @_ }
+
+        Initialize-Service -Name httpd -Mode Launch
     }
 }
 
@@ -194,7 +206,7 @@ Function Install-PostFix
 {
     sudo yum install postfix -y
 
-    "/etc/postfix/main.cf" | % { 
+    [Content]::New("/etc/postfix/main.cf" | % { 
 
         @{
             Path    = $_
@@ -300,7 +312,15 @@ Function Install-PostFix
 
 Function Install-RoundCube
 {
-    roundcubemail-1.4.2 | % { 
+    [ CmdLetBinding () ] Param ( 
+    
+        [ Parameter ( Position = 0, Mandatory, HelpMessage =    "File Path" ) ] [ String ] $Path ,
+        [ Parameter ( Position = 1, Mandatory, HelpMessage =   "ServerName" ) ] [ String ] $Name ,
+        [ Parameter ( Position = 2,            HelpMessage =         "Port" ) ] [ Int32  ] $Port = 80 ,
+        [ Parameter ( Position = 3,            HelpMessage = "DocumentRoot" ) ] [ String ] $Root = "/var/www/html/" , 
+        [ Parameter ( Position = 4,            HelpMessage =    "Log Paths" ) ] [ String ] $Logs = "/var/log/httpd" )
+
+    roundcubemail-1.4.2 | % {
 
         wget https://github.com/roundcube/roundcubemail/releases/download/1.4.2/$_-complete.tar.gz
         sudo tar xvzf $_-complete.tar.gz
@@ -311,54 +331,54 @@ Function Install-RoundCube
     sudo dnf module reset php
     sudo dnf module enable php:remi-7.4 -y
 
-    sudo dnf install -y " ldap imagick common gd imap json curl zip xml mbstring bz2 intl gmp".Replace(" "," php-")
-
-    @{  
-        Path  = "/etc/httpd/conf.d/roundcube.conf" 
-        Value = @"
-        <VirtualHost *:80>
-          ServerName mail.securedigitsplus.com
-          DocumentRoot /var/www/roundcube/
-
-          ErrorLog /var/log/httpd/roundcube_error.log        
-          CustomLog /var/log/httpd/roundcube_access.log combined
-
-          <Directory />
-            Options FollowSymLinks
-            AllowOverride All
-          </Directory>
-        
-          <Directory /var/www/roundcube/>
-            Options FollowSymLinks MultiViews
-            AllowOverride All
-            Order allow,deny
-            allow from all
-          </Directory>
-        
-        </VirtualHost>
-"@ 
+    sudo dnf install -y " ldap imagick common gd imap json curl zip xml mbstring bz2 intl gmp" -Replace " "," php-"
     
-    }         | % { Set-Content @_ }
+    Set-Content -Path $Path -Value (("|<{0} *:$Port>|  ServerName $Name|  DocumentRoot $Root||  ErrorLog $Logs`_error.log|"+
+    "  CustomLog $Logs`_access.log combined||  <{1} />|    {2}|    {3}|  </{1}>||  <{1} $Root>|    {2} MultiViews|    {3}|"+
+    "    Order allow,deny|    allow from all|  </{1}>||</{0}>" ) -f  "VirtualHost" , "Directory" , "Options FollowSymLinks",
+    "AllowOverride All").Split('|')
+
+}
     
-    # Initialize MySQL Root
+Function Install-SQLDatabase
+{
+    [ CmdLetBinding () ] Param ( 
+    
+        [ Parameter ( Position = 0, Mandatory, HelpMessage =    "Database Name" ) ] [       String ] $Name ,
+        [ Parameter ( Position = 1, Mandatory, HelpMessage =    "Character Set" ) ] [       String ] $Encoding = "default character set utf8 collate utf8_general_ci",
+        [ Parameter ( Position = 2,            HelpMessage =   "Master Account" ) ] [       String ] $Account ,
+        [ Parameter ( Position = 3,            HelpMessage =         "Password" ) ] [ SecureString ] $Password = ( Read-Host "Enter Password" -AsSecureString ) ,
+        [ Parameter ( Position = 5,            HelpMessage =        "Log Paths" ) ] [       String ] $Logs     = "/var/log/httpd" )
+
+    Do
+    {
+        $Confirm = Read-Host "Enter Confirmation Password" -AsSecureString
+        
+        If ( $Password -notmatch $Confirm )
+        {
+            Read-Host "Password does not match confirmation"
+        }
+    }
+    Until  ( $Password    -match $Confirm )
+
     mysql_secure_installation
     mysql -u root -p
-    create database roundcube default character set utf8 collate utf8_general_ci;
-    create user postmaster@localhost identified by 'password';
-    grant all privileges on roundcube.* to postmaster@localhost;
+    create database $Name $Encoding;
+    create user $Account@localhost identified by "$Password";
+    grant all privileges on $Name.* to $Account@localhost;
     flush privileges;
     exit;
 
-    mysql -u root -p roundcube < /var/www/roundcube/SQL/mysql.initial.sql
+    & { "mysql -u root -p roundcube < /var/www/roundcube/SQL/mysql.initial.sql" }
 
-    "start","enable","status" | % { IEX "systemctl $_ php-fpm" }
+    Initialize-Service php-fpm Relaunch
+    Initialize-Service httpd   Restart
 
-    systemctl restart httpd
     setsebool -P httpd_execmem 1
 
     systemctl reload firewalld
 
-    $Conf = gc /etc/php.ini | ? { $_ -match ";date.timezone =" } | % { "date.timezone = America/New_York" }
+    [Content]::New("/etc/php.ini",";date.timezone =","date.timezone = America/New_York")
 }
 
 #/_________________________________________
