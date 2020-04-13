@@ -167,3 +167,19 @@ Function Resolve-Namespace
 
                 [ Windows.UI.Notifications.ToastNotificationManager ]::CreateToastNotifier( $Root.GUID ).Show( $Root.Object )
         }
+
+        # Two Versions of the same example
+
+        @{  
+            Image   = "https://raw.githubusercontent.com/secure-digits-plus-llc/FightingEntropy/master/Graphics/logo.jpg"
+            GUID    = New-GUID
+            Type    = 4
+            Header  = "Secure Digits Plus LLC"
+            Message = "Fighting Entropy"
+            Footer  = Get-Date -Format HH:mm:ss
+        
+        } | % { Show-ToastNotification @_ }
+
+        Show-ToastNotification -Image $Image -GUID ( New-GUID ) -Type 4 -Header "Secure Digits Plus LLC" -Message "Fighting Entropy" -Footer ( Get-Date -Format HH:mm:ss )
+
+
