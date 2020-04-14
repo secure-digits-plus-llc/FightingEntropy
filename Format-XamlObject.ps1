@@ -4,25 +4,20 @@ Function Format-XamlObject # Formats a Xaml Object to have a clean structure ___
         
         [ Parameter ( Mandatory , Position = 0 ) ] [ String ] $Xaml )
 
-        # $Xaml                                 = $Xaml_Input2
-
-        # Look. Might be messy looking..? But it works. Besides... sometimes you gotta get real messy.
-
-        $Xaml = @{  $True  = $Xaml -Replace "'" , '&apos;' ; $False = $Xaml -Replace "'" , '"' }[ $Xaml.Split('"').Count -gt $Xaml.Split("'").Count ]
-
-        ("([*])","&star;"),("(\s+<)","<"),('(="\s+)','="'),('(=")',' = "'),("><",">`n<") | % { 
+                $Xaml                                   = @{  
             
-            $Xaml = $Xaml -Replace $_[0] , $_[1] 
-        }
-
-        ("quot",34),("amp",38),("apos",39),("star",42),("lt",60),("gt",62) | % { 
+            $True                               = $Xaml -Replace "'" , '&apos;'
+            $False                              = $Xaml -Replace "'" , '"' 
+        
+        }[ ( $Xaml -Split '"' ).Count -gt ( $Xaml -Split "'" ).Count ] 
             
-            $Xaml = $Xaml -Replace "&$($_[0]);" , "&#$($_[1]);" 
-        }
+        0..5 | % { $Xaml = $Xaml -Replace "([\s]*[=][\s]*),(\s+),([\`"]\s\/\>),([\`"]\/\>),([*]),> <".Split(',')[$_] , "=, ,`"/>,`">,&star;,>`n<".Split(',')[$_] }
 
-        ([Regex]"(&#x)+([0-9A-Fa-f]*;)").Matches($Xaml).Value | Select -Unique | % { 
+        0..5 | % { $Xaml = $Xaml -Replace "&$("quot,amp,apos,star,lt,gt".Split(',')[$_]);" , "&#$((34,38,39,42,60,62)[$_]);" }
+
+        ( [ Regex ] "(&#x)+([0-9A-Fa-f]*;)" ).Matches( $Xaml ).Value | Select -Unique | % { 
             
-            $Xaml = $Xaml -Replace $_ , ("&#{0};" -f ($_.Replace("&#x","").Replace(";","")| % { [Convert]::ToInt64($_,16)} ) )
+            $Xaml = $Xaml -Replace $_ , ( "&#{0};" -f ( $_.Replace("&#x","").Replace(";","") | % { [Convert]::ToInt64($_,16)} ) )
         }
 
         $Xaml                                   = $Xaml -join "`n"
