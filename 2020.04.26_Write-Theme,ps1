@@ -1,0 +1,566 @@
+# Still rewriting class based version of the Write-Theme cmdlet, toying with the idea of possibly integrating
+# Convert-HashToArray, which is a name of an item I found while researching last year... but it happens to be an updated
+# version of the OutFile-Ini by Oliver Lipkau, in addition to the suggestion to use GetEnumerator() from a user on Reddit.
+
+# Essentially, I had to write a 1,000 line script in order to implement some console foreground/background colors. 
+# I had a slew of smaller commands that were similar, and started toying with the idea of using [CmdLetBinding()] parameters.
+
+# Eventually, after shuffling a few ideas around, I've started writing class based resources in PowerShell, not too dissimilar 
+# from what you would typically find in C#. In fact, it is a "more" strict version of 'Shell that's using the same exact 
+# logical structuring process, all of the C# constructs can be "emulated" or "reproduced" or even, "prerendered/precalucated".
+
+# So while the previous iteration has some inherent repetition and/or confusing appearance?
+
+# The class based idea will be able to reuse a lot of the same code and therefore, achive a huge reduction in overhead for color
+# rendering.
+
+# Thats the idea... using Regex and math.
+# _______________________________________________________
+# Scratch space...........................................
+
+
+    [Console]::BufferWidth
+
+    [Environment]::GetEnvironmentVariables().GetEnumerator() | Sort Name 
+
+
+    "Operating","Computer" | % { [CimInstance]::New([string]"Win32_OperatingSystem") }
+
+    # 0    4    8   12   16   20   24   28   32   36   40   44   48   52   56   60   64   68   72   76   80   84   88   92   96  100   104 108  112  116  120
+      "    |____|    |____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|    |    "
+      "   /|/¯¯\|\__/|/¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯\|\___|    "
+      "   \|\__/|/¯¯¯|   _|__[ |Tabl|e of| Con|tent|s ] |____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|_   |___/|/¯¯\|\   "
+      "    |¯¯¯\|\___|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|___/|/¯¯\|\__/|/   "
+      "    |    |¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|¯¯¯¯|    |¯¯¯¯|    "
+
+      "    |____|    |____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|____|    |    "
+
+    $Stack = "    ____    ____________________________________________________________________________________________________        ",
+             "   //¯¯\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___    ",
+             "   \\__//¯¯¯   ___[ Content... For all tablekind. ( A normal, yet dramatic, table of content...) ]_______   ___//¯¯\\   ",
+             "    ¯¯¯\\__________________________________________________________________________________________________//¯¯\\__//   ",
+             "        ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    "
+
+Class Range
+    {
+         [Int32[]] $Range
+
+        Range([Int32]$Range)
+        {
+            $This.Range        = $( If ( $Range -gt 1 ) { 0..( $Range - 1 ) } Else { $Range } )
+        }
+    }
+
+    Class Charm
+    {
+         [Int32]  $Index
+          [Char]  $Char
+        [String]  $Name
+        [String]  $Decimal
+        [String]  $Dec
+        [String]  $Hexidecimal
+        [String]  $Hex
+
+        Charm([Int]$Index)
+        {
+            $This.Index        = [Int]   $Index
+            $This.Char         = [Char]  $Index
+
+            $This.Name         = @{  
+            
+                $True          = @{ 
+                
+                    32         = "nbsp"
+                    34         = "quot"
+                    38         = "amp"
+                    39         = "apos"
+                    42         = "star"
+                    60         = "lt"
+                    62         = "gt"
+
+                }[$Index]      | % { "&{0};" -f $_ }
+
+                $False         = "" 
+                
+            }[$Index -in 32,34,38,39,42,60,62]
+            
+            $This.Decimal      = $Index
+            $This.Dec          = [String](  "&#{0:d};" -f $Index )
+            $This.Hexidecimal  = [String](    "{0:X}"  -f $Index )
+            $This.Hex          = [String]( "&#x{0:X};" -f $Index )
+        }
+    }
+
+    Class Block
+    {
+         [Int32[]] $Index
+        [String[]] $Block
+
+        Block([Int32]$Index)
+        {
+            $This.Index        = @(0..13)[$Index]
+            $This.Block        = "    ,____,¯¯¯¯,----,   /,\   ,   \,/   ,/¯¯\,\__/,¯¯¯\,/¯¯¯,___/,\___".Split(',')[$Index]
+        }
+    }
+
+    Class Track
+    {
+             [Int32] $Index
+            [String] $Track
+
+        Track([Int32]$Index,[String]$Track) # $Test = @( 0..4 | % { [Track]::new($_,$Stack[$_]) } )
+        {
+            $This.Index  =  [Int32] $Index
+            $This.Track  = [String] $Track
+        }
+    }
+
+    Class Stack
+    {
+         [Int32[]] $Index
+         [Track[]] $Stack
+
+        Stack([Int32[]]$Index,[Track[]]$Stack) # $Restack = [Stack]::new(([Range]5).Range,$Test).Stack
+        {
+            $This.Index = ForEach ( $I in $Index ) { $Index[$I] }
+            $This.Stack = ForEach ( $I in $Index ) { $Stack[$I] }
+        }
+    }
+
+    Class Stock
+    {
+        [Hashtable] $Stock
+          [Stack[]] $Stack
+          [Charm[]] $Charm
+          [Block[]] $Block
+       
+        Stock([Stack]$Stack)
+        {
+            $This.Index  = [Int32[]]@([Range]$Stack.Count).Range
+            $This.Stack  = [Track[]]@([Range]$Stack.Count).Range
+            $This.Charm  = [Charm[]]@([Range]255).Range
+            $This.Block  = [Block[]]@([Range] 14).Range
+        }
+    }
+
+    Class Mask
+    {
+       [String] $Track
+       [String] $Block
+       [String] $Mask
+        [Array] $Items
+
+        Mask([Int32]$Index,[String]$Track,[String]$Block)
+        {
+            $This.Index = $Index
+            $This.Track = $Track
+            $This.Block = $Block
+            $This.Items = @( )
+            $S          = 0
+                    
+            0..13       | % {
+    
+                If ( $Line -Match $Obj[$_].String.Replace("\","\\") )
+                {
+                    $Line = $Line.Replace( $Obj[$_].String , "{$S}" )
+                    $S     ++
+                }
+            }
+
+            $Track[$I]    = $Line
+        }
+    }
+
+    # $Stack -creplace "    ","{0}" -creplace "____","{1}" -creplace "¯¯¯¯","{2}" -creplace
+
+    $Complete = [ PSCustomObject ]@{ 
+
+        Block = ([Range] 13).Range | % { [Block]$_ }
+        Stock = ([Range]255).Range | % { [Charm]$_ }
+        Track = ([Range]  5).Range | % { [Track]$_ }
+        Mask  = ""
+    }
+
+
+
+
+
+        $Track[$I]    = $Line
+
+    
+
+                ForEach ( $I in [Model]::Range )
+                {
+                    $This.Index  = $I
+                    $This.Object = ([Stock]::String)[$I]
+                    $This.Chars  =   [Char[]]@( $This.Object[0..3] )
+
+                    $This.Dec    =    [Int[]]@( ForEach ( $L in 0..3 ) {    [Int] $This.Charm[$L].Guide } )
+                    $This.Hex    = [String[]]@( ForEach ( $L in 0..3 ) { [String] $This.Charm[$L].Hex   } )
+                }
+            }
+            
+            $This.Charm  = ForEach ( $I in [Range]::New( $Range ).Range ) 
+            { 
+                [Charm]::New($I) 
+            }
+        }
+    }
+
+        [String] $Template
+
+    $Obj = [Range]::New(255).Range | % { [Charm]::New($_) }
+
+    $Obj.Index[$Obj.Char -ceq "m"]
+      
+    Class Mask
+    {
+        
+        
+        ForEach ( $I in 0..( $Track.Count - 1 ) )
+        {
+            $Line    += $Track[$I]
+            $Mask    += $I
+            $Items    = @( )
+            $S        = 0
+
+            0..13     | % { 
+    
+            If ( $Line -Match $Obj[$_].String.Replace("\","\\") )
+            {
+                $Line = $Line.Replace( $Obj[$_].String , "{$S}" )
+                $S     ++
+            }
+        }
+
+        $Track[$I]    = $Line
+    }
+
+    Class Model
+    {
+           [Int[]] $Index
+        [Object[]] $Object
+           [Int[]] $Dec
+        [String[]] $Hex
+
+        static    [Charm[]] $Charm  = @( 0..255 | % { [Charm]::New($_) } )
+        static   [String[]] $String = @( "    ,____,¯¯¯¯,----,   /,\   ,   \,/   ,/¯¯\,\__/,¯¯¯\,/¯¯¯,___/,\___" -Split ',' )
+
+        Model()
+        {
+            #$I in ( [Model]::Range )
+            #ForEach ( $I in 0..13 )
+
+            ForEach ( $I in [Model]::Range )
+            {
+                $This.Index  = $I
+                $This.Object = ([Stock]::String)[$I]
+                $This.Chars  =   [Char[]]@( $This.Object[0..3] )
+
+                $This.Dec    =    [Int[]]@( ForEach ( $L in 0..3 ) {    [Int] $This.Charm[$L].Guide } )
+                $This.Hex    = [String[]]@( ForEach ( $L in 0..3 ) { [String] $This.Charm[$L].Hex   } )
+            }
+        }
+    }
+
+        
+        @{ 
+            Index  =    [Int] $Index
+            String = [String] $Obj
+            Char   =   [Char[]]@( $Obj[0..3] )
+            Dec    =    [Int[]]@( ForEach ( $L in 0..3 ) {    [Int] $Chart[$_[$L]].Guide } )
+            Hex    = [String[]]@( ForEach ( $L in 0..3 ) { [String] $Chart[$_[$L]].Hex   } )
+
+        }
+    }
+
+    $Array             = "    ____    ____________________________________________________________________________________________________        ",
+                         "   //¯¯\\__//¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\\___    ",
+                         "   \\__//¯¯¯   ___[ Table of Contents ] _________________________________________________________________   ___//¯¯\\   ",
+                         "    ¯¯¯\\__________________________________________________________________________________________________//¯¯\\__//   ",
+                         "        ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯    ¯¯¯¯    "
+
+    $Track             = @{ 
+    
+        Line           = ""
+        Mask           = ""
+    }
+    
+    [PSCustomObject]@{
+    
+        Line           = @( )
+        Mask           = @( )
+    }
+
+    ForEach ( $I in 0..( $Track.Count - 1 ) )
+    {
+        $Line        += $Track[$I]
+        $Mask        += $I
+        $Items        = @( )
+        $S            = 0
+
+        0..13         | % { 
+    
+            If ( $Line -Match $Obj[$_].String.Replace("\","\\") )
+            {
+                $Line = $Line.Replace( $Obj[$_].String , "{$S}" )
+                $S     ++
+            }
+        }
+
+        $Track[$I]    = $Line
+    }
+
+        If ( $Track -Match $Collect[$_].String.Replace("\","\\") } | % { 
+    
+        $Track    = $Track -Replace $Collect[$_] , "{$S}"
+        $S ++
+        
+    }
+    
+     | % { $Track.Replace
+        $Track -match $Collect[$I].String | % {
+        
+            $Track    = $Track -Replace $Collect[$I].String 
+    }
+
+    $Stock        = [ PSCustomObject ]@{ 
+
+        Charm     = Foreach ( $I in 0..65534 ) { [Charm]::new($I) }
+        Block     = ForEach ( $I in 0..13 ) 
+        { 
+            $Str  = $String[$I]
+
+            [PSCustomObject]@{
+            
+                Index  = $I
+                String = $Str
+                Array  = $Str[0..3]
+            }
+        }
+        Stack     = @( ) # Total number of lines/content
+        Mask      = @( )
+        Fore      = @( )
+    }
+
+    $Stock.Block  = ForEach ( $I in 0..13 ) 
+    { 
+        ("    ,____,¯¯¯¯,----,   /,\   ,   \,/   ,/¯¯\,\__/,¯¯¯\,/¯¯¯,___/,\___" -Split ',')[$I] | % {
+            
+            [ PSCustomObject ]@{ 
+                
+                Index  = $I
+                String = $_
+                Array  = $_[0..3]
+                Int    = $_[0..3] #| ? { [Char]$_ }
+            }
+        }
+    }
+
+    $Track        = "    ____    ____________________________________________________________________________________________________        "
+    $Line         = $Track.Clone()
+
+
+    ForEach ( $I in 0..13 )
+    {
+        If ( $Line -Match $Stock.Block[$I] )
+        {
+            $Line += @{
+            
+                String = $Stock.Block[$I]
+
+            $Line -Replace $Stock.Block[$I]
+            $Stock.Block[$I]
+        }
+
+        $Line
+    }
+
+
+    ForEach ( $I in 0..( $Block.Count - 1 ) )
+    {     
+        $I = 
+        $Track = $Track -Replace $Block[$I]
+
+
+    "    ____    ____________________________________________________________________________________________________        "
+
+    $Track     = [PSCustomObject]@{ 
+
+        String = "    ____    ____________________________________________________________________________________________________        "
+        Mask   = ""
+    }
+
+    $Track.String
+
+
+    $String64 = 
+
+    $Color  = 0..254 | % { 
+
+        [PSCustomObject]@{ 
+
+            Hex = "&#x{0:X};"
+
+    $I      = 0
+    $String = "    ____    ____________________________________________________________________________________________________        "
+    $Line   = @{ }
+    
+
+    ForEach ( $I in 0..120 )
+    {
+        "{0}/{1}/{2}/{3}" -f $I , $String[$I] , 0 , 0
+    }
+    
+    
+    -f @( ($I+$X) , ($String[$I+$X]) , 0 , 0 )
+                    
+                    # String = $String[$I+$X]
+                    # Index  = $I+$X
+                    
+            }
+        }
+    }
+            
+            $Init             = $True
+        }
+
+        $Block[$_ % 4].String = $String[$_]
+        $Block[$_ % 4].Index  = $_
+
+    }
+
+
+
+
+
+
+
+
+
+    $Chunk = 0..120 | % {
+
+        If ( $_ % 4 -eq 0 )
+        {
+            "[$I]"
+            $I ++   
+        }
+
+        $_
+    }
+
+    
+
+ForEach ( $X in ( 0..15 ) )
+{
+    0..120 | % { "{0}/{1}/{2}" -f $_,0,0 }
+
+
+    "    ____    ____________________________________________________________________________________________________        "
+
+
+
+
+
+"   \\__//                                                                                                  \\__//¯¯\\   " 
+"   //¯¯\\                                                                                                  //¯¯\\__//   " 
+
+"   \","\__/","/  "
+
+
+    $Test   = [Ordered]@{ 
+               
+        Example1 = [Ordered]@{
+        
+            Item1_1 = "Value1_1"; 
+            Item1_2 = "Value1_2"; 
+            Item1_3 = "Value1_3" 
+        }
+
+        Example2 = [Ordered]@{
+        
+            Item2_1 = "Value2_1"; 
+            Item2_2 = "Value2_2"; 
+            Item2_3 = "Value2_3" 
+        }
+
+        Example3 = [Ordered]@{
+        
+            Item3_1 = "Value3_1"; 
+            Item3_2 = "Value3_2"; 
+            Item3_3 = "Value3_3" 
+        }
+    }
+
+
+
+    #$Table | % {
+    $Test.GetEnumerator()
+
+
+    ForEach ( $I in $Test.GetEnumerator() )
+    {
+        
+        If ( $_.Value.GetType().Name -eq "Hashtable" )
+        {
+            $_.Name
+
+            $Test.$( $_.Name ).GetEnumerator() | % { 
+                    
+                $_.Name , $_.Value -join '=' 
+            }
+        }
+
+        Else
+        {
+            $Output                             += $_.Name , $_.Value -join '=' 
+        }
+    }
+
+    $Output                                     += ""
+}
+
+
+<#
+
+
+    Class Stock
+    {
+        [Int32]    $Index
+        [Int32]    $Guide
+        [String]   $Name
+        [Char]     $Char
+        [String[]] $Line
+
+        Stock( [Int32] $Index, [Int32] $Guide, [String] $Name )
+        {
+            $This.Index =  [Int32] $Index
+            $This.Guide =  [Int32] $Guide
+            $This.Name  = [String] $Name
+            $This.Char  =   [Char] $Guide
+            $This.Line  = ForEach ( $I in 0..120 ) { @( [Char] $Guide ) * $I -join '' }
+        }
+    }
+
+    Class Track
+    {
+        [Int32]   $Index
+        [Int32]   $Total
+        [Int32[]] $Range
+
+            [String[]] $Margin
+            [String[]] $Face
+            [String[]] $Slat
+            [String[]] $Track
+
+        Track( [Int32] $Index, [Int32] $Total )
+        {
+            $This.Index  = $Index
+            $This.Range  = 0..( $Total - 1 )
+            $This.Margin = @{ 1 =      " /" , "\ "   ;        0 =      " \" , "/ "           }[ $Index % 2 ]
+            $This.Face   = @{ 1 =    " // " , " \\ " ;        0 =    " \\ " , " // "         }[ $Index % 2 ]
+            $This.Slat   = @{ 1 =    "/¯¯\" , "\__/" ;        0 =    "\__/" , "/¯¯\"         }[ $Index % 2 ]
+            $This.Track  = @{ 1 = @( "/¯¯\" , "\__/" ) * 13 ; 0 = @( "\__/" , "/¯¯\" ) * 13  }[ $Index % 2 ]
+        }
+    }
+    #>
