@@ -16,5 +16,5 @@ If you would like to install/test/use it...
 
 # Install [2021.2.0]
 
-    Invoke-Expression ( Invoke-RestMethod https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Install.ps1 )
+    Invoke-Expression ( Invoke-RestMethod https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Install.ps1?raw=true )
 
