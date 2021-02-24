@@ -1,22 +1,45 @@
 # An ode to the Microsoft Deployment Toolkit...
 
-    It is *the* toolkit...
-    ...that Microsoft themselves uses...
-    ...to deploy *additional* toolkits.
+    Once upon a time, there were a bunch of experts sitting at a table, <br>
+    talking among themselves as to what awesome thing they were likely <br>
+    to (build/do) next.
 
-    It's not that weird.
-    You're just thinking way too far into it, honestly.
+    Then, a voice from the crowd of these like minded geniuses emerged… <br>
+    “What if we make a tool that can automatically install Windows? Like, <br>
+    over the network?”
 
-    Regardless... it is quite a fearsome toolkit to have in one's pocket.
-    Or, wherever really...
-    ...at any given time.
+    Ever since that day...? <br>
+    Well, the world’s best software engineers put their heads together... <br>
+    ...and made a series of service and software suites… <br>
+    (Windows Deployment Services/WDS): <br>
+    - When you need an (image file/ISO), and no funny business. <br>
+    (Microsoft Deployment Toolkit/MDT): <br>
+    - When you need to be seen as an adult, not a child. <br>
+    (System Center Configuration Manager/SCCM): <br>
+    - The end all, be all... of system configurations. <br>
+    (Windows Assessment and Deployment Kit/WinADK): <br>
+    - When you feel like whittling away at the build process. <br>
+    (Windows Preinstallation Environment/WinPE): <br>
+    - When all else fails, this is the last line of defense. <br>
 
-    When you need to be taken seriously...?
-    Well, it *should* be the first choice on one's agenda.
-    But, that's up to you.
+    Now, there are various other names and pieces of software that COULD go <br>
+    along with this process... there’s Hyper-V, Internet Information Services, <br>
+    Background Intelligent Transfer Service, but in the end, everything ties <br>
+    right back to… The Microsoft Deployment Toolkit.<br>
+    
+    These geniuses, assembled a toolkit like no other. <br>
+    With it, you can install Windows like a pro. <br>
+    There used to be a day and age where people had a hard time <br>
+    transferring all of their stuff around. <br>
+    
+    Not anymore. <br>
+    With the Microsoft Deployment Toolkit, and Active Directory Domain Services…? <br>
+    You can really show people who the boss is, and keep it moving and flowing nicely. <br>
 
-    The [Microsoft Deployment Toolkit].
-    Even Mr. Gates thinks it's awesome.
+    Some people might even stop and ask you, <br>
+    “Hey, how do you keep things moving so smoothly like that…?” <br> 
+    Your response will be... *pull your shades down slightly* <br>
+    “I simply learned from the best…”
 
 # About FightingEntropy
 FightingEntropy is a PowerShell modification for:
