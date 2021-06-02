@@ -48,7 +48,8 @@ This tool is still in deep development
 In it's current state, the module is broken down into several classes and functions. 
 If you would like to install/test/use it...
 
-# Install [2021.2.0]
-
-    Invoke-Expression ( Invoke-RestMethod https://github.com/secure-digits-plus-llc/FightingEntropy/blob/master/Install.ps1?raw=true )
-
+# [Install] - Points to relative repo
+    IRM github.com/mcc85s/FightingEntropy/blob/main/Install.ps1?raw=true | IEX
+    
+# [Remove] - Points to relative repo
+    IRM github.com/mcc85s/FightingEntropy/blob/main/Remove.ps1?raw=true | IEX
